@@ -116,8 +116,8 @@ ini.Clear();
 
 To write back to a file while preserving spacings, comments, blank lines and other data:
 ```C++
-// pretty parameter is optional. if set to true, spacings will be added between values
-// and keys and blank lines will be added between sections
+// pretty parameter is optional. if set to true, spacings will be added around values and keys and
+// blank lines will be added between sections
 bool pretty = true;
 ini.Write(pretty); // returns true if successful
 ```
