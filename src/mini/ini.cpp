@@ -365,6 +365,11 @@ namespace mINI
 		return Write(filename, pretty);
 	}
 
+	bool INIFile::Write(const char* const filename, bool pretty) const
+	{
+		return Write(std::string(filename), pretty);
+	}
+
 	inline bool INIFile::Write(std::string const& filename, bool pretty) const
 	{
 		INILazyWriter lazyWriter(filename);
@@ -377,6 +382,11 @@ namespace mINI
 		return Generate(filename, pretty);
 	}
 	
+	bool INIFile::Generate(const char* const filename, bool pretty) const
+	{
+		return Generate(std::string(filename), pretty);
+	}
+
 	inline bool INIFile::Generate(std::string const& filename, bool pretty) const
 	{
 		INIWriteStream outputStream(filename);
@@ -507,7 +517,8 @@ namespace mINI
 
 	bool INIReadStream::operator>>(INISection& data)
 	{
-		if (fileReadStream.eof())
+		bool eof = fileReadStream.eof();
+		if (eof && sectionCurrent.empty())
 		{
 			return false;
 		}
@@ -515,10 +526,10 @@ namespace mINI
 		bool sectionChanged = false;
 		INIKeyValue parseData;
 
-		data.first = (reading) ? sectionCurrent : "";
+		data.first = sectionCurrent;
 		data.second.clear();
 
-		while (std::getline(fileReadStream, line))
+		while (!eof && std::getline(fileReadStream, line))
 		{
 			if (fileReadStream.bad())
 			{
@@ -553,6 +564,7 @@ namespace mINI
 			}
 		}
 
+		sectionCurrent.clear();
 		return reading;
 	}
 
@@ -695,7 +707,7 @@ namespace mINI
 		bool continueToNextSection = false;
 		bool discardNextEmpty = false;
 		bool writeNewKeys = false;
-		unsigned int lastKeyLine = 0;
+		size_t lastKeyLine = 0;
 
 		for (auto line = originalLines->begin(); line != originalLines->end(); ++line)
 		{

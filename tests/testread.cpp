@@ -40,7 +40,7 @@ const T_LineData data_INI_not_well_formed = {
 	"; ;; ; ;;;",
 	"      ;  string values    ",
 	"",
-	"[fruit]          ",
+	"[fruit]        ; test comment ",
 	"",
 	"",
 	"   GARBAGE",
@@ -86,9 +86,9 @@ const T_LineData data_INI_not_well_formed = {
 	"almond=false",
 	"GARBAGE",
 	"GARBAGE",
-	"  walnut=                  0",
+	"  walnut=                  0              ",
 	"  peanut=                    ",
-	"cashew                  =no",
+	"cashew=no                 ",
 	"GARBAGE",
 	"",
 	"     coconut=   yes"
@@ -146,17 +146,61 @@ const T_LineData data_INI_edge_case_5 = {
 	"[empty5]"
 };
 
+// edge case: single empty section with empty name
+const T_LineData data_INI_edge_case_6 = {
+	"[]"
+};
+
+// edge case: single empty section with keys
+const T_LineData data_INI_edge_case_7 = {
+	"[]",
+	"ignored1=value1",
+	"ignored2=value2"
+};
+
+// edge case: multiple empty sections with empty names, one with keys
+const T_LineData data_INI_edge_case_8 = {
+	"[]",
+	"[]",
+	"ignored1=value1",
+	"ignored2=value2"
+	"[]"
+};
+
+// letter case: everything lowercase, retreive uppercase
+const T_LineData data_INI_letter_case_1 = {
+	"[drinks]",
+	"coffee = 3",
+	"beer = 4",
+	"tea = 5"
+};
+
+// letter case: everything uppercase, retreive lowercase
+const T_LineData data_INI_letter_case_2 = {
+	"[DRINKS]",
+	"COFFEE = 3",
+	"BEER = 4",
+	"TEA = 5"
+};
+
+// leter case: 
+
 //
 //  filenames
 //
-const std::string filename_INI_well_formed = "data1.ini";
-const std::string filename_INI_not_well_formed = "data2.ini";
-const std::string filename_INI_empty = "data3.ini";
-const std::string filename_INI_edge_case_1 = "data4.ini";
-const std::string filename_INI_edge_case_2 = "data5.ini";
-const std::string filename_INI_edge_case_3 = "data6.ini";
-const std::string filename_INI_edge_case_4 = "data7.ini";
-const std::string filename_INI_edge_case_5 = "data8.ini";
+const std::string filename_INI_well_formed = "data01.ini";
+const std::string filename_INI_not_well_formed = "data02.ini";
+const std::string filename_INI_empty = "data03.ini";
+const std::string filename_INI_edge_case_1 = "data04.ini";
+const std::string filename_INI_edge_case_2 = "data05.ini";
+const std::string filename_INI_edge_case_3 = "data06.ini";
+const std::string filename_INI_edge_case_4 = "data07.ini";
+const std::string filename_INI_edge_case_5 = "data08.ini";
+const std::string filename_INI_edge_case_6 = "data09.ini";
+const std::string filename_INI_edge_case_7 = "data10.ini";
+const std::string filename_INI_edge_case_8 = "data11.ini";
+const std::string filename_INI_letter_case_1 = "data12.ini";
+const std::string filename_INI_letter_case_2 = "data13.ini";
 
 const std::string filename_dummy = "dummy_______filename_______";
 
@@ -200,7 +244,6 @@ void OutputData(std::string const& filename, mINI::INIFile& ini)
 			std::cout << "   " << key << ": " << value << std::endl;
 		}
 	}
-	std::cout << std::endl;
 }
 
 //
@@ -211,12 +254,14 @@ const lest::test mINI_tests[] =
 	CASE("Basic read")
 	{
 		// read two INI files with differing form and ensure values match
-		// expected: A and B data does not differ
+		// expected: data from both sources is equal
 		mINI::INIFile iniDataA(filename_INI_well_formed);
 		mINI::INIFile iniDataB(filename_INI_not_well_formed);
-		// output all data
+		// output data to screen
 		OutputData(filename_INI_well_formed, iniDataA);
 		OutputData(filename_INI_not_well_formed, iniDataB);
+		// check sizes
+		EXPECT(iniDataA.Size() == iniDataB.Size());
 		// check data
 		EXPECT(iniDataA.Get("fruit", "apple") == iniDataB.Get("fruit", "apple"));
 		EXPECT(iniDataA.Get("fruit", "banana") == iniDataB.Get("fruit", "banana"));
@@ -245,6 +290,7 @@ const lest::test mINI_tests[] =
 		// read from an empty file
 		// expected: empty data
 		mINI::INIFile iniDataEmpty(filename_INI_empty);
+		OutputData(filename_INI_empty, iniDataEmpty);
 		EXPECT(iniDataEmpty.Size() == 0u);
 	},
 
@@ -297,10 +343,38 @@ const lest::test mINI_tests[] =
 		EXPECT(iniEdgeCase5.Get("notempty", "a") == "1");
 		EXPECT(iniEdgeCase5.Get("notempty", "b") == "2");
 		EXPECT(iniEdgeCase5.Get("notempty", "c") == "3");
+		
+		// edge case 6: single empty section with an empty name
+		// expected: empty data
+		mINI::INIFile iniEdgeCase6(filename_INI_edge_case_6);
+		OutputData(filename_INI_edge_case_6, iniEdgeCase6);
+		EXPECT(iniEdgeCase6.Size() == 0u);
+		
+		// edge case 7: single empty section with an empty name and keys
+		// expected: empty data
+		mINI::INIFile iniEdgeCase7(filename_INI_edge_case_7);
+		OutputData(filename_INI_edge_case_7, iniEdgeCase7);
+		EXPECT(iniEdgeCase7.Size() == 0u);
+		
+		// edge case 8: multiple empty sections, some with keys
+		// expected: empty data
+		mINI::INIFile iniEdgeCase8(filename_INI_edge_case_8);
+		OutputData(filename_INI_edge_case_8, iniEdgeCase8);
+		EXPECT(iniEdgeCase8.Size() == 0u);
 	},
 
-	CASE("Read and check for case insensitivity")
+	CASE("Check for case insensitivity")
 	{
+		// read from two INI files with opposite case syntax
+		// expected: data from both sources is equal
+		mINI::INIFile iniLetterCase1(filename_INI_letter_case_1);
+		mINI::INIFile iniLetterCase2(filename_INI_letter_case_2);
+		OutputData(filename_INI_letter_case_1, iniLetterCase1);
+		OutputData(filename_INI_letter_case_2, iniLetterCase2);
+		EXPECT(iniLetterCase1.Size() == iniLetterCase2.Size());
+		EXPECT(iniLetterCase1.Get("DRINKS", "COFFEE") == iniLetterCase2.Get("drinks", "coffee"));
+		EXPECT(iniLetterCase1.Get("DRINKS", "BEER") == iniLetterCase2.Get("drinks", "beer"));
+		EXPECT(iniLetterCase1.Get("DRINKS", "TEA") == iniLetterCase2.Get("drinks", "tea"));
 	}
 };
 
@@ -315,6 +389,11 @@ int main(int argc, char** argv)
 	WriteTestINI(filename_INI_edge_case_3, data_INI_edge_case_3);
 	WriteTestINI(filename_INI_edge_case_4, data_INI_edge_case_4);
 	WriteTestINI(filename_INI_edge_case_5, data_INI_edge_case_5);
+	WriteTestINI(filename_INI_edge_case_6, data_INI_edge_case_6);
+	WriteTestINI(filename_INI_edge_case_7, data_INI_edge_case_7);
+	WriteTestINI(filename_INI_edge_case_8, data_INI_edge_case_8);
+	WriteTestINI(filename_INI_letter_case_1, data_INI_letter_case_1);
+	WriteTestINI(filename_INI_letter_case_2, data_INI_letter_case_2);
 	// run tests
 	if (int failures = lest::run(mINI_tests, argc, argv))
 	{

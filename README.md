@@ -1,8 +1,10 @@
 # mINI
 
-**This project is still under development!**
+**This project is still being developed!**
 
-This is a tiny utility library for reading from and writing data to INI files with a straightforward API and a minimal footprint. It conforms to the (somewhat) standard INI format - sections and keys are case insensitive, and any leading or trailing whitespace is ignored. Comments are lines that begin with a semicolon. Trailing comments are disallowed since values may also contain semicolons.
+This is a tiny utility library for reading from and writing data to INI files with a straightforward API and a minimal footprint. It conforms to the (somewhat) standard INI format - sections and keys are case insensitive, and any leading or trailing whitespace is ignored. Comments are lines that begin with a semicolon. Trailing comments are allowed on lines with sections but not on key/value lines since a value may also contain semicolons.
+
+Files are read on demand, after which the data is kept in memory. Files are closed after any read or write operations.
 
 This library supports lazy writing, which only writes changes and updates and preserves custom spacings and comments. A lazy write invoked by a `Write` call will read the output file, find changes made and update the file accordingly. If performance is a strong issue and you only need to generate files, use `Generate` instead.
 
