@@ -11,6 +11,27 @@ typedef std::vector<std::string> T_LineData;
 // test data
 //
 
+// basic INI file
+const T_LineData data_INI_basic = {
+	"; this is a comment",
+	"[first section]",
+	"someKey = 1",
+	"anotherKey = 2",
+	"",
+	"; this is another comment",
+	"[second section]",
+	"humans = 16",
+	"orcs = 8",
+	"barbarians = 20",
+	"",
+	"; this is yet another comment",
+	"[third section]",
+	"spiders=25",
+	"bugs=0",
+	"ants=100",
+	"flies=5"
+};
+
 // properly formed INI
 const T_LineData data_INI_well_formed = {
 	";string values",
@@ -183,24 +204,24 @@ const T_LineData data_INI_letter_case_2 = {
 	"TEA = 5"
 };
 
-// leter case: 
 
 //
 //  filenames
 //
-const std::string filename_INI_well_formed = "data01.ini";
-const std::string filename_INI_not_well_formed = "data02.ini";
-const std::string filename_INI_empty = "data03.ini";
-const std::string filename_INI_edge_case_1 = "data04.ini";
-const std::string filename_INI_edge_case_2 = "data05.ini";
-const std::string filename_INI_edge_case_3 = "data06.ini";
-const std::string filename_INI_edge_case_4 = "data07.ini";
-const std::string filename_INI_edge_case_5 = "data08.ini";
-const std::string filename_INI_edge_case_6 = "data09.ini";
-const std::string filename_INI_edge_case_7 = "data10.ini";
-const std::string filename_INI_edge_case_8 = "data11.ini";
-const std::string filename_INI_letter_case_1 = "data12.ini";
-const std::string filename_INI_letter_case_2 = "data13.ini";
+const std::string filename_INI_basic = "data01.ini";
+const std::string filename_INI_well_formed = "data02.ini";
+const std::string filename_INI_not_well_formed = "data03.ini";
+const std::string filename_INI_empty = "data04.ini";
+const std::string filename_INI_edge_case_1 = "data05.ini";
+const std::string filename_INI_edge_case_2 = "data06.ini";
+const std::string filename_INI_edge_case_3 = "data07.ini";
+const std::string filename_INI_edge_case_4 = "data08.ini";
+const std::string filename_INI_edge_case_5 = "data09.ini";
+const std::string filename_INI_edge_case_6 = "data10.ini";
+const std::string filename_INI_edge_case_7 = "data11.ini";
+const std::string filename_INI_edge_case_8 = "data12.ini";
+const std::string filename_INI_letter_case_1 = "data13.ini";
+const std::string filename_INI_letter_case_2 = "data14.ini";
 
 const std::string filename_dummy = "dummy_______filename_______";
 
@@ -251,7 +272,53 @@ void OutputData(std::string const& filename, mINI::INIFile& ini)
 //
 const lest::test mINI_tests[] =
 {
-	CASE("Basic read")
+	CASE("Test basic features")
+	{
+		// read a basic INI file with 3 sections
+		mINI::INIFile iniDataBasic(filename_INI_basic);
+		OutputData(filename_INI_basic, iniDataBasic);
+		// test Size()
+		EXPECT(iniDataBasic.Size() == 3u);
+		// test Size(section)
+		EXPECT(iniDataBasic.Size("first section") == 2u);
+		EXPECT(iniDataBasic.Size("second section") == 3u);
+		EXPECT(iniDataBasic.Size("third section") == 4u);
+		// test Has(section)
+		EXPECT(iniDataBasic.Has("first section") == true);
+		EXPECT(iniDataBasic.Has("second section") == true);
+		EXPECT(iniDataBasic.Has("third section") == true);
+		EXPECT(iniDataBasic.Has("fourth section") == false);
+		EXPECT(iniDataBasic.Has("") == false);
+		// test Has(section, key)
+		EXPECT(iniDataBasic.Has("first section", "someKey") == true);
+		EXPECT(iniDataBasic.Has("first section", "anotherKey") == true);
+		EXPECT(iniDataBasic.Has("first section", "nonExistentKey") == false);
+		EXPECT(iniDataBasic.Has("second section", "humans") == true);
+		EXPECT(iniDataBasic.Has("second section", "orcs") == true);
+		EXPECT(iniDataBasic.Has("second section", "barbarians") == true);
+		EXPECT(iniDataBasic.Has("second section", "elves") == false);
+		EXPECT(iniDataBasic.Has("third section", "spiders") == true);
+		EXPECT(iniDataBasic.Has("third section", "bugs") == true);
+		EXPECT(iniDataBasic.Has("third section", "ants") == true);
+		EXPECT(iniDataBasic.Has("third section", "flies") == true);
+		EXPECT(iniDataBasic.Has("third section", "mosquitoes") == false);
+		EXPECT(iniDataBasic.Has("fourth section", "spaceships") == false);
+		EXPECT(iniDataBasic.Has("fourth section", "") == false);
+		EXPECT(iniDataBasic.Has("", "") == false);
+		// test Remove()
+		EXPECT(iniDataBasic.Remove("first section", "someKey") == true);
+		EXPECT(iniDataBasic.Remove("third section", "flies") == true);
+		EXPECT(iniDataBasic.Remove("third section", "mosquitoes") == false);
+		EXPECT(iniDataBasic.Has("first section", "someKey") == false);
+		EXPECT(iniDataBasic.Has("third section", "flies") == false);
+		EXPECT(iniDataBasic.Has("third section", "mosquitoes") == false);
+		// test Clear()
+		iniDataBasic.Clear();
+		EXPECT(iniDataBasic.Size() == 0u);
+	},
+
+
+	CASE("Read and compare")
 	{
 		// read two INI files with differing form and ensure values match
 		// expected: data from both sources is equal
@@ -262,13 +329,15 @@ const lest::test mINI_tests[] =
 		OutputData(filename_INI_not_well_formed, iniDataB);
 		// check sizes
 		EXPECT(iniDataA.Size() == iniDataB.Size());
-		// check data
+		// use various types to check if data from both sources matches
 		EXPECT(iniDataA.Get("fruit", "apple") == iniDataB.Get("fruit", "apple"));
+		EXPECT(iniDataA.GetChar("fruit", "apple") == iniDataB.GetChar("fruit", "apple"));
 		EXPECT(iniDataA.Get("fruit", "banana") == iniDataB.Get("fruit", "banana"));
 		EXPECT(iniDataA.Get("fruit", "grape") == iniDataB.Get("fruit", "grape"));
 		EXPECT(iniDataA.Get("fruit", "orange") == iniDataB.Get("fruit", "orange"));
 		EXPECT(iniDataA.GetUInt("vegetables", "garlic") == iniDataB.GetUInt("vegetables", "garlic"));
 		EXPECT(fabs(iniDataA.GetFloat("vegetables", "pepper") - iniDataB.GetFloat("vegetables", "pepper")) < 0.1);
+		EXPECT(fabs(iniDataA.GetDouble("vegetables", "pepper") - iniDataB.GetDouble("vegetables", "pepper")) < 0.1);
 		EXPECT(iniDataA.GetInt("vegetables", "pumpkin") == iniDataB.GetInt("vegetables", "pumpkin"));
 		EXPECT(iniDataA.GetBool("nuts", "almond") == iniDataB.GetBool("nuts", "almond"));
 		EXPECT(iniDataA.GetBool("nuts", "walnut") == iniDataB.GetBool("nuts", "walnut"));
@@ -343,19 +412,19 @@ const lest::test mINI_tests[] =
 		EXPECT(iniEdgeCase5.Get("notempty", "a") == "1");
 		EXPECT(iniEdgeCase5.Get("notempty", "b") == "2");
 		EXPECT(iniEdgeCase5.Get("notempty", "c") == "3");
-		
+
 		// edge case 6: single empty section with an empty name
 		// expected: empty data
 		mINI::INIFile iniEdgeCase6(filename_INI_edge_case_6);
 		OutputData(filename_INI_edge_case_6, iniEdgeCase6);
 		EXPECT(iniEdgeCase6.Size() == 0u);
-		
+
 		// edge case 7: single empty section with an empty name and keys
 		// expected: empty data
 		mINI::INIFile iniEdgeCase7(filename_INI_edge_case_7);
 		OutputData(filename_INI_edge_case_7, iniEdgeCase7);
 		EXPECT(iniEdgeCase7.Size() == 0u);
-		
+
 		// edge case 8: multiple empty sections, some with keys
 		// expected: empty data
 		mINI::INIFile iniEdgeCase8(filename_INI_edge_case_8);
@@ -381,6 +450,7 @@ const lest::test mINI_tests[] =
 int main(int argc, char** argv)
 {
 	// write test files
+	WriteTestINI(filename_INI_basic, data_INI_basic);
 	WriteTestINI(filename_INI_well_formed, data_INI_well_formed);
 	WriteTestINI(filename_INI_not_well_formed, data_INI_not_well_formed);
 	WriteTestINI(filename_INI_empty, data_INI_empty);

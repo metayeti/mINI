@@ -12,7 +12,7 @@ Read and write order is preserved. New keys and sections will be written to the 
 
 ## Installation
 
-Copy the folder in /src/ into your own project's source code folder, and add `ini.cpp` and `ini.h` to your project. Then include the header file somewhere in your code:
+Copy the folder in /src/ into your own project's source code folder, and add `ini.cpp` and `ini.h` to your project. If you're building manually, just make sure your compiler sees the source file. Then include the header file somewhere in your code:
 ```C++
 #include "mini/ini.h"
 ```

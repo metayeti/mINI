@@ -29,6 +29,7 @@
 //  Instantiate INIFile and use:
 //  - the constructor or Read to read from an INI file.
 //  - Has to check if a given section or key exists.
+//  - Size to get number of sections of keys within a section.
 //  - Get, GetInt, GetUInt... to retreive data.
 //  - Set to set a new value.
 //  - RemoveKey or RemoveSection to remove parts of data.
