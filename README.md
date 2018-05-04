@@ -2,15 +2,15 @@
 
 **This project is still under development!**
 
-This is a tiny library for reading from and writing data to INI files. It conforms to the (somewhat) standard INI format - sections and keys are case insensitive, and any leading or trailing whitespace is ignored. Comments are lines that begin with a semicolon.
+This is a tiny utility library for reading from and writing data to INI files with a straightforward API and a minimal footprint. It conforms to the (somewhat) standard INI format - sections and keys are case insensitive, and any leading or trailing whitespace is ignored. Comments are lines that begin with a semicolon. Trailing comments are disallowed since values may also contain semicolons.
 
-This library supports lazy writing, which only writes changes and updates and preserves custom spacings and comments. A lazy write invoke by a `Write` call will read the output file, find changes made and update the file accordingly. If performance is a strong issue and you only need to generate files, use `Generate` instead.
+This library supports lazy writing, which only writes changes and updates and preserves custom spacings and comments. A lazy write invoked by a `Write` call will read the output file, find changes made and update the file accordingly. If performance is a strong issue and you only need to generate files, use `Generate` instead.
 
 Read and write order is preserved. New keys and sections will be written to the file in the same order they were added. Iterating through data will take the same order as the original file.
 
 ## Installation
 
-Simply copy the folder in /src/ into your own project's source code folder, and add `ini.cpp` and `ini.h` to your project. Then include the header in your code:
+Copy the folder in /src/ into your own project's source code folder, and add `ini.cpp` and `ini.h` to your project. Then include the header file somewhere in your code:
 ```C++
 #include "mini/ini.h"
 ```
@@ -102,20 +102,21 @@ ini.Clear();
 To generate an INI file and overwrite any existing formatting, comments and other data from the original file:
 ```C++
 // the pretty parameter is optional
-// if set to true, spacings will be added between values and keys and blank
-// lines will be added between sections
+// if set to true, spacings will be added between values and keys and blank lines
+// will be added between sections
 bool pretty = true;
 ini.Generate("myfile.ini", pretty);
 ```
 
 To write back to a file while preserving spacings, comments, blank lines and other data:
 ```C++
+bool pretty = true;
 ini.Write(pretty);
 ```
 
 ### Iterating
 
-To iterate through data:
+To iterate through data in-order:
 ```C++
 // loop through sections
 for (auto const& it : ini)
