@@ -4,7 +4,7 @@
 
 This is a tiny utility library for reading from and writing data to INI files with a straightforward API and a minimal footprint. It conforms to the (somewhat) standard INI format - sections and keys are case insensitive, and any leading or trailing whitespace is ignored. Comments are lines that begin with a semicolon. Trailing comments are only allowed on section lines.
 
-Files are read from or written to disk on demand and are not kept open. After reading, data is kept in memory.
+After reading, data is kept in memory. Files are read from or written to disk on demand and closed immediately after.
 
 This library supports lazy writing, which only writes changes and updates and preserves custom spacings and comments. A lazy write invoked by a `Write` call will read the output file, find changes made and update the file accordingly. If performance is a strong issue and you only need to generate files, use `Generate` instead.
 
@@ -112,20 +112,24 @@ To clear all data:
 ini.Clear();
 ```
 
-### Writing to file
+### Writing to a file
 
-To write back to a file while preserving spacings, comments, blank lines and other data:
+To write back to a file we previously read, while preserving spacings, comments, blank lines and other data:
 ```C++
 // pretty parameter is optional. if set to true, spacings will be added around values and keys and
 // blank lines will be added between sections
 bool pretty = true;
 ini.Write(pretty); // returns true if successful
+// you can specify a filename if needed:
+std::string filename = "test.ini";
+ini.Write(filename, pretty);
 ```
 
 To generate an INI file and overwrite any existing formatting, comments and other data from the original file:
 ```C++
+std::string filename = "test.ini";
 bool pretty = true;
-ini.Generate("myfile.ini", pretty); // returns true if successful
+ini.Generate(filename, pretty); // returns true if successful
 // alternatively, you can generate back into original file by skipping the filename parameter
 // use with caution as this will override any metadata, for example comments
 ini.Generate(pretty);
