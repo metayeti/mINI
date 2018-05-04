@@ -254,6 +254,11 @@ namespace mINI
 		data.push_back(INISection(section, collectionToAdd));
 	}
 
+	void INIFile::Set(std::string section, std::string key, const char* const value)
+	{
+		Set(section, key, std::string(value));
+	}
+
 	void INIFile::Set(std::string section, std::string key, bool value)
 	{
 		Set(section, key, std::string((value) ? "yes" : "no"));

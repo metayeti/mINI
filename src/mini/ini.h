@@ -138,6 +138,7 @@ namespace mINI
 
 		// set a string value
 		void Set(std::string section, std::string key, std::string value);
+		void Set(std::string section, std::string key, const char* const value);
 
 		// set a boolean value
 		void Set(std::string section, std::string key, bool value);
