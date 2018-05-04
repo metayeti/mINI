@@ -51,6 +51,9 @@ ini.Get(section, key);
 // any other value maps to true
 ini.GetBool(section, key);
 
+// retreive a char value
+ini.GetChar(section, key);
+
 // retreive an int value
 ini.GetInt(section, key);
 
