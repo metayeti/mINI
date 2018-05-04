@@ -347,7 +347,12 @@ namespace mINI
 		return lazyWriter.Write(data);
 	}
 
-	bool INIFile::Generate(std::string const& filename, bool pretty) const
+	bool INIFile::Generate(bool pretty) const
+	{
+		return Generate(filename, pretty);
+	}
+	
+	inline bool INIFile::Generate(std::string const& filename, bool pretty) const
 	{
 		INIWriteStream outputStream(filename);
 		if (outputStream.Good())

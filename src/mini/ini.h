@@ -22,7 +22,7 @@
 //  and preserves custom spacings and comments. A lazy write will read the
 //  output file, find changes made and update the file accordingly. If
 //  performance is a strong issue and you only need to generate files, use
-//  Rewrite instead.
+//  Generate instead.
 //
 //  Section and key order is preserved on both read and write operations.
 //
@@ -170,6 +170,7 @@ namespace mINI
 
 		// generate a file
 		// this will overwrite any previous file contents
+		bool Generate(bool pretty = false) const;
 		bool Generate(std::string const& filename, bool pretty = false) const;
 
 		// iterators
