@@ -2,9 +2,9 @@
 
 **This project is still being developed!**
 
-This is a tiny utility library for reading from and writing data to INI files with a straightforward API and a minimal footprint. It conforms to the (somewhat) standard INI format - sections and keys are case insensitive, and any leading or trailing whitespace is ignored. Comments are lines that begin with a semicolon. Trailing comments are allowed on lines with sections but not on key/value lines since a value may also contain semicolons.
+This is a tiny utility library for reading from and writing data to INI files with a straightforward API and a minimal footprint. It conforms to the (somewhat) standard INI format - sections and keys are case insensitive, and any leading or trailing whitespace is ignored. Comments are lines that begin with a semicolon. Trailing comments are only allowed on section lines.
 
-Files are read on demand, after which the data is kept in memory. Files are closed after any read or write operations.
+Files are read from or written to disk on demand and are not kept open. After reading, data is kept in memory.
 
 This library supports lazy writing, which only writes changes and updates and preserves custom spacings and comments. A lazy write invoked by a `Write` call will read the output file, find changes made and update the file accordingly. If performance is a strong issue and you only need to generate files, use `Generate` instead.
 
@@ -32,7 +32,7 @@ mINI::INIFile ini;
 
 Use `Read` to read from a file:
 ```C++
-ini.Read("myfile.ini");
+ini.Read("myfile.ini"); // returns true if successful
 ```
 
 Alternatively, use the constructor to read from a file on instantiation:
@@ -42,51 +42,51 @@ mINI::INIFile ini("myfile.ini");
 
 ### Reading data
 
-To read data, use one of the `Get` functions:
+To read data, use one of the `Get` functions. If a value doesn't exist, default will be returned:
 ```C++
 // retreive a string value
 // section and key are string values
-ini.Get(section, key);
+ini.Get(section, key); // default: empty string
 
 // retreive a boolean value
 // values "", "0", "no" and "false" map to false
 // any other value maps to true
-ini.GetBool(section, key);
+ini.GetBool(section, key); // default: false
 
 // retreive a char value
-ini.GetChar(section, key);
+ini.GetChar(section, key); // default: 0
 
 // retreive an int value
-ini.GetInt(section, key);
+ini.GetInt(section, key); // default: 0
 
 // retreive an unsigned int value
-ini.GetUInt(section, key);
+ini.GetUInt(section, key); // default: 0
 
 // retreive a float value
-ini.GetFloat(section, key);
+ini.GetFloat(section, key); // default: 0
 
 // retreive a double value
-ini.GetDouble(section, key);
+ini.GetDouble(section, key); // default: 0
 ```
 
 To check if a key exists:
 ```C++
-ini.Has(section, key);
+ini.Has(section, key); // returns true or false
 ```
 
 To check if a section exists:
 ```C++
-ini.Has(section);
-```
-
-To get the number of sections:
-```C++
-ini.Size();
+ini.Has(section); // returns true or false
 ```
 
 To get the number of keys in a given section:
 ```C++
-ini.Size(section);
+ini.Size(section); // returns a size_t, defaults to 0 if section is not found
+```
+
+To get the number of sections:
+```C++
+ini.Size(); // returns a size_t
 ```
 
 ### Updating data
@@ -99,12 +99,12 @@ ini.Set(section, key, value);
 
 To remove a single key:
 ```C++
-ini.Remove(section, key);
+ini.Remove(section, key); // returns true if remove was successful
 ```
 
 To remove a section:
 ```C++
-ini.Remove(section);
+ini.Remove(section); // returns true if remove was successful
 ```
 
 To clear all data:
@@ -114,19 +114,21 @@ ini.Clear();
 
 ### Writing to file
 
-To generate an INI file and overwrite any existing formatting, comments and other data from the original file:
-```C++
-// the pretty parameter is optional
-// if set to true, spacings will be added between values and keys and blank lines
-// will be added between sections
-bool pretty = true;
-ini.Generate("myfile.ini", pretty);
-```
-
 To write back to a file while preserving spacings, comments, blank lines and other data:
 ```C++
+// pretty parameter is optional. if set to true, spacings will be added between values
+// and keys and blank lines will be added between sections
 bool pretty = true;
-ini.Write(pretty);
+ini.Write(pretty); // returns true if successful
+```
+
+To generate an INI file and overwrite any existing formatting, comments and other data from the original file:
+```C++
+bool pretty = true;
+ini.Generate("myfile.ini", pretty); // returns true if successful
+// alternatively, you can generate back into original file by skipping the filename parameter
+// use with caution as this will override any metadata, for example comments
+ini.Generate(pretty);
 ```
 
 ### Iterating

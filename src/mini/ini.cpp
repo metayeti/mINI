@@ -500,10 +500,13 @@ namespace mINI
 	//
 	///////////////////////////////////////////////////////////////////////////
 
-	INIReadStream::INIReadStream(std::string const& filename)
+	INIReadStream::INIReadStream(std::string const& filename, bool generateLineData)
 	{
 		fileReadStream.open(filename);
-		lineData = std::make_shared<T_LineData>();
+		if (generateLineData)
+		{
+			lineData = std::make_shared<T_LineData>();
+		}
 	}
 
 	INIReadStream::~INIReadStream()
@@ -535,7 +538,10 @@ namespace mINI
 			{
 				return false;
 			}
-			lineData->push_back(line);
+			if (lineData)
+			{
+				lineData->push_back(line);
+			}
 			auto parseResult = INIParser::parseLine(line, parseData);
 			sectionChanged = false;
 			if (parseResult == INIParser::PDATA_SECTION)
@@ -685,7 +691,7 @@ namespace mINI
 		T_LineData outputLines;
 		INIReadStream::T_LineDataPtr originalLines;
 		{
-			INIReadStream inputStream(filename);
+			INIReadStream inputStream(filename, true);
 			if (inputStream.Good())
 			{
 				inputStream >> originalData;

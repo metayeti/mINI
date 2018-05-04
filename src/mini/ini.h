@@ -233,7 +233,7 @@ namespace mINI
 		T_LineDataPtr lineData;
 
 	public:
-		INIReadStream(std::string const& filename);
+		INIReadStream(std::string const& filename, bool generateLineData = false);
 		~INIReadStream();
 
 		// checks if opening succeeded
