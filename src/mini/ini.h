@@ -166,7 +166,7 @@ namespace mINI
 		// lazy-write to file
 		// preserves comments, spacings, etc. and updates file with changes
 		bool Write(bool pretty = false) const;
-        bool Write(std::string const& filename, bool pretty = false) const;
+		bool Write(std::string const& filename, bool pretty = false) const;
 
 		// generate a file
 		// this will overwrite any previous file contents
