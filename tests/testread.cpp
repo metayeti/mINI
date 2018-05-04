@@ -10,7 +10,9 @@ typedef std::vector<std::string> T_LineData;
 //
 // test data
 //
-const T_LineData INI_file_well_formed = {
+
+// properly formed INI
+const T_LineData data_INI_well_formed = {
 	";string values",
 	"[fruit]",
 	"apple=good",
@@ -31,7 +33,8 @@ const T_LineData INI_file_well_formed = {
 	"coconut=yes"
 };
 
-const T_LineData INI_file_not_well_formed = {
+// improperly formed INI with plenty of garbage values
+const T_LineData data_INI_not_well_formed = {
 	"GARBAGE",
 	"",
 	"; ;; ; ;;;",
@@ -98,19 +101,83 @@ const T_LineData INI_file_not_well_formed = {
 	"GARBAGE",
 };
 
-const std::string filename1 = "data1.ini";
-const std::string filename2 = "data2.ini";
+// empty file
+const T_LineData data_INI_empty = {};
 
+// edge case: key value lines without section
+const T_LineData data_INI_edge_case_1 = {
+	"ignored1=value1",
+	"ignored2=value2"
+};
+
+// edge case: key value lines without section with proper form following
+const T_LineData data_INI_edge_case_2 = {
+	"ignored1=value1",
+	"ignored2=value2",
+	"[data]",
+	"proper1=a",
+	"proper2=b"
+};
+
+// edge case: single empty section
+const T_LineData data_INI_edge_case_3 = {
+	"[empty]"
+};
+
+// edge case: many empty sections
+const T_LineData data_INI_edge_case_4 = {
+	"[empty1]",
+	"[empty2]",
+	"[empty3]",
+	"[empty4]",
+	"[empty5]"
+};
+
+// edge case: many empty sections with data in between
+const T_LineData data_INI_edge_case_5 = {
+	"[empty1]",
+	"[empty2]",
+	"[notempty]",
+	"a=1",
+	"b=2",
+	"c=3",
+	"[empty3]",
+	"[empty4]",
+	"[empty5]"
+};
+
+//
+//  filenames
+//
+const std::string filename_INI_well_formed = "data1.ini";
+const std::string filename_INI_not_well_formed = "data2.ini";
+const std::string filename_INI_empty = "data3.ini";
+const std::string filename_INI_edge_case_1 = "data4.ini";
+const std::string filename_INI_edge_case_2 = "data5.ini";
+const std::string filename_INI_edge_case_3 = "data6.ini";
+const std::string filename_INI_edge_case_4 = "data7.ini";
+const std::string filename_INI_edge_case_5 = "data8.ini";
+
+const std::string filename_dummy = "dummy_______filename_______";
+
+//
+//  helper functions
+//
 bool WriteTestINI(std::string const& filename, T_LineData const& lines)
 {
 	std::ofstream fileWriteStream(filename);
 	if (fileWriteStream.is_open())
 	{
-		for (auto it = lines.begin(); it != lines.end(); ++it)
+		if (lines.size())
 		{
-			fileWriteStream << *it;
-			if (it != lines.end())
+			auto it = lines.begin();
+			for (;;)
 			{
+				fileWriteStream << *it;
+				if (++it == lines.end())
+				{
+					break;
+				}
 				fileWriteStream << std::endl;
 			}
 		}
@@ -141,14 +208,15 @@ void OutputData(std::string const& filename, mINI::INIFile& ini)
 //
 const lest::test mINI_tests[] =
 {
-	// read two INI files and compare results
-	CASE("Read INI: General")
+	CASE("Basic read")
 	{
-		mINI::INIFile iniDataA(filename1);
-		mINI::INIFile iniDataB(filename2);
-		// cout all data
-		OutputData(filename1, iniDataA);
-		OutputData(filename2, iniDataB);
+		// read two INI files with differing form and ensure values match
+		// expected: A and B data does not differ
+		mINI::INIFile iniDataA(filename_INI_well_formed);
+		mINI::INIFile iniDataB(filename_INI_not_well_formed);
+		// output all data
+		OutputData(filename_INI_well_formed, iniDataA);
+		OutputData(filename_INI_not_well_formed, iniDataB);
 		// check data
 		EXPECT(iniDataA.Get("fruit", "apple") == iniDataB.Get("fruit", "apple"));
 		EXPECT(iniDataA.Get("fruit", "banana") == iniDataB.Get("fruit", "banana"));
@@ -162,19 +230,96 @@ const lest::test mINI_tests[] =
 		EXPECT(iniDataA.GetBool("nuts", "peanut") == iniDataB.GetBool("nuts", "peanut"));
 		EXPECT(iniDataA.GetBool("nuts", "cashew") == iniDataB.GetBool("nuts", "cashew"));
 		EXPECT(iniDataA.GetBool("nuts", "coconut") == iniDataB.GetBool("nuts", "coconut"));
+	},
+
+	CASE("Read missing file")
+	{
+		// attempt to read from file that doesn't exist
+		// expected: empty data
+		mINI::INIFile iniDataMissingFile(filename_dummy);
+		EXPECT(iniDataMissingFile.Size() == 0u);
+	},
+
+	CASE("Read an empty file")
+	{
+		// read from an empty file
+		// expected: empty data
+		mINI::INIFile iniDataEmpty(filename_INI_empty);
+		EXPECT(iniDataEmpty.Size() == 0u);
+	},
+
+	CASE("Read edge case files")
+	{
+		// edge case 1: sectionless key/values
+		// expected: empty data
+		mINI::INIFile iniEdgeCase1(filename_INI_edge_case_1);
+		OutputData(filename_INI_edge_case_1, iniEdgeCase1);
+		EXPECT(iniEdgeCase1.Size() == 0u);
+
+		// edge case 2: sectionless key/values at begining, real data following
+		// expected: result data only contains real data
+		mINI::INIFile iniEdgeCase2(filename_INI_edge_case_2);
+		OutputData(filename_INI_edge_case_2, iniEdgeCase2);
+		EXPECT(iniEdgeCase2.Size() == 1u);
+		EXPECT(iniEdgeCase2.Size("data") == 2u);
+		EXPECT(iniEdgeCase2.Get("data", "proper1") == "a");
+		EXPECT(iniEdgeCase2.Get("data", "proper2") == "b");
+
+		// edge case 3: single empty section
+		// expected: data contains a single empty section
+		mINI::INIFile iniEdgeCase3(filename_INI_edge_case_3);
+		OutputData(filename_INI_edge_case_3, iniEdgeCase3);
+		EXPECT(iniEdgeCase3.Size() == 1u);
+		EXPECT(iniEdgeCase3.Size("empty") == 0u);
+
+		// edge case 4: many empty sections
+		// expected: data contains five empty sections
+		mINI::INIFile iniEdgeCase4(filename_INI_edge_case_4);
+		OutputData(filename_INI_edge_case_4, iniEdgeCase4);
+		EXPECT(iniEdgeCase4.Size() == 5u);
+		EXPECT(iniEdgeCase4.Size("empty1") == 0u);
+		EXPECT(iniEdgeCase4.Size("empty2") == 0u);
+		EXPECT(iniEdgeCase4.Size("empty3") == 0u);
+		EXPECT(iniEdgeCase4.Size("empty4") == 0u);
+		EXPECT(iniEdgeCase4.Size("empty5") == 0u);
+
+		// edge case 5: empty sections with data in between
+		// expected: 5 empty sections and 1 non-empty section
+		mINI::INIFile iniEdgeCase5(filename_INI_edge_case_5);
+		OutputData(filename_INI_edge_case_5, iniEdgeCase5);
+		EXPECT(iniEdgeCase5.Size() == 6u);
+		EXPECT(iniEdgeCase5.Size("empty1") == 0u);
+		EXPECT(iniEdgeCase5.Size("empty2") == 0u);
+		EXPECT(iniEdgeCase5.Size("empty3") == 0u);
+		EXPECT(iniEdgeCase5.Size("empty4") == 0u);
+		EXPECT(iniEdgeCase5.Size("empty5") == 0u);
+		EXPECT(iniEdgeCase5.Size("notempty") == 3u);
+		EXPECT(iniEdgeCase5.Get("notempty", "a") == "1");
+		EXPECT(iniEdgeCase5.Get("notempty", "b") == "2");
+		EXPECT(iniEdgeCase5.Get("notempty", "c") == "3");
+	},
+
+	CASE("Read and check for case insensitivity")
+	{
 	}
 };
 
 int main(int argc, char** argv)
 {
 	// write test files
-	WriteTestINI(filename1, INI_file_well_formed);
-	WriteTestINI(filename2, INI_file_not_well_formed);
+	WriteTestINI(filename_INI_well_formed, data_INI_well_formed);
+	WriteTestINI(filename_INI_not_well_formed, data_INI_not_well_formed);
+	WriteTestINI(filename_INI_empty, data_INI_empty);
+	WriteTestINI(filename_INI_edge_case_1, data_INI_edge_case_1);
+	WriteTestINI(filename_INI_edge_case_2, data_INI_edge_case_2);
+	WriteTestINI(filename_INI_edge_case_3, data_INI_edge_case_3);
+	WriteTestINI(filename_INI_edge_case_4, data_INI_edge_case_4);
+	WriteTestINI(filename_INI_edge_case_5, data_INI_edge_case_5);
 	// run tests
 	if (int failures = lest::run(mINI_tests, argc, argv))
 	{
 		return failures;
 	}
 
-	return std::cout << "All tests passed!" << std::endl, EXIT_SUCCESS;
+	return std::cout << std::endl << "All tests passed!" << std::endl, EXIT_SUCCESS;
 }

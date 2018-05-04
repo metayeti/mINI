@@ -107,6 +107,12 @@ namespace mINI
 		// check if a given key exists
 		bool Has(std::string section, std::string key) const;
 
+		// get number of sections
+		size_t Size() const;
+
+		// get number of keys in a given section
+		size_t Size(std::string section) const;
+
 		// get a string value
 		std::string Get(std::string section, std::string key) const;
 
@@ -272,7 +278,7 @@ namespace mINI
 
 		std::string filename;
 
-		static T_DataMap CreateMap(INIData const& data);
+		static T_DataMap MakeMap(INIData const& data);
 		T_LineData GetLazyOutput(INIData const& data) const;
 
 	public:

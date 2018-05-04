@@ -111,6 +111,31 @@ namespace mINI
 		return false;
 	}
 
+	size_t INIFile::Size() const
+	{
+		return data.size();
+	}
+
+	size_t INIFile::Size(std::string section) const
+	{
+		INIStringUtil::Trim(section);
+		if (section.empty())
+		{
+			return false;
+		}
+		INIStringUtil::ToLower(section);
+		for (auto const& it : data)
+		{
+			auto const& dSection = it.first;
+			if (dSection == section)
+			{
+				auto const& collection = it.second;
+				return collection.size();
+			}
+		}
+		return 0;
+	}
+
 	std::string INIFile::Get(std::string section, std::string key) const
 	{
 		INIStringUtil::Trim(section);
@@ -573,7 +598,7 @@ namespace mINI
 		std::string const& sectionName = data.first;
 		auto const& collection = data.second;
 		fileWriteStream << '[' << sectionName << ']';
-		if (collection.size() > 0)
+		if (collection.size())
 		{
 			fileWriteStream << std::endl;
 			auto it = collection.begin();
@@ -593,18 +618,21 @@ namespace mINI
 
 	void INIWriteStream::operator<<(INIData const& data)
 	{
-		auto it = data.begin();
-		for (;;)
+		if (data.size())
 		{
-			*this << *it;
-			if (++it == data.end())
+			auto it = data.begin();
+			for (;;)
 			{
-				break;
-			}
-			fileWriteStream << std::endl;
-			if (prettyPrint)
-			{
+				*this << *it;
+				if (++it == data.end())
+				{
+					break;
+				}
 				fileWriteStream << std::endl;
+				if (prettyPrint)
+				{
+					fileWriteStream << std::endl;
+				}
 			}
 		}
 	}
@@ -615,8 +643,7 @@ namespace mINI
 	//
 	///////////////////////////////////////////////////////////////////////////
 
-	
-	INILazyWriter::T_DataMap INILazyWriter::CreateMap(INIData const& data)
+	INILazyWriter::T_DataMap INILazyWriter::MakeMap(INIData const& data)
 	{
 		T_DataMap dataMap;
 		for (auto const& it : data)
@@ -644,7 +671,7 @@ namespace mINI
 		// read original data
 		INIData originalData;
 		T_LineData outputLines;
-		INIReadStream::T_LineDataPtr originalLines = nullptr;
+		INIReadStream::T_LineDataPtr originalLines;
 		{
 			INIReadStream inputStream(filename);
 			if (inputStream.Good())
@@ -658,8 +685,8 @@ namespace mINI
 			}
 		}
 		// build data maps
-		T_DataMap originalMap = CreateMap(originalData);
-		T_DataMap outputMap = CreateMap(data);
+		T_DataMap originalMap = MakeMap(originalData);
+		T_DataMap outputMap = MakeMap(data);
 
 		// iterate over original lines and write to output
 		INIKeyValue parseData;
@@ -668,7 +695,7 @@ namespace mINI
 		bool continueToNextSection = false;
 		bool discardNextEmpty = false;
 		bool writeNewKeys = false;
-		size_t lastKeyLine = 0;
+		unsigned int lastKeyLine = 0;
 
 		for (auto line = originalLines->begin(); line != originalLines->end(); ++line)
 		{
@@ -802,7 +829,7 @@ namespace mINI
 				}
 			}
 		}
-		
+
 		// check for any new sections and add them to the end of the file
 		for (auto const& it : outputMap)
 		{
@@ -869,15 +896,18 @@ namespace mINI
 		std::ofstream fileWriteStream(filename);
 		if (fileWriteStream.is_open())
 		{
-			auto line = output.begin();
-			for (;;)
+			if (output.size())
 			{
-				fileWriteStream << *line;
-				if (++line == output.end())
+				auto line = output.begin();
+				for (;;)
 				{
-					break;
+					fileWriteStream << *line;
+					if (++line == output.end())
+					{
+						break;
+					}
+					fileWriteStream << std::endl;
 				}
-				fileWriteStream << std::endl;
 			}
 			return true;
 		}

@@ -77,6 +77,16 @@ To check if a section exists:
 ini.Has(section);
 ```
 
+To get the number of sections:
+```C++
+ini.Size();
+```
+
+To get the number of keys in a given section:
+```C++
+ini.Size(section);
+```
+
 ### Updating data
 
 To update old values or create new ones, use the `Set` function:
