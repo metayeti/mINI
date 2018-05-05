@@ -109,13 +109,16 @@ To update old values or create new ones, use the `Set` function:
 ini.Set(section, key, value);
 ```
 
-To set multiple values for a single section at once:
+You can set multiple values for a single section at once:
 ```C++
-ini.Set(section, {
-	{key, value},
-	{key, value},
-	{key, value},
-	...
+// section, key and value are string values
+ini.Set(section, { {key, value}, ... });
+
+// example usage:
+ini.Set("section", {
+	{"key1", "value1"},
+	{"key2", "value2"},
+	{"key3", "value3"}
 });
 ```
 
