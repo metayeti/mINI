@@ -206,7 +206,7 @@ const T_LineData data_INI_letter_case_2 = {
 
 
 //
-//  filenames
+// filenames
 //
 const std::string filename_INI_basic = "data01.ini";
 const std::string filename_INI_well_formed = "data02.ini";
@@ -226,7 +226,7 @@ const std::string filename_INI_letter_case_2 = "data14.ini";
 const std::string filename_dummy = "dummy_______filename_______";
 
 //
-//  helper functions
+// helper functions
 //
 bool WriteTestINI(std::string const& filename, T_LineData const& lines)
 {
@@ -351,7 +351,6 @@ const lest::test mINI_tests[] =
 		EXPECT(iniDataA.Get("fruit", "grape") == iniDataB.Get("fruit", "grape"));
 		EXPECT(iniDataA.Get("fruit", "orange") == iniDataB.Get("fruit", "orange"));
 		EXPECT(iniDataA.GetUInt("vegetables", "garlic") == iniDataB.GetUInt("vegetables", "garlic"));
-		EXPECT(fabs(iniDataA.GetFloat("vegetables", "pepper") - iniDataB.GetFloat("vegetables", "pepper")) < 0.1);
 		EXPECT(fabs(iniDataA.GetDouble("vegetables", "pepper") - iniDataB.GetDouble("vegetables", "pepper")) < 0.1);
 		EXPECT(iniDataA.GetInt("vegetables", "pumpkin") == iniDataB.GetInt("vegetables", "pumpkin"));
 		EXPECT(iniDataA.GetBool("nuts", "almond") == iniDataB.GetBool("nuts", "almond"));

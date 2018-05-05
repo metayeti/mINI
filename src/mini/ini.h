@@ -30,7 +30,7 @@
 //  - the constructor or Read to read from an INI file.
 //  - Has to check if a given section or key exists.
 //  - Size to get number of sections of keys within a section.
-//  - Get, GetInt, GetUInt... to retreive data.
+//  - Get, GetChar, GetBool, GetInt, GetUInt, GetDouble to retreive data.
 //  - Set to set a new value.
 //  - RemoveKey or RemoveSection to remove parts of data.
 //  - Clear to remove all data.
@@ -134,9 +134,6 @@ namespace mINI
 		// get an unsigned integer value
 		unsigned int GetUInt(std::string section, std::string key) const;
 
-		// get a float value
-		float GetFloat(std::string section, std::string key) const;
-
 		// get a double value
 		double GetDouble(std::string section, std::string key) const;
 
@@ -155,9 +152,6 @@ namespace mINI
 
 		// set an unsigned integer value
 		void Set(std::string section, std::string key, unsigned int value);
-
-		// set a float value
-		void Set(std::string section, std::string key, float value);
 
 		// set a double value
 		void Set(std::string section, std::string key, double value);

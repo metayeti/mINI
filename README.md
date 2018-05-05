@@ -4,9 +4,7 @@
 
 This is a tiny utility library for reading from and writing data to INI files with a straightforward API and a minimal footprint. It conforms to the (somewhat) standard INI format - sections and keys are case insensitive, and any leading or trailing whitespace is ignored. Comments are lines that begin with a semicolon. Trailing comments are only allowed on section lines.
 
-After reading, data is kept in memory. Files are read from or written to disk on demand and closed immediately after.
-
-This library supports lazy writing, which only writes changes and updates and preserves custom spacings and comments. A lazy write invoked by a `Write` call will read the output file, find changes made and update the file accordingly. If performance is a strong issue and you only need to generate files, use `Generate` instead.
+After reading, data is kept in memory. Files are read from or written to disk on demand and closed immediately after. This library supports lazy writing, which only writes changes and updates and preserves custom spacings and comments. A lazy write invoked by a `Write` call will read the output file, find changes made and update the file accordingly. If performance is a strong issue and you only need to generate files, use `Generate` instead.
 
 Read and write order is preserved. New keys and sections will be written to the file in the same order they were added. Iterating through data will take the same order as the original file.
 
@@ -35,7 +33,7 @@ Use `Read` to read from a file:
 ini.Read("myfile.ini"); // returns true if successful
 ```
 
-Alternatively, use the constructor to read from a file on instantiation:
+Alternatively, you can use the constructor to read from a file on instantiation:
 ```C++
 mINI::INIFile ini("myfile.ini");
 ```
@@ -61,9 +59,6 @@ ini.GetInt(section, key);
 
 // retreive an unsigned int value
 ini.GetUInt(section, key);
-
-// retreive a float value
-ini.GetFloat(section, key);
 
 // retreive a double value
 ini.GetDouble(section, key);
@@ -109,7 +104,7 @@ ini.Size(); // returns a size_t
 
 To update old values or create new ones, use the `Set` function:
 ```C++
-// value may be one of the following: string, bool, char, int, unsigned int, float, double
+// value may be one of the following: string, bool, char, int, unsigned int, double
 ini.Set(section, key, value);
 ```
 

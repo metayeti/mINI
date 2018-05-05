@@ -220,12 +220,6 @@ namespace mINI
 		return strtoul(value.c_str(), NULL, 10);
 	}
 
-	float INIFile::GetFloat(std::string section, std::string key) const
-	{
-		auto const value = Get(section, key);
-		return static_cast<float>(atof(value.c_str()));
-	}
-
 	double INIFile::GetDouble(std::string section, std::string key) const
 	{
 		auto const value = Get(section, key);
@@ -244,6 +238,7 @@ namespace mINI
 		{
 			return;
 		}
+		INIStringUtil::Trim(value);
 		INIStringUtil::ToLower(section);
 		INIStringUtil::ToLower(key);
 		for (auto& it : data)
@@ -294,11 +289,6 @@ namespace mINI
 	}
 
 	void INIFile::Set(std::string section, std::string key, unsigned int value)
-	{
-		Set(section, key, INIStringUtil::ToString(value));
-	}
-
-	void INIFile::Set(std::string section, std::string key, float value)
 	{
 		Set(section, key, INIStringUtil::ToString(value));
 	}
