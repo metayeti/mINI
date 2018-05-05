@@ -52,6 +52,15 @@ const T_LineData data_INI_types = {
 
 // pretty-printed generated file
 const T_LineData data_INI_pretty = {
+	"[section1]",
+	"key1 = value1",
+	"key2 = value2",
+	"key3 = value3",
+	"",
+	"[section2]",
+	"key1 = value1",
+	"key2 = value2",
+	"key3 = value3"
 };
 
 //
@@ -158,11 +167,23 @@ const lest::test mINI_tests[] =
 		iniDataTypes.Set("double", "double3", .3);
 		iniDataTypes.Set("double", "double4", .123456789123);
 		EXPECT(iniDataTypes.Generate(filename_INI_types) == true);
-		EXPECT(VerifyData(filename_INI_types, data_INI_types));
+		EXPECT(VerifyData(filename_INI_types, data_INI_types) == true);
 	},
 
 	CASE ("Generate pretty")
 	{
+		mINI::INIFile iniDataPretty;
+		iniDataPretty.Set("section1", "key1", "value1");
+		iniDataPretty.Set("section1", "key2", "value2");
+		iniDataPretty.Set("section1", "key3", "value3");
+		// test fancy set
+		iniDataPretty.Set("section2", {
+			{"key1", "value1"},
+			{"key2", "value2"},
+			{"key3", "value3"}
+		});
+		EXPECT(iniDataPretty.Generate(filename_INI_pretty, true) == true);
+		EXPECT(VerifyData(filename_INI_pretty, data_INI_pretty) == true);
 	}
 };
 

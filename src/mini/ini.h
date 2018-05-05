@@ -137,6 +137,9 @@ namespace mINI
 		// get a double value
 		double GetDouble(std::string section, std::string key) const;
 
+		// set a collection
+		void Set(std::string section, INICollection const& collection);
+		
 		// set a string value
 		void Set(std::string section, std::string key, std::string value);
 		void Set(std::string section, std::string key, const char* const value);

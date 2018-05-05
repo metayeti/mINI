@@ -104,8 +104,19 @@ ini.Size(); // returns a size_t
 
 To update old values or create new ones, use the `Set` function:
 ```C++
+// section and key are string values
 // value may be one of the following: string, bool, char, int, unsigned int, double
 ini.Set(section, key, value);
+```
+
+To set multiple values for a single section at once:
+```C++
+ini.Set(section, {
+	{key, value},
+	{key, value},
+	{key, value},
+	...
+});
 ```
 
 To remove a single key:

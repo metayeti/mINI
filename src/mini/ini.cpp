@@ -226,6 +226,16 @@ namespace mINI
 		return atof(value.c_str());
 	}
 
+	void INIFile::Set(std::string section, INICollection const& collection)
+	{
+		for (auto const& it : collection)
+		{
+			auto const& key = it.first;
+			auto const& value = it.second;
+			Set(section, key, value);
+		}
+	}
+	
 	void INIFile::Set(std::string section, std::string key, std::string value)
 	{
 		INIStringUtil::Trim(section);
