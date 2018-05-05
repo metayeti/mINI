@@ -254,14 +254,14 @@ bool WriteTestINI(std::string const& filename, T_LineData const& lines)
 void OutputData(std::string const& filename, mINI::INIFile& ini)
 {
 	std::cout << '=' << filename << '=' << std::endl;
-	for (auto it = ini.begin(); it != ini.end(); ++it)
+	for (auto const& it : ini)
 	{
-		std::cout << it->first << std::endl;
-		auto collection = it->second;
-		for (auto it2 = collection.begin(); it2 != collection.end(); ++it2)
+		std::cout << it.first << std::endl;
+		auto const& collection = it.second;
+		for (auto it2 : collection)
 		{
-			auto const& key = it2->first;
-			auto const& value = it2->second;
+			auto const& key = it2.first;
+			auto const& value = it2.second;
 			std::cout << "   " << key << ": " << value << std::endl;
 		}
 	}
@@ -274,11 +274,26 @@ const lest::test mINI_tests[] =
 {
 	CASE("Test basic features")
 	{
+		// create a blank INI
+		mINI::INIFile iniDataBasic;
+		// ensure Size() is 0
+		EXPECT(iniDataBasic.Size() == 0u);
 		// read a basic INI file with 3 sections
-		mINI::INIFile iniDataBasic(filename_INI_basic);
+		iniDataBasic.Read(filename_INI_basic);
 		OutputData(filename_INI_basic, iniDataBasic);
 		// test Size()
 		EXPECT(iniDataBasic.Size() == 3u);
+		// test Get(section)
+		mINI::INICollection* collection = iniDataBasic.Get("first section");
+		EXPECT(collection != nullptr);
+		if (collection != nullptr)
+		{
+			for (auto const& it : *collection)
+			{
+				std::cout << "COLLECTION: " << it.first << " : " << it.second << std::endl;
+			}
+			EXPECT(collection->size() == 2u);
+		}
 		// test Size(section)
 		EXPECT(iniDataBasic.Size("first section") == 2u);
 		EXPECT(iniDataBasic.Size("second section") == 3u);

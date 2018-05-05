@@ -114,6 +114,9 @@ namespace mINI
 		// get number of keys in a given section
 		size_t Size(std::string section) const;
 
+		// get a section as collection of key-value pairs
+		INICollection* Get(std::string section);
+		
 		// get a string value
 		std::string Get(std::string section, std::string key) const;
 

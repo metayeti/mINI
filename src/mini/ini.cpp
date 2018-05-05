@@ -136,6 +136,25 @@ namespace mINI
 		return 0;
 	}
 
+	INICollection* INIFile::Get(std::string section)
+	{
+		INIStringUtil::Trim(section);
+		if (section.empty())
+		{
+			return nullptr;
+		}
+		INIStringUtil::ToLower(section);
+		for (auto& it : data)
+		{
+			auto const& dSection = it.first;
+			if (dSection == section)
+			{
+				return &it.second;
+			}
+		}
+		return nullptr;
+	}
+	
 	std::string INIFile::Get(std::string section, std::string key) const
 	{
 		INIStringUtil::Trim(section);
@@ -377,6 +396,10 @@ namespace mINI
 
 	inline bool INIFile::Write(std::string const& filename, bool pretty) const
 	{
+		if (filename.empty())
+		{
+			return false;
+		}
 		INILazyWriter lazyWriter(filename);
 		lazyWriter.prettyPrint = pretty;
 		return lazyWriter.Write(data);
@@ -394,6 +417,10 @@ namespace mINI
 
 	inline bool INIFile::Generate(std::string const& filename, bool pretty) const
 	{
+		if (filename.empty())
+		{
+			return false;
+		}
 		INIWriteStream outputStream(filename);
 		if (outputStream.Good())
 		{
@@ -915,10 +942,10 @@ namespace mINI
 			return false;
 		}
 		// file exists, lazy-write to it
-		T_LineData output = GetLazyOutput(data);
 		std::ofstream fileWriteStream(filename);
 		if (fileWriteStream.is_open())
 		{
+			T_LineData output = GetLazyOutput(data);
 			if (output.size())
 			{
 				auto line = output.begin();

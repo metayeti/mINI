@@ -42,7 +42,7 @@ mINI::INIFile ini("myfile.ini");
 
 ### Reading data
 
-To read data, use one of the `Get` functions. If a value doesn't exist, default will be returned:
+To read data, use one of the `Get` functions. If a value doesn't exist, default will be returned. Default values are either 0 or an empty string:
 ```C++
 // retreive a string value
 // section and key are string values
@@ -57,16 +57,16 @@ ini.GetBool(section, key); // default: false
 ini.GetChar(section, key); // default: 0
 
 // retreive an int value
-ini.GetInt(section, key); // default: 0
+ini.GetInt(section, key);
 
 // retreive an unsigned int value
-ini.GetUInt(section, key); // default: 0
+ini.GetUInt(section, key);
 
 // retreive a float value
-ini.GetFloat(section, key); // default: 0
+ini.GetFloat(section, key);
 
 // retreive a double value
-ini.GetDouble(section, key); // default: 0
+ini.GetDouble(section, key);
 ```
 
 To check if a key exists:
@@ -114,7 +114,7 @@ ini.Clear();
 
 ### Writing to a file
 
-To write back to a file we previously read, while preserving spacings, comments, blank lines and other data:
+To write back to a file we previously read while preserving spacings, comments, blank lines and other data:
 ```C++
 // pretty parameter is optional. if set to true, spacings will be added around values and keys and
 // blank lines will be added between sections
