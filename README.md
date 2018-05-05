@@ -69,7 +69,7 @@ ini.GetFloat(section, key);
 ini.GetDouble(section, key);
 ```
 
-To get an entire collection as a list of key and value pairs:
+To get an entire section as a collection of key and value pairs:
 ```C++
 // returns a pointer to INICollection or nullptr if section is not found
 mINI::INICollection* keyValueStore = ini.Get(section);
