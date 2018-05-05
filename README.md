@@ -4,7 +4,7 @@
 
 This is a tiny utility library for reading from and writing data to INI files with a straightforward API and a minimal footprint. It conforms to the (somewhat) standard INI format - sections and keys are case insensitive, and any leading or trailing whitespace is ignored. Comments are lines that begin with a semicolon. Trailing comments are only allowed on section lines.
 
-After reading, data is kept in memory. Files are read from or written to disk on demand and closed immediately after. This library supports lazy writing, which only writes changes and updates and preserves custom spacings and comments. A lazy write invoked by a `Write` call will read the output file, find changes made and update the file accordingly. If performance is a strong issue and you only need to generate files, use `Generate` instead.
+After reading, data is kept in memory. Files are read from or written to disk on demand and closed immediately after. This library supports lazy writing, which only writes changes and updates and preserves custom spacings, comments and formatting. A lazy write invoked by a `Write` call will read the output file, find changes made and update the file accordingly. If performance is a strong issue and you only need to generate files, use `Generate` instead.
 
 Read and write order is preserved. New keys and sections will be written to the file in the same order they were added. Iterating through data will take the same order as the original file.
 

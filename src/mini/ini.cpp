@@ -942,10 +942,10 @@ namespace mINI
 			return false;
 		}
 		// file exists, lazy-write to it
+		T_LineData output = GetLazyOutput(data);
 		std::ofstream fileWriteStream(filename);
 		if (fileWriteStream.is_open())
 		{
-			T_LineData output = GetLazyOutput(data);
 			if (output.size())
 			{
 				auto line = output.begin();

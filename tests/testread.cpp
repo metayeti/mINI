@@ -228,6 +228,7 @@ const std::string filename_dummy = "dummy_______filename_______";
 //
 // helper functions
 //
+
 bool WriteTestINI(std::string const& filename, T_LineData const& lines)
 {
 	std::ofstream fileWriteStream(filename);

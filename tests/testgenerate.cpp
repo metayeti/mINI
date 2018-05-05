@@ -14,7 +14,7 @@ typedef std::vector<std::string> T_LineData;
 const T_LineData data_INI_basic = {
 	"[section]",
 	"key1=value1",
-	"key2=value2",
+	"key2=value2"
 };
 
 // empty file
