@@ -69,6 +69,19 @@ ini.GetFloat(section, key);
 ini.GetDouble(section, key);
 ```
 
+To get an entire collection as a list of key and value pairs:
+```C++
+// returns a pointer to INICollection or nullptr if section is not found
+mINI::INICollection* keyValueStore = ini.Get(section);
+// example usage
+for (auto const& it : *keyValueStore)
+{
+	std::string const& key = it.first;
+	std::string const& value = it.second;
+	std::cout << key << ": " << value << std::endl;
+}
+```
+
 To check if a key exists:
 ```C++
 ini.Has(section, key); // returns true or false
