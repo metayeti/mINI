@@ -12,8 +12,9 @@
 //  straightforward API and a minimal footprint. It conforms to the (somewhat)
 //  standard INI format - sections and keys are case insensitive, and all
 //  leading and trailing whitespace is ignored. Comments are lines that begin
-//  with a semicolon. Trailing comments are not allowed since values may also
-//  contain semicolons.
+//  with a semicolon. Trailing comments on value lines are not allowed since
+//  values may also contain semicolons. Trailing comments on section lines are
+//  ignored and therefore implicitly allowed.
 //
 //  Files are read on demand in one fell swoop and the data is kept in memory,
 //  ready to be manipulated. Files are closed after read or write operations.
@@ -136,7 +137,7 @@ namespace mINI
 
 		// get a double value
 		double GetDouble(std::string section, std::string key) const;
-
+		
 		// set a collection
 		void Set(std::string section, INICollection const& collection);
 		
@@ -173,15 +174,15 @@ namespace mINI
 
 		// lazy-write to file
 		// preserves comments, spacings, etc. and updates file with changes
-		bool Write(bool pretty = false) const;
-		bool Write(const char* const filename, bool pretty = false) const;
 		bool Write(std::string const& filename, bool pretty = false) const;
+		bool Write(const char* const filename, bool pretty = false) const;
+		bool Write(bool pretty = false) const;
 
 		// generate a file
 		// this will overwrite any previous file contents
-		bool Generate(bool pretty = false) const;
-		bool Generate(const char* const filename, bool pretty = false) const;
 		bool Generate(std::string const& filename, bool pretty = false) const;
+		bool Generate(const char* const filename, bool pretty = false) const;
+		bool Generate(bool pretty = false) const;
 
 		// iterators
 		iterator begin();

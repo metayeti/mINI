@@ -225,7 +225,7 @@ namespace mINI
 		auto const value = Get(section, key);
 		return atof(value.c_str());
 	}
-
+	
 	void INIFile::Set(std::string section, INICollection const& collection)
 	{
 		for (auto const& it : collection)
@@ -384,17 +384,7 @@ namespace mINI
 		return false;
 	}
 
-	bool INIFile::Write(bool pretty) const
-	{
-		return Write(filename, pretty);
-	}
-
-	bool INIFile::Write(const char* const filename, bool pretty) const
-	{
-		return Write(std::string(filename), pretty);
-	}
-
-	inline bool INIFile::Write(std::string const& filename, bool pretty) const
+	bool INIFile::Write(std::string const& filename, bool pretty) const
 	{
 		if (filename.empty())
 		{
@@ -405,17 +395,17 @@ namespace mINI
 		return lazyWriter.Write(data);
 	}
 
-	bool INIFile::Generate(bool pretty) const
+	bool INIFile::Write(const char* const filename, bool pretty) const
 	{
-		return Generate(filename, pretty);
-	}
-	
-	bool INIFile::Generate(const char* const filename, bool pretty) const
-	{
-		return Generate(std::string(filename), pretty);
+		return Write(std::string(filename), pretty);
 	}
 
-	inline bool INIFile::Generate(std::string const& filename, bool pretty) const
+	bool INIFile::Write(bool pretty) const
+	{
+		return Write(filename, pretty);
+	}
+
+	bool INIFile::Generate(std::string const& filename, bool pretty) const
 	{
 		if (filename.empty())
 		{
@@ -429,6 +419,16 @@ namespace mINI
 		    return true;
 		}
 		return false;
+	}
+
+	bool INIFile::Generate(const char* const filename, bool pretty) const
+	{
+		return Generate(std::string(filename), pretty);
+	}
+
+	bool INIFile::Generate(bool pretty) const
+	{
+		return Generate(filename, pretty);
 	}
 
 	INIFile::iterator INIFile::begin()
