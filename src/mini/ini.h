@@ -33,7 +33,7 @@
 //  - Size to get number of sections of keys within a section.
 //  - Get, GetChar, GetBool, GetInt, GetUInt, GetDouble to retreive data.
 //  - Set to set a new value.
-//  - RemoveKey or RemoveSection to remove parts of data.
+//  - Remove to remove parts of data.
 //  - Clear to remove all data.
 //  - Write to write to and update an INI file.
 //  - Generate to create or rewrite an INI file.
