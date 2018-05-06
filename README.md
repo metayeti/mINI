@@ -64,7 +64,7 @@ ini.GetUInt(section, key);
 ini.GetDouble(section, key);
 ```
 
-To get an entire section as a collection of key and value pairs:
+To retreive an entire section as a collection of key and value pairs:
 ```C++
 mINI::INICollection keyValueStore = ini.Get(section);
 // example usage

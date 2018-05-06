@@ -121,7 +121,7 @@ namespace mINI
 		INIStringUtil::Trim(section);
 		if (section.empty())
 		{
-			return false;
+			return 0;
 		}
 		INIStringUtil::ToLower(section);
 		for (auto const& it : data)
