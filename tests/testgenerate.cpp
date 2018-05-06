@@ -63,6 +63,29 @@ const T_LineData data_INI_pretty = {
 	"key3 = value3"
 };
 
+// edge case: single empty section
+const T_LineData data_INI_edge_case_1 = {
+	"[test]"
+};
+
+// edge case: many empty sections
+const T_LineData data_INI_edge_case_2 = {
+	"[test1]",
+	"[test2]",
+	"[test3]"
+};
+
+// edge case: many empty sections with non-empty sections in between
+const T_LineData data_INI_edge_case_3 = {
+	"[test1]",
+	"[test2]",
+	"[realdata]",
+	"value1=A",
+	"value2=B",
+	"value3=C",
+	"[test3]"
+};
+
 //
 // filenames
 //
@@ -71,6 +94,9 @@ const std::string filename_INI_basic = "data01.ini";
 const std::string filename_INI_empty = "data02.ini";
 const std::string filename_INI_types = "data03.ini";
 const std::string filename_INI_pretty = "data04.ini";
+const std::string filename_INI_edge_case_1 = "data05.ini";
+const std::string filename_INI_edge_case_2 = "data06.ini";
+const std::string filename_INI_edge_case_3 = "data07.ini";
 
 const std::string filename_invalid = "?<>||*/\\..^^&&";
 
@@ -184,6 +210,47 @@ const lest::test mINI_tests[] =
 		});
 		EXPECT(iniDataPretty.Generate(filename_INI_pretty, true) == true);
 		EXPECT(VerifyData(filename_INI_pretty, data_INI_pretty) == true);
+	},
+
+	CASE ("Generate edge cases")
+	{
+		// edge case 1: single empty section
+		mINI::INIFile iniEdgeCase1;
+		// in order to add an empty section, we create a dummy value and remove the
+		// key. the API doesn't provide a function to add empty sections on purpose
+		// since it attempts to abstract the interface and let the user deal with
+		// data and not the file structure
+		iniEdgeCase1.Set("test", "dummy", "");
+		iniEdgeCase1.Remove("test", "dummy");
+		EXPECT(iniEdgeCase1.Generate(filename_INI_edge_case_1) == true);
+		EXPECT(VerifyData(filename_INI_edge_case_1, data_INI_edge_case_1));
+
+		// edge case 2: many empty sections
+		mINI::INIFile iniEdgeCase2;
+		iniEdgeCase2.Set("test1", "dummy", "");
+		iniEdgeCase2.Remove("test1", "dummy");
+		iniEdgeCase2.Set("test2", "dummy", "");
+		iniEdgeCase2.Remove("test2", "dummy");
+		iniEdgeCase2.Set("test3", "dummy", "");
+		iniEdgeCase2.Remove("test3", "dummy");
+		EXPECT(iniEdgeCase2.Generate(filename_INI_edge_case_2) == true);
+		EXPECT(VerifyData(filename_INI_edge_case_2, data_INI_edge_case_2));
+
+		// edge case 3: many empty sections with non-empty sections in between
+		mINI::INIFile iniEdgeCase3;
+		iniEdgeCase3.Set("test1", "dummy", "");
+		iniEdgeCase3.Remove("test1", "dummy");
+		iniEdgeCase3.Set("test2", "dummy", "");
+		iniEdgeCase3.Remove("test2", "dummy");
+		iniEdgeCase3.Set("realdata", {
+			{"value1", "A"},
+			{"value2", "B"},
+			{"value3", "C"}
+		});
+		iniEdgeCase3.Set("test3", "dummy", "");
+		iniEdgeCase3.Remove("test3", "dummy");
+		EXPECT(iniEdgeCase3.Generate(filename_INI_edge_case_3) == true);
+		EXPECT(VerifyData(filename_INI_edge_case_3, data_INI_edge_case_3));
 	}
 };
 

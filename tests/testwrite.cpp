@@ -26,12 +26,74 @@ const T_LineData data_INI_basic_expected = {
 };
 
 // complex ini file
+const T_LineData data_INI_complex_initial = {
+	"   GARBAGE   ",
+	";;;;;;;;;;;;;;comment comment",
+	";;;;;;",
+	";",
+	"GARBAGE",
+	"GARBAGE  ",
+	"[section1] ; trailing comment",
+	"GARBAGE",
+	";;",
+	"a=1",
+	"bbb = 3",
+	"ccc          = 4",
+	"ddddd  =       5",
+	";",
+	";",
+	"",
+	"[other section]",
+	"dinosaurs= 16",
+	"birds= 123.456",
+	"giraffes= 2",
+	"[extra section]",
+	"            a = 1",
+	"            b=2",
+	"            c    =    3",
+	";end of original file"
+};
+
+const T_LineData data_INI_complex_expected = {
+	"   GARBAGE   ",
+	";;;;;;;;;;;;;;comment comment",
+	";;;;;;",
+	";",
+	"GARBAGE",
+	"GARBAGE  ",
+	"[section1] ; trailing comment",
+	"GARBAGE",
+	";;",
+	"a=2",
+	"bbb = 100",
+	"ccc          = -500",
+	"ddddd  =       0xFF",
+	"newkey=newvalue",
+	";",
+	";",
+	"",
+	"[other section]",
+	"dinosaurs= 16",
+	"birds= all",
+	"giraffes= 50",
+	"elephants=200",
+	"lions=64",
+	"[extra section]",
+	"            a = -1",
+	"            b=3",
+	"            c    =    0",
+	";end of original file",
+	"[new section]",
+	"key1=value1",
+	"key2=value2"
+};
 
 //
 // filenames
 //
 
 const std::string filename_INI_basic = "data01.ini";
+const std::string filename_INI_complex = "data02.ini";
 
 //
 // helper functions
@@ -111,6 +173,37 @@ const lest::test mINI_tests[] =
 		iniDataBasic.Set("section", "key2", "newvalue2");
 		EXPECT(iniDataBasic.Write() == true);
 		EXPECT(VerifyData(filename_INI_basic, data_INI_basic_expected) == true);
+	},
+	
+	CASE("Complex write")
+	{
+		// change a few keys from input file and add a new section,
+		// then check for correctness
+		mINI::INIFile iniDataComplex(filename_INI_complex);
+		iniDataComplex.Set("section1", {
+			{"a", "2"},
+			{"bbb", "100"},
+			{"ccc", "-500"},
+			{"ddddd", "0xFF"},
+			{"newkey", "newvalue"}
+		});
+		iniDataComplex.Set("other section", {
+			{"birds", "all"},
+			{"giraffes", "50"},
+			{"elephants", "200"},
+			{"lions", "64"}
+		});
+		iniDataComplex.Set("extra section", {
+			{"     a", "     -1"},
+			{"b     ", "3      "},
+			{"    c  ", "   0  "}
+		});
+		iniDataComplex.Set("new section", {
+			{"key1", "value1"},
+			{"key2", "value2"}
+		});
+		EXPECT(iniDataComplex.Write() == true);
+		EXPECT(VerifyData(filename_INI_complex, data_INI_complex_expected) == true);
 	}
 };
 
@@ -118,6 +211,7 @@ int main(int argc, char** argv)
 {
 	// write test files
 	WriteTestINI(filename_INI_basic, data_INI_basic_initial);
+	WriteTestINI(filename_INI_complex, data_INI_complex_initial);
 	// run tests
 	if (int failures = lest::run(mINI_tests, argc, argv))
 	{
