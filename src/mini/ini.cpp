@@ -136,12 +136,12 @@ namespace mINI
 		return 0;
 	}
 
-	INICollection* INIFile::Get(std::string section)
+	INICollection INIFile::Get(std::string section) const
 	{
 		INIStringUtil::Trim(section);
 		if (section.empty())
 		{
-			return nullptr;
+			return INICollection();
 		}
 		INIStringUtil::ToLower(section);
 		for (auto& it : data)
@@ -149,10 +149,10 @@ namespace mINI
 			auto const& dSection = it.first;
 			if (dSection == section)
 			{
-				return &it.second;
+				return INICollection(it.second);
 			}
 		}
-		return nullptr;
+		return INICollection();
 	}
 	
 	std::string INIFile::Get(std::string section, std::string key) const

@@ -66,17 +66,13 @@ ini.GetDouble(section, key);
 
 To get an entire section as a collection of key and value pairs:
 ```C++
-// returns a pointer to INICollection or nullptr if section is not found
-mINI::INICollection* keyValueStore = ini.Get(section);
+mINI::INICollection keyValueStore = ini.Get(section);
 // example usage
-if (keyValueStore)
+for (auto const& it : keyValueStore)
 {
-    for (auto const& it : *keyValueStore)
-    {
-	    std::string const& key = it.first;
-	    std::string const& value = it.second;
-	    std::cout << key << ": " << value << std::endl;
-    }
+    std::string const& key = it.first;
+    std::string const& value = it.second;
+    std::cout << key << ": " << value << std::endl;
 }
 ```
 

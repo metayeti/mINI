@@ -116,7 +116,7 @@ namespace mINI
 		size_t Size(std::string section) const;
 
 		// get a section as collection of key-value pairs
-		INICollection* Get(std::string section);
+		INICollection Get(std::string section) const;
 		
 		// get a string value
 		std::string Get(std::string section, std::string key) const;

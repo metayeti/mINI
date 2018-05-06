@@ -285,15 +285,11 @@ const lest::test mINI_tests[] =
 		// test Size()
 		EXPECT(iniDataBasic.Size() == 3u);
 		// test Get(section)
-		mINI::INICollection* collection = iniDataBasic.Get("first section");
-		EXPECT(collection != nullptr);
-		if (collection != nullptr)
+		mINI::INICollection collection = iniDataBasic.Get("first section");
+		EXPECT(collection.size() == 2u);
+		for (auto const& it : collection)
 		{
-			for (auto const& it : *collection)
-			{
-				std::cout << "COLLECTION: " << it.first << " : " << it.second << std::endl;
-			}
-			EXPECT(collection->size() == 2u);
+			std::cout << "COLLECTION: " << it.first << " : " << it.second << std::endl;
 		}
 		// test Size(section)
 		EXPECT(iniDataBasic.Size("first section") == 2u);
