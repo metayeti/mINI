@@ -88,6 +88,27 @@ const T_LineData data_INI_complex_expected = {
 	"key2=value2"
 };
 
+// toupdate ini file
+const T_LineData data_INI_toupdate_initial = {
+	"[colors]",
+	"Red=255",
+	"GREEN=0",
+	"blue=100"
+	"[toremovenone]",
+	"[toremoveone]",
+	"A=B",
+	"[toremovefull]",
+	"key1=value1",
+	"key2=value2",
+	"key3=value3",
+	"[toupdate]",
+	"original=100",
+	"modified=100"
+};
+
+const T_LineData data_INI_toupdate_expected = {
+};
+
 //
 // filenames
 //
