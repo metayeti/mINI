@@ -11,22 +11,19 @@
 //  A tiny-ish utility for reading from and writing data to INI files with a
 //  straightforward API and a minimal footprint. It conforms to the (somewhat)
 //  standard INI format - sections and keys are case insensitive, and all
-//  leading and trailing whitespace is ignored. Empty keys and sections are
-//  ignored. Comments are lines that begin with a semicolon. Trailing comments
-//  on value lines are not allowed since values may also contain semicolons.
-//  Trailing comments on section lines are ignored.
+//  leading and trailing whitespace is ignored. Empty keys and sections names
+//  are ignored. Comments are lines that begin with a semicolon. Trailing
+//  comments on value lines are not allowed since values may also contain
+//  semicolons. Trailing comments on section lines are ignored.
 //
 //  Files are read on demand in one fell swoop and the data is kept in memory,
 //  ready to be manipulated. Files are closed after read or write operations.
 //  This utility supports lazy writing, which only writes changes and updates
-//  and preserves custom spacings and comments. A lazy write will read the
-//  output file, find changes made and update the file accordingly. If
-//  performance is a strong issue and you only need to generate files, use
-//  Generate instead. Section and key order is preserved on both read and write
-//  operations.
-//
-//  You can use the iterators at begin() and end() to iterate through all data
-//  in-order.
+//  and preserves custom spacings and comments. A lazy write invoked by a
+//  write() call will read the output file, find changes made and update the
+//  file accordingly. If performance is a strong issue and you only need to
+//  generate files, use generate() instead. Section and key order is preserved
+//  on both read and write operations.
 //
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -36,11 +33,18 @@
 //  mINI::INIFile file("myfile.ini");
 //  mINI::INIStructure ini = file.read();
 //
-//  /* read values. if value doesn't exist it will be created */
+//  /* read values. if key doesn't exist it will be created */
 //  std::string value = ini["section"]["key"];
 //
-//  /* read values. if value doesn't exist it will NOT be created */
+//  /* read values safely. if key doesn't exist it will NOT be created */
 //  std::string value = ini.get("section").get("key");
+//
+//  /* =IMPORTANT=
+//     The difference between the [] and get() operators is that [] returns
+//     REAL data which you can modify and creates a new key automatically
+//     if it doesn't yet exist, while get() returns a COPY of data and
+//     doesn't create new keys. Use has() combined with the [] operator to
+//     get ful control over what is being created anew in the structure.
 //
 //  /* set or update values */
 //  ini["section"]["key"] = "value";
@@ -57,22 +61,56 @@
 //  /* or generate a file */
 //  file.generate(ini);
 //
-//  /* check if key or section is present */
-//  bool hasKey = ini["section"].has("key");
+//  /* check if section or key is present */
 //  bool hasSection = ini.has("section");
+//  bool hasKey = ini["section"].has("key");
 //
 //  /* remove keys or sections */
 //  bool removedKey = ini["section2"].remove("key2");
 //  bool removedSection = ini.remove("section2");
 //
-//  /* check for number of keys or sections */
+//  /* check for number of sections or keys in a section */
 //  size_t n_keys = ini["section"].size();
 //  size_t n_sections = ini.size();
+//
+//  /* to remove all keys from a section */
+//  ini["section"].clear();
 //
 //  /* to clear all data */
 //  ini.clear();
 //
-//  /* to iterate through INI data in-order */
+//  /* =IMPORTANT=
+//     Keep in mind that [] will always create a section if it does not already
+//     exist! You can use has() to check if it exists before performing any
+//     further operations. Remember that get() will return a copy of data, so
+//     you should NOT do removes or updates that way. Straightforward usage
+//     with [] operators shouldn't really be a problem in most real-world cases
+//     where you're doing lookups on known keys anyway and you may not care if
+//     empty keys or sections get created, but this is something to keep in mind
+//     when dealing with this datastructure. Always use has() before using the
+//     [] operator if you don't want new empty sections and keys. Below is
+//     a short example that demonstrates safe manipulation with data. */
+//
+//  if (ini.has("section"))
+//  {
+//      // we have section, we can access it safely
+//      auto& collection = ini["section"];
+//      if (collection.has("key"))
+//      {
+//          // we have key, we can access it safely
+//          auto& value = collection["key"];
+//          // do something with value, for example change it
+//          value = "some value";
+//          // if we wanted to, we can remove this key safely since we know
+//          // that it exists
+//          collection.remove("key");
+//      }
+//      // similarly, if we wanted to we can remove this section safely since
+//      // we've made sure it exists
+//      ini.remove("section");
+//  }
+//
+//  /* to iterate through data in-order and display results */
 //  for (auto const& it : ini)
 //  {
 //      auto const& section = it.first();
