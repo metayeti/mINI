@@ -83,17 +83,6 @@ namespace mINI
 		{
 			std::transform(str.begin(), str.end(), str.begin(), ::tolower);
 		}
-
-		template<typename T>
-		static std::string ToString(T const& value)
-		{
-			std::stringstream buff;
-			std::string output;
-			buff.precision(12);
-			buff << value;
-			buff >> output;
-			return output;
-		}
 	};
 
 	const std::string INIStringUtil::whitespaceDelimiters = " \t\n\r\f\v";
@@ -310,7 +299,6 @@ namespace mINI
 
 		void operator>>(INIStructure& data)
 		{
-			size_t count = 0;
 			std::string line;
 			std::string section;
 			bool inSection = false;
