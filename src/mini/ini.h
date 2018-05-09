@@ -1,7 +1,30 @@
+/*
+ * The MIT License (MIT)
+ * Copyright (c) 2018 Danijel Durakovic
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ */
+
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  mINI
-//  An INI file reader and writer.
+//  /mINI/
+//  An INI file reader and writer for the modern age.
 //
 //  (c) 2018 Danijel Durakovic
 //  Licensed under terms of the MIT License
@@ -40,11 +63,11 @@
 //  std::string value = ini.get("section").get("key");
 //
 //  /* =IMPORTANT=
-//     The difference between the [] and get() operators is that [] returns
+//     The difference between the [] and get() operations is that [] returns
 //     REAL data which you can modify and creates a new key automatically
 //     if it doesn't yet exist, while get() returns a COPY of data and
 //     doesn't create new keys. Use has() combined with the [] operator to
-//     get ful control over what is being created anew in the structure.
+//     get full control over what is being created anew in the structure. */
 //
 //  /* set or update values */
 //  ini["section"]["key"] = "value";
@@ -66,10 +89,10 @@
 //  bool hasKey = ini["section"].has("key");
 //
 //  /* remove keys or sections */
-//  bool removedKey = ini["section2"].remove("key2");
-//  bool removedSection = ini.remove("section2");
+//  bool removedKeySuccess = ini["section2"].remove("key2");
+//  bool removedSectionSuccess = ini.remove("section2");
 //
-//  /* check for number of sections or keys in a section */
+//  /* check for number of keys or sections*/
 //  size_t n_keys = ini["section"].size();
 //  size_t n_sections = ini.size();
 //
@@ -80,16 +103,16 @@
 //  ini.clear();
 //
 //  /* =IMPORTANT=
-//     Keep in mind that [] will always create a section if it does not already
-//     exist! You can use has() to check if it exists before performing any
+//     Keep in mind that [] will always create an item if it does not already
+//     exist! You can use has() to check if an item exists before performing
 //     further operations. Remember that get() will return a copy of data, so
 //     you should NOT do removes or updates that way. Straightforward usage
 //     with [] operators shouldn't really be a problem in most real-world cases
 //     where you're doing lookups on known keys anyway and you may not care if
 //     empty keys or sections get created, but this is something to keep in mind
 //     when dealing with this datastructure. Always use has() before using the
-//     [] operator if you don't want new empty sections and keys. Below is
-//     a short example that demonstrates safe manipulation with data. */
+//     [] operator IF you don't want new empty sections and keys. Below is
+//     a short example that demonstrates safe manipulation of data. */
 //
 //  if (ini.has("section"))
 //  {
@@ -105,9 +128,6 @@
 //          // that it exists
 //          collection.remove("key");
 //      }
-//      // similarly, if we wanted to we can remove this section safely since
-//      // we've made sure it exists
-//      ini.remove("section");
 //  }
 //
 //  /* to iterate through data in-order and display results */
@@ -130,29 +150,6 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-/*
- * The MIT License (MIT)
- * Copyright (c) 2018 Danijel Durakovic
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of
- * this software and associated documentation files (the "Software"), to deal in
- * the Software without restriction, including without limitation the rights to
- * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
- * of the Software, and to permit persons to whom the Software is furnished to do
- * so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
- * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
- * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
- * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
- * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- *
- */
-
 #ifndef MINI_INI_H_
 #define MINI_INI_H_
 
@@ -170,7 +167,6 @@ namespace mINI
 	{
 	public:
 		static const std::string whitespaceDelimiters;
-
 		static inline void Trim(std::string& str)
 		{
 			str.erase(str.find_last_not_of(whitespaceDelimiters) + 1);
@@ -185,14 +181,14 @@ namespace mINI
 	const std::string INIStringUtil::whitespaceDelimiters = " \t\n\r\f\v";
 
 	template<class T>
-	class MagicMap
+	class INIMap
 	{
 	public:
 		using T_Data = std::vector<std::unique_ptr<T>>;
 		using T_DataIndexMap = std::unordered_map<std::string, std::size_t>;
 		using T_IterItem = std::pair<std::string, const T*>;
 		using T_IterList = std::vector<T_IterItem>;
-		using T_MultiSetArgs = typename std::vector<std::pair<std::string, T>>;
+		using T_MultiArgs = typename std::vector<std::pair<std::string, T>>;
 		using const_iterator = typename T_IterList::const_iterator;
 
 	private:
@@ -200,7 +196,7 @@ namespace mINI
 		T_DataIndexMap dataIndexMap;
 		T_IterList iterList;
 
-		inline std::size_t SetEmpty(std::string& key)
+		inline std::size_t setEmpty(std::string& key)
 		{
 			std::size_t index = data.size();
 			dataIndexMap[key] = index;
@@ -210,9 +206,9 @@ namespace mINI
 		}
 
 	public:
-		MagicMap() { }
+		INIMap() { }
 
-		MagicMap(MagicMap const& other)
+		INIMap(INIMap const& other)
 		{
 			std::size_t data_size = other.data.size();
 			for (std::size_t i = 0; i < data_size; ++i)
@@ -231,11 +227,11 @@ namespace mINI
 			INIStringUtil::ToLower(key);
 			auto it = dataIndexMap.find(key);
 			bool hasIt = (it == dataIndexMap.end());
-			std::size_t index = (hasIt) ? SetEmpty(key) : it->second;
+			std::size_t index = (hasIt) ? setEmpty(key) : it->second;
 			return *data[index];
 		}
 
-		T get(std::string key)
+		T get(std::string key) const
 		{
 			INIStringUtil::Trim(key);
 			INIStringUtil::ToLower(key);
@@ -271,9 +267,9 @@ namespace mINI
 			}
 		}
 
-		void set(T_MultiSetArgs keyValues)
+		void set(T_MultiArgs const& multiArgs)
 		{
-			for (auto const& it : keyValues)
+			for (auto const& it : multiArgs)
 			{
 				auto const& key = it.first;
 				auto const& obj = it.second;
@@ -312,7 +308,7 @@ namespace mINI
 			dataIndexMap.clear();
 		}
 
-		std::size_t size()
+		std::size_t size() const
 		{
 			return data.size();
 		}
@@ -321,12 +317,13 @@ namespace mINI
 		const_iterator end() const { return iterList.end(); }
 	};
 
-	using INIStructure = MagicMap<MagicMap<std::string>>;
-	using T_KeyValue = std::pair<std::string, std::string>;
+	using INIStructure = INIMap<INIMap<std::string>>;
 
 	class INIParser
 	{
 	public:
+		using T_KeyValue = std::pair<std::string, std::string>;
+
 		enum PDataType
 		{
 			PDATA_NONE,
@@ -399,7 +396,7 @@ namespace mINI
 		}
 		~INIReader() { }
 
-		bool good()
+		bool good() const
 		{
 			return fileReadStream.is_open();
 		}
@@ -409,7 +406,7 @@ namespace mINI
 			std::string line;
 			std::string section;
 			bool inSection = false;
-			T_KeyValue parseData;
+			INIParser::T_KeyValue parseData;
 			while (std::getline(fileReadStream, line))
 			{
 				auto parseResult = INIParser::parseLine(line, parseData);
@@ -430,11 +427,73 @@ namespace mINI
 
 	class INIWriter
 	{
-		
+	private:
+		std::ofstream fileWriteStream;
 	};
 
-	class INILazyWriter
+	class INIGenerator
 	{
+	private:
+		std::ofstream fileWriteStream;
+
+	public:
+		bool prettyPrint = false;
+
+		INIGenerator(std::string const& filename)
+		{
+			fileWriteStream.open(filename);
+		}
+		~INIGenerator() { }
+
+		bool good() const
+		{
+			return fileWriteStream.is_open();
+		}
+
+		void operator<<(INIStructure& data)
+		{
+			if (data.size())
+			{
+				auto it = data.begin();
+				for (;;)
+				{
+					auto const& section = it->first;
+					auto const& collection = *it->second;
+					fileWriteStream
+						<< "["
+						<< section
+						<< "]";
+					if (collection.size())
+					{
+						fileWriteStream << std::endl;
+						auto it2 = collection.begin();
+						for (;;)
+						{
+							auto const& key = it2->first;
+							auto const& value = *it2->second;
+							fileWriteStream
+								<< key
+								<< ((prettyPrint) ? " = " : "=")
+								<< value;
+							if (++it2 == collection.end())
+							{
+								break;
+							}
+							fileWriteStream << std::endl;
+						}
+					}
+					if (++it == data.end())
+					{
+						break;
+					}
+					fileWriteStream << std::endl;
+					if (prettyPrint)
+					{
+						fileWriteStream << std::endl;
+					}
+				}
+			}
+		}
 	};
 
 	class INIFile
@@ -443,7 +502,7 @@ namespace mINI
 		std::string filename;
 
 	public:
-		INIFile(const std::string& filename)
+		INIFile(std::string const& filename)
 		: filename(filename)
 		{
 		}
@@ -461,13 +520,24 @@ namespace mINI
 			return output;
 		}
 
-		bool Write(INIStructure data)
+		bool write(INIStructure data)
 		{
+			
 			return false;
 		}
 
-		bool Generate(INIStructure data)
+		bool generate(INIStructure data, bool pretty = false)
 		{
+			if (filename.empty())
+			{
+				return false;
+			}
+			INIGenerator generator(filename);
+			if (generator.good())
+			{
+				generator.prettyPrint = pretty;
+				generator << data;
+			}
 			return false;
 		}
 	};
