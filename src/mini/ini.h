@@ -74,6 +74,7 @@ namespace mINI
 	{
 	public:
 		static const std::string whitespaceDelimiters;
+
 		static inline void Trim(std::string& str)
 		{
 			str.erase(str.find_last_not_of(whitespaceDelimiters) + 1);
@@ -93,7 +94,7 @@ namespace mINI
 	public:
 		using T_Data = std::vector<std::unique_ptr<T>>;
 		using T_DataIndexMap = std::unordered_map<std::string, std::size_t>;
-		using T_IterItem = std::pair<std::string, const T&>;
+		using T_IterItem = std::pair<std::string, const T*>;
 		using T_IterList = std::vector<T_IterItem>;
 		using const_iterator = typename T_IterList::const_iterator;
 
@@ -107,7 +108,7 @@ namespace mINI
 			std::size_t index = data.size();
 			dataIndexMap[key] = index;
 			data.push_back(std::make_unique<T>());
-			iterList.push_back(T_IterItem(key, *data.back()));
+			iterList.push_back(T_IterItem(key, data.back().get()));
 			return index;
 		}
 
@@ -122,7 +123,7 @@ namespace mINI
 				std::string const& key = other.iterList[i].first;
 				auto const& ptrToData = other.data[i];
 				data.push_back(std::make_unique<T>(*ptrToData));
-				iterList.push_back(T_IterItem(key, *data.back()));
+				iterList.push_back(T_IterItem(key, data.back().get()));
 			}
 			dataIndexMap = T_DataIndexMap(other.dataIndexMap);
 		}
@@ -169,7 +170,7 @@ namespace mINI
 			{
 				dataIndexMap[key] = data.size();
 				data.push_back(std::make_unique<T>(obj));
-				iterList.push_back(T_IterItem(key, *data.back()));
+				iterList.push_back(T_IterItem(key, data.back().get()));
 			}
 		}
 
@@ -213,9 +214,8 @@ namespace mINI
 		const_iterator end() const { return iterList.end(); }
 	};
 
-	using INISection = MagicMap<std::string>;
-	using INIStructure = MagicMap<INISection>;
-	using INIKeyValue = std::pair<std::string, std::string>;
+	using INIStructure = MagicMap<MagicMap<std::string>>;
+	using T_KeyValue = std::pair<std::string, std::string>;
 
 	class INIParser
 	{
@@ -229,7 +229,7 @@ namespace mINI
 			PDATA_UNKNOWN
 		};
 
-		static PDataType parseLine(std::string line, INIKeyValue& parseData)
+		static PDataType parseLine(std::string line, T_KeyValue& parseData)
 		{
 			parseData.first.clear();
 			parseData.second.clear();
@@ -302,7 +302,7 @@ namespace mINI
 			std::string line;
 			std::string section;
 			bool inSection = false;
-			INIKeyValue parseData;
+			T_KeyValue parseData;
 			while (std::getline(fileReadStream, line))
 			{
 				auto parseResult = INIParser::parseLine(line, parseData);
