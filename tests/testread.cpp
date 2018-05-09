@@ -58,12 +58,12 @@ void outputData(mINI::INIStructure const& ini)
 	for (auto const& it : ini)
 	{
 		auto const& section = it.first;
-		auto const& collection = *it.second;
+		auto const& collection = it.second;
 		std::cout << "[" << section << "]" << std::endl;
 		for (auto const& it2 : collection)
 		{
 			auto const& key = it2.first;
-			auto const& value = *it2.second;
+			auto const& value = it2.second;
 			std::cout << key << "=" << value << std::endl;
 		}
 		std::cout << std::endl;
