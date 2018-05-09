@@ -36,8 +36,11 @@
 //  mINI::INIFile file("myfile.ini");
 //  mINI::INIStructure ini = file.read();
 //
-//  /* read values */
+//  /* read values. if value doesn't exist it will be created */
 //  std::string value = ini["section"]["key"];
+//
+//  /* read values. if value doesn't exist it will NOT be created */
+//  std::string value = ini.get("section").get("key");
 //
 //  /* set or update values */
 //  ini["section"]["key"] = "value";
@@ -48,6 +51,12 @@
 //      {"key2", "value2"}
 //  });
 //
+//  /* write updates back to file, preserving comments and formatting */
+//  file.write(ini);
+//
+//  /* or generate a file */
+//  file.generate(ini);
+//
 //  /* check if key or section is present */
 //  bool hasKey = ini["section"].has("key");
 //  bool hasSection = ini.has("section");
@@ -56,15 +65,26 @@
 //  bool removedKey = ini["section2"].remove("key2");
 //  bool removedSection = ini.remove("section2");
 //
-//  /* check number of keys or sections */
+//  /* check for number of keys or sections */
 //  size_t n_keys = ini["section"].size();
 //  size_t n_sections = ini.size();
 //
-//  /* write updates back to file, preserving comments and formatting */
-//  file.write(ini);
+//  /* to clear all data */
+//  ini.clear();
 //
-//  /* or generate a file */
-//  file.generate(ini);
+//  /* to iterate through INI data in-order */
+//  for (auto const& it : ini)
+//  {
+//      auto const& section = it.first();
+//      auto const& collection = *it.second();
+//      std::cout << "[" << section << "]" << std::endl;
+//      for (auto const& it2 : collection)
+//      {
+//           auto const& key = it2.first();
+//           auto const& value = *it2.second();
+//           std::cout << key << "=" << value << std::endl;
+//      }	
+//  }
 //
 ///////////////////////////////////////////////////////////////////////////////
 //
