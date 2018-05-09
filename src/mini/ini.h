@@ -11,24 +11,62 @@
 //  A tiny-ish utility for reading from and writing data to INI files with a
 //  straightforward API and a minimal footprint. It conforms to the (somewhat)
 //  standard INI format - sections and keys are case insensitive, and all
-//  leading and trailing whitespace is ignored. Comments are lines that begin
-//  with a semicolon. Trailing comments on value lines are not allowed since
-//  values may also contain semicolons. Trailing comments on section lines are
-//  ignored and therefore implicitly allowed.
+//  leading and trailing whitespace is ignored. Empty keys and sections are
+//  ignored. Comments are lines that begin with a semicolon. Trailing comments
+//  on value lines are not allowed since values may also contain semicolons.
+//  Trailing comments on section lines are ignored.
 //
 //  Files are read on demand in one fell swoop and the data is kept in memory,
 //  ready to be manipulated. Files are closed after read or write operations.
-//
 //  This utility supports lazy writing, which only writes changes and updates
 //  and preserves custom spacings and comments. A lazy write will read the
 //  output file, find changes made and update the file accordingly. If
 //  performance is a strong issue and you only need to generate files, use
-//  Generate instead.
-//
-//  Section and key order is preserved on both read and write operations.
+//  Generate instead. Section and key order is preserved on both read and write
+//  operations.
 //
 //  You can use the iterators at begin() and end() to iterate through all data
 //  in-order.
+//
+///////////////////////////////////////////////////////////////////////////////
+//
+//  Basic usage example:
+//
+//  /* read from file */
+//  mINI::INIFile file("myfile.ini");
+//  mINI::INIStructure ini = file.read();
+//
+//  /* read values */
+//  std::string value = ini["section"]["key"];
+//
+//  /* set or update values */
+//  ini["section"]["key"] = "value";
+//
+//  /* set multiple values */
+//  ini["section2"].set({
+//      {"key1", "value1"},
+//      {"key2", "value2"}
+//  });
+//
+//  /* check if key or section is present */
+//  bool hasKey = ini["section"].has("key");
+//  bool hasSection = ini.has("section");
+//
+//  /* remove keys or sections */
+//  bool removedKey = ini["section2"].remove("key2");
+//  bool removedSection = ini.remove("section2");
+//
+//  /* check number of keys or sections */
+//  size_t n_keys = ini["section"].size();
+//  size_t n_sections = ini.size();
+//
+//  /* write updates back to file, preserving comments and formatting */
+//  file.write(ini);
+//
+//  /* or generate a file */
+//  file.generate(ini);
+//
+///////////////////////////////////////////////////////////////////////////////
 //
 //  Long live the INI file!!!
 //
@@ -96,6 +134,7 @@ namespace mINI
 		using T_DataIndexMap = std::unordered_map<std::string, std::size_t>;
 		using T_IterItem = std::pair<std::string, const T*>;
 		using T_IterList = std::vector<T_IterItem>;
+		using T_MultiSetArgs = typename std::vector<std::pair<std::string, T>>;
 		using const_iterator = typename T_IterList::const_iterator;
 
 	private:
@@ -171,6 +210,16 @@ namespace mINI
 				dataIndexMap[key] = data.size();
 				data.push_back(std::make_unique<T>(obj));
 				iterList.push_back(T_IterItem(key, data.back().get()));
+			}
+		}
+
+		void set(T_MultiSetArgs keyValues)
+		{
+			for (auto const& it : keyValues)
+			{
+				auto const& key = it.first;
+				auto const& obj = it.second;
+				set(key, obj);
 			}
 		}
 
@@ -323,6 +372,7 @@ namespace mINI
 
 	class INIWriter
 	{
+		
 	};
 
 	class INILazyWriter

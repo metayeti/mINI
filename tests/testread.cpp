@@ -79,8 +79,6 @@ const lest::test mINI_tests[] = {
 		auto const& filename = testDataBasic.first;
 		mINI::INIFile iniFile(filename);
 		mINI::INIStructure ini = iniFile.read();
-		//ini["fruit"].remove("grapes");
-		//ini.remove("fruit");
 		std::cout << filename << std::endl;
 		outputData(ini);
 		EXPECT(ini["fruit"]["bananas"] == "1");
