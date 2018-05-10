@@ -61,7 +61,7 @@ ini["fruits"]["bananas"] = "100";
 file.write(ini);
 ```
 
-Our INI file now looks like this:
+After running the code, our INI file now looks like this:
 ```INI
 ; amounts of fruits
 [fruits]
@@ -104,7 +104,7 @@ To generate a file:
 file.generate(ini);
 ```
 
-Note that `generate()` will override any custom formatting and comments from the original file.
+Note that `generate()` will override any custom formatting and comments from the original file!
 
 You can use pretty-print with `generate()` as well:
 ```C++
@@ -138,13 +138,29 @@ There are two ways of reading data from the INI structure. You can either use th
 
 ```C++
 // read values. if key doesn't exist, it will be created
-auto value = ini["section"]["key"];
+auto& value = ini["section"]["key"];
 
-// read values safely. if key doesn't exist it will NOT be created
+// read values safely - if key doesn't exist it will NOT be created
 auto value = ini.get("section").get("key");
 ```
 
 IMPORTANT: The difference between the `[]` and `get()` operations is that `[]` returns a reference to **real** data that you may modify and creates a new item automatically if it does not yet exist, while `get()` returns a **copy** of the data and does not create new keys. Use `has()` before doing any operations with `[]` if you don't wish to create new items. You may also want to avoid using `get()` whenever you're dealing with any sort of system constraints or enormous structures.
+
+You can combine usage of `[]` and `get()` as your leisure:
+```C++
+// will get a copy of the section and retreive a key
+// technically a better way to read data safely than .get().get() since it only
+// copies data once; does not create new keys
+ini.get("section")["key"];
+
+// if we're sure section exists and we just want a copy of key if one exists
+// without creating an empty value when the key doesn't exist:
+ini["section"].get("key");
+
+// you may chain other functions in a similar way
+// the following code gets a copy of section and checks if a key exists:
+ini.get("section").has("key");
+```
 
 ### Updating values
 
@@ -203,7 +219,7 @@ To get the number of sections in the structure:
 size_t n_sections = ini.size();
 ```
 
-IMPORTANT: Keep in mind that `[]` will always create a new item if one does not already exist! You can use `has()` to check if an item exists before performing further operations. Remember that `get()` will return a copy of data, so you should **not** do removes or updates to data with it. Straightforward usage of the `[]` operator shouldn't be a problem in most real-world cases where you're doing lookups on known keys and you may not care if empty keys or sections get created, but this is something to keep in mind when dealing with this datastructure. Always use `has()` before using the `[]` operator **if** you don't want new empty sections and keys. Below is a short example that demonstrates safe manipulation of data.
+IMPORTANT: Keep in mind that `[]` will always create a new item if one does not already exist! You can use `has()` to check if an item exists before performing further operations. Remember that `get()` will return a copy of data, so you should **not** do removes or updates to data with it. Straightforward usage of the `[]` operator shouldn't be a problem in most real-world cases where you're doing lookups on known keys and you may not care if empty keys or sections get created, but this is something to keep in mind when dealing with this datastructure. Always use `has()` before using the `[]` operator IF you don't want new empty sections and keys. Below is a short example that demonstrates safe manipulation of data.
 
 ```C++
 if (ini.has("section"))

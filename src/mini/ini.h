@@ -50,7 +50,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  /* === BASIC READ/WRITE === */
+//  BASIC EXAMPLE:
 //
 //  /* read from file */
 //  mINI::INIFile file("myfile.ini");
@@ -63,8 +63,7 @@
 //  /* read values safely. if key doesn't exist it will NOT be created */
 //  std::string value = ini.get("section").get("key");
 //
-//  /* =IMPORTANT=
-//     The difference between the [] and get() operations is that [] returns
+//  /* The difference between the [] and get() operations is that [] returns
 //     REAL data which you can modify and creates a new item automatically
 //     if it doesn't yet exist, while get() returns a COPY of data and
 //     doesn't create new keys. Use has() combined with the [] operator to
@@ -84,68 +83,6 @@
 //
 //  /* or generate a file */
 //  file.generate(ini);
-//
-//  /* === OTHER FEATURES === */
-//
-//  /* check if section or key is present */
-//  bool hasSection = ini.has("section");
-//  bool hasKey = ini["section"].has("key");
-//
-//  /* remove keys or sections */
-//  bool removedKeySuccess = ini["section2"].remove("key2");
-//  bool removedSectionSuccess = ini.remove("section2");
-//
-//  /* check for number of keys or sections*/
-//  size_t n_keys = ini["section"].size();
-//  size_t n_sections = ini.size();
-//
-//  /* to remove all keys from a section */
-//  ini["section"].clear();
-//
-//  /* to clear all data */
-//  ini.clear();
-//
-//  /* =IMPORTANT=
-//     Keep in mind that [] will always create an item if it does not already
-//     exist! You can use has() to check if an item exists before performing
-//     further operations. Remember that get() will return a copy of data, so
-//     you should NOT do removes or updates that way. Straightforward usage
-//     with [] operators shouldn't really be a problem in most real-world cases
-//     where you're doing lookups on known keys anyway and you may not care if
-//     empty keys or sections get created, but this is something to keep in mind
-//     when dealing with this datastructure. Always use has() before using the
-//     [] operator IF you don't want new empty sections and keys. Below is
-//     a short example that demonstrates safe manipulation of data. */
-//
-//  if (ini.has("section"))
-//  {
-//      // we have section, we can access it safely
-//      auto& collection = ini["section"];
-//      if (collection.has("key"))
-//      {
-//          // we have key, we can access it safely
-//          auto& value = collection["key"];
-//          // do something with value, for example change it
-//          value = "some value";
-//          // if we wanted to, we can remove this key safely since we know
-//          // that it exists
-//          collection.remove("key");
-//      }
-//  }
-//
-//  /* to iterate through data in-order and display results */
-//  for (auto const& it : ini)
-//  {
-//      auto const& section = it.first();
-//      auto const& collection = *it.second();
-//      std::cout << "[" << section << "]" << std::endl;
-//      for (auto const& it2 : collection)
-//      {
-//           auto const& key = it2.first();
-//           auto const& value = *it2.second();
-//           std::cout << key << "=" << value << std::endl;
-//      }
-//  }
 //
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -513,13 +450,160 @@ namespace mINI
 	{
 	private:
 		using T_LineData = std::vector<std::string>;
+		using T_LineDataPtr = std::shared_ptr<T_LineData>;
+
 		std::string filename;
 
-		T_LineData getLazyOutput(INIStructure const& data, INIStructure const& original)
+		T_LineData getLazyOutput(T_LineDataPtr const& lineData, INIStructure& data, INIStructure& original)
 		{
-			if (prettyPrint)
+			T_LineData output;
+			INIParser::T_ParseValues parseData;
+            std::string sectionCurrent;
+            bool parsingSection = false;
+            bool continueToNextSection = false;
+            bool discardNextEmpty = false;
+            bool writeNewKeys = false;
+            std::size_t lastKeyLine = 0;
+
+			for (auto line = lineData->begin(); line != lineData->end(); ++line)
 			{
+				if (!writeNewKeys)
+				{
+					auto parseResult = INIParser::parseLine(*line, parseData);
+					if (parseResult == INIParser::PDATA_SECTION)
+					{
+						if (parsingSection)
+						{
+							writeNewKeys = true;
+							parsingSection = false;
+							--line;
+							continue;
+						}
+						sectionCurrent = parseData.first;
+                        if (data.has(sectionCurrent))
+                        {
+							parsingSection = true;
+							continueToNextSection = false;
+							discardNextEmpty = false;
+							output.emplace_back(*line);
+                        }
+                        else
+                        {
+                            continueToNextSection = true;
+                            discardNextEmpty = true;
+                        }
+                        continue;
+					}
+					else if (parseResult == INIParser::PDATA_KEYVALUE)
+					{
+						if (continueToNextSection)
+						{
+							continue;
+						}
+						if (data.has(sectionCurrent))
+						{
+							auto& collection = data[sectionCurrent];
+							auto const& key = parseData.first;
+							auto const& value = parseData.second;
+							if (collection.has(key))
+							{
+								auto& outputValue = collection[key];
+								if (value == outputValue)
+								{
+									output.emplace_back(*line);
+								}
+								else
+								{
+									auto equalsAt = line->find_first_of('=');
+									auto valueAt = line->find_first_not_of(
+										INIStringUtil::whitespaceDelimiters,
+										equalsAt + 1
+									);
+									std::string outputLine = line->substr(0, valueAt);
+                                    if (prettyPrint && equalsAt + 1 == valueAt)
+                                    {
+										outputLine += " ";
+                                    }
+                                    outputLine += outputValue;
+                                    output.emplace_back(outputLine);
+								}
+								lastKeyLine = output.size();
+							}
+                        }
+					}
+					else
+					{
+						if (discardNextEmpty && line->empty())
+						{
+							discardNextEmpty = false;
+						}
+						else if (parseResult != INIParser::PDATA_UNKNOWN)
+						{
+							output.emplace_back(*line);
+						}
+					}
+				}
+				if (writeNewKeys || std::next(line) == lineData->end())
+				{
+					T_LineData linesToAdd;
+                    if (data.has(sectionCurrent) && original.has(sectionCurrent))
+                    {
+						auto const& collection = data[sectionCurrent];
+						auto const& collectionOriginal = original[sectionCurrent];
+						for (auto const& it : collection)
+						{
+							auto const& key = it.first;
+							if (collectionOriginal.has(key))
+							{
+								continue;
+							}
+							auto const& value = *it.second;
+							linesToAdd.emplace_back(
+								key + ((prettyPrint) ? " = " : "=") + value
+							);
+
+						}
+                    }
+                    if (!linesToAdd.empty())
+                    {
+						output.insert(
+							output.begin() + lastKeyLine,
+							linesToAdd.begin(),
+							linesToAdd.end()
+						);
+                    }
+                    if (writeNewKeys)
+                    {
+						writeNewKeys = false;
+						--line;
+                    }
+				}
 			}
+
+            for (auto const& it : data)
+            {
+                auto const& section = it.first;
+                if (original.has(section))
+                {
+					continue;
+                }
+                if (prettyPrint && output.size() > 0 && !output.back().empty())
+                {
+					output.emplace_back();
+                }
+                output.emplace_back("[" + section + "]");
+                auto const& collection = *it.second;
+                for (auto const& it2 : collection)
+                {
+                    auto const& key = it2.first;
+                    auto const& value = *it2.second;
+                    output.emplace_back(
+						key + ((prettyPrint) ? " = " : "=") + value
+                    );
+                }
+            }
+
+			return output;
 		}
 
 	public:
@@ -531,7 +615,7 @@ namespace mINI
 		}
 		~INIWriter() { }
 
-		bool operator<<(INIStructure const& data)
+		bool operator<<(INIStructure& data)
 		{
 			struct stat buf;
 			bool fileExists = (stat(filename.c_str(), &buf) == 0);
@@ -542,18 +626,18 @@ namespace mINI
 				return generator << data;
 			}
 			INIStructure originalData;
-			INIReader::T_LineDataPtr lineData;
+			T_LineDataPtr lineData;
 			bool readSuccess = false;
 			{
 				INIReader reader(filename, true);
-				if (readSuccess = reader >> originalData)
+				if ((readSuccess = reader >> originalData))
 				{
 					lineData = reader.getLines();
 				}
 			}
 			if (readSuccess)
 			{
-				T_LineData output = getLazyOutput(data, originalData);
+				T_LineData output = getLazyOutput(lineData, data, originalData);
 				std::ofstream fileWriteStream(filename);
 				if (fileWriteStream.is_open())
 				{
@@ -614,7 +698,7 @@ namespace mINI
 			return generator << data;
 		}
 
-		bool write(INIStructure const& data, bool pretty = false) const
+		bool write(INIStructure& data, bool pretty = false) const
 		{
 			if (filename.empty())
 			{
