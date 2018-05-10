@@ -6,6 +6,7 @@ This is a tiny C++ utility library for manipulating INI files.
 
 It conforms to the following format:
 - section and key names are case insensitive
+- whitespace around sections, keys and values is ignored
 - empty section or key names are ignored
 - keys that do not belong to a section are ignored
 - comments are lines that begin with a semicolon
@@ -13,7 +14,7 @@ It conforms to the following format:
 
 Files are read on demand in one fell swoop, after which the data is kept in memory and is ready to be manipulated. Files are closed after read or write operations. This utility supports lazy writing, which only writes changes and updates and preserves custom spacings and comments. A lazy write invoked by a `write()` call will read the output file, find what changes have been made, and update the file accordingly. If performance is a strong issue and/or you only need to generate files, use `generate()` instead.
 
-Section and key order is preserved on read and write operations. Iterating through data will take the same order as the original file.
+Section and key order is preserved on read and write operations. Iterating through data will take the same order as the original file or the order in which keys were added to the structure.
 
 This library operates with the `std::string` type to hold values and relies on your host environment for encoding.
 
@@ -39,7 +40,7 @@ oranges=30
 
 Our code:
 ```C++
-// first, create an INI file
+// first, create a file instance
 mINI::INIFile file("myfile.ini");
 
 // next, create a structure that will hold data
@@ -49,12 +50,12 @@ mINI::INIStructure ini;
 file.read(ini);
 
 // read a value
-auto const& amountOfApples = ini["fruits"]["apples"];
+std::string const& amountOfApples = ini["fruits"]["apples"];
 
 // update a value
 ini["fruits"]["oranges"] = "50";
 
-// add a value
+// add a new entry
 ini["fruits"]["bananas"] = "100";
 
 // write updates to file
@@ -72,7 +73,7 @@ bananas=100
 
 ## Manipulating files
 
-The `INIFile` class holds the filename and exposes functions for reading, writing and generating INI files.
+The `INIFile` class holds the filename and exposes functions for reading, writing and generating INI files. It does not keep the file open but merely provides an abstraction you can use to access physical files.
 
 To create a file instance:
 ```C++
@@ -99,19 +100,21 @@ You can set the second parameter to `write()` to `true` if you want the file to 
 bool writeSuccess = file.write(ini, true);
 ```
 
+A `write()` call will attempt to preserve any custom formatting the original INI file uses and will only use pretty-print for creation of new keys and sections.
+
 To generate a file:
 ```C++
 file.generate(ini);
 ```
 
-Note that `generate()` will override any custom formatting and comments from the original file!
+Note that `generate()` will overwrite any custom formatting and comments from the original file!
 
 You can use pretty-print with `generate()` as well:
 ```C++
 file.generate(ini, true);
 ```
 
-Example: generated INI without pretty-print:
+Example output for a generated INI file *without* pretty-print:
 ```INI
 [section1]
 key1=value1
@@ -120,7 +123,7 @@ key2=value2
 key1=value1
 ```
 
-Example: generated INI with pretty-print:
+Example output for a generated INI file *with* pretty-print:
 ```INI
 [section1]
 key1 = value1
@@ -138,19 +141,19 @@ There are two ways of reading data from the INI structure. You can either use th
 
 ```C++
 // read values. if key doesn't exist, it will be created
-auto& value = ini["section"]["key"];
+std::string& value = ini["section"]["key"];
 
 // read values safely - if key doesn't exist it will NOT be created
-auto value = ini.get("section").get("key");
+std::string value = ini.get("section").get("key");
 ```
 
-IMPORTANT: The difference between the `[]` and `get()` operations is that `[]` returns a reference to **real** data that you may modify and creates a new item automatically if it does not yet exist, while `get()` returns a **copy** of the data and does not create new keys. Use `has()` before doing any operations with `[]` if you don't wish to create new items. You may also want to avoid using `get()` whenever you're dealing with any sort of system constraints or enormous structures.
+The difference between `[]` and `get()` operations is that `[]` returns a reference to **real** data that you may modify and creates a new item automatically if it does not yet exist, while `get()` returns a **copy** of the data and does not create new items. Use `has()` before doing any operations with `[]` if you don't wish to create new items. You may also want to avoid using `get()` if you happen to be operating on enormous structures for some reason.
 
-You can combine usage of `[]` and `get()` as your leisure:
+You can combine usage of `[]` and `get()` at your leisure:
 ```C++
 // will get a copy of the section and retreive a key
 // technically a better way to read data safely than .get().get() since it only
-// copies data once; does not create new keys
+// copies data once; does not create new keys in actual data
 ini.get("section")["key"];
 
 // if we're sure section exists and we just want a copy of key if one exists
@@ -219,7 +222,7 @@ To get the number of sections in the structure:
 size_t n_sections = ini.size();
 ```
 
-IMPORTANT: Keep in mind that `[]` will always create a new item if one does not already exist! You can use `has()` to check if an item exists before performing further operations. Remember that `get()` will return a copy of data, so you should **not** do removes or updates to data with it. Straightforward usage of the `[]` operator shouldn't be a problem in most real-world cases where you're doing lookups on known keys and you may not care if empty keys or sections get created, but this is something to keep in mind when dealing with this datastructure. Always use `has()` before using the `[]` operator IF you don't want new empty sections and keys. Below is a short example that demonstrates safe manipulation of data.
+Keep in mind that `[]` will always create a new item if one does not already exist! You can use `has()` to check if an item exists before performing further operations. Remember that `get()` will return a copy of data, so you should **not** do removes or updates to data with it. Straightforward usage of the `[]` operator shouldn't be a problem in most real-world cases where you're doing lookups on known keys and you may not care if empty keys or sections get created, but this is something to keep in mind when dealing with this datastructure. Always use `has()` before using the `[]` operator IF you don't want new empty sections and keys. Below is a short example that demonstrates safe manipulation of data.
 
 ```C++
 if (ini.has("section"))
@@ -232,6 +235,8 @@ if (ini.has("section"))
 		auto& value = collection["key"];
 		// do something with value, for example change it
 		value = "some value";
+		// or we may want to remove the key instead
+		collection.remove("key");
 	}
 }
 ```
@@ -253,6 +258,12 @@ for (auto const& it : ini)
 	}
 }
 ```
+
+`it.first` is always string type.
+
+`it.second` is const pointer type which points to data and needs to be dereferenced to be used.
+
+Iterators are only meant for reading data and should not be used for manipulating it in any way. For this purpose the API only exposes a `const_iterator`.
 
 ## Thanks
 
