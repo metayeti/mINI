@@ -66,7 +66,7 @@
 //  /* The difference between the [] and get() operations is that [] returns
 //     REAL data which you can modify and creates a new item automatically
 //     if it doesn't yet exist, while get() returns a COPY of data and
-//     doesn't create new keys. Use has() combined with the [] operator to
+//     doesn't create new items. Use has() combined with the [] operator to
 //     get full control over what is being created anew in the structure. */
 //
 //  /* set or update values */
@@ -458,12 +458,12 @@ namespace mINI
 		{
 			T_LineData output;
 			INIParser::T_ParseValues parseData;
-            std::string sectionCurrent;
-            bool parsingSection = false;
-            bool continueToNextSection = false;
-            bool discardNextEmpty = false;
-            bool writeNewKeys = false;
-            std::size_t lastKeyLine = 0;
+			std::string sectionCurrent;
+			bool parsingSection = false;
+			bool continueToNextSection = false;
+			bool discardNextEmpty = false;
+			bool writeNewKeys = false;
+			std::size_t lastKeyLine = 0;
 
 			for (auto line = lineData->begin(); line != lineData->end(); ++line)
 			{
@@ -480,19 +480,19 @@ namespace mINI
 							continue;
 						}
 						sectionCurrent = parseData.first;
-                        if (data.has(sectionCurrent))
-                        {
+						if (data.has(sectionCurrent))
+						{
 							parsingSection = true;
 							continueToNextSection = false;
 							discardNextEmpty = false;
 							output.emplace_back(*line);
-                        }
-                        else
-                        {
-                            continueToNextSection = true;
-                            discardNextEmpty = true;
-                        }
-                        continue;
+						}
+						else
+						{
+							continueToNextSection = true;
+							discardNextEmpty = true;
+						}
+						continue;
 					}
 					else if (parseResult == INIParser::PDATA_KEYVALUE)
 					{
@@ -520,16 +520,16 @@ namespace mINI
 										equalsAt + 1
 									);
 									std::string outputLine = line->substr(0, valueAt);
-                                    if (prettyPrint && equalsAt + 1 == valueAt)
-                                    {
+									if (prettyPrint && equalsAt + 1 == valueAt)
+									{
 										outputLine += " ";
-                                    }
-                                    outputLine += outputValue;
-                                    output.emplace_back(outputLine);
+									}
+									outputLine += outputValue;
+									output.emplace_back(outputLine);
 								}
 								lastKeyLine = output.size();
 							}
-                        }
+						}
 					}
 					else
 					{
@@ -546,8 +546,8 @@ namespace mINI
 				if (writeNewKeys || std::next(line) == lineData->end())
 				{
 					T_LineData linesToAdd;
-                    if (data.has(sectionCurrent) && original.has(sectionCurrent))
-                    {
+					if (data.has(sectionCurrent) && original.has(sectionCurrent))
+					{
 						auto const& collection = data[sectionCurrent];
 						auto const& collectionOriginal = original[sectionCurrent];
 						for (auto const& it : collection)
@@ -563,45 +563,45 @@ namespace mINI
 							);
 
 						}
-                    }
-                    if (!linesToAdd.empty())
-                    {
+					}
+					if (!linesToAdd.empty())
+					{
 						output.insert(
 							output.begin() + lastKeyLine,
 							linesToAdd.begin(),
 							linesToAdd.end()
 						);
-                    }
-                    if (writeNewKeys)
-                    {
+					}
+					if (writeNewKeys)
+					{
 						writeNewKeys = false;
 						--line;
-                    }
+					}
 				}
 			}
 
-            for (auto const& it : data)
-            {
-                auto const& section = it.first;
-                if (original.has(section))
-                {
-					continue;
-                }
-                if (prettyPrint && output.size() > 0 && !output.back().empty())
-                {
+			for (auto const& it : data)
+			{
+				auto const& section = it.first;
+				if (original.has(section))
+				{
+				continue;
+				}
+				if (prettyPrint && output.size() > 0 && !output.back().empty())
+				{
 					output.emplace_back();
-                }
-                output.emplace_back("[" + section + "]");
-                auto const& collection = *it.second;
-                for (auto const& it2 : collection)
-                {
-                    auto const& key = it2.first;
-                    auto const& value = *it2.second;
-                    output.emplace_back(
+				}
+				output.emplace_back("[" + section + "]");
+				auto const& collection = *it.second;
+				for (auto const& it2 : collection)
+				{
+					auto const& key = it2.first;
+					auto const& value = *it2.second;
+					output.emplace_back(
 						key + ((prettyPrint) ? " = " : "=") + value
-                    );
-                }
-            }
+					);
+				}
+			}
 
 			return output;
 		}
