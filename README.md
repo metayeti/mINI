@@ -7,6 +7,7 @@ This is a tiny C++ utility library for manipulating INI files.
 It conforms to the following format:
 - section and key names are case insensitive
 - empty section or key names are ignored
+- keys that do not belong to a section are ignored
 - comments are lines that begin with a semicolon
 - trailing comments are only allowed on section lines
 
@@ -103,14 +104,14 @@ To generate a file:
 file.generate(ini);
 ```
 
-Note that `generate` will override any custom formatting and comments from the original file.
+Note that `generate()` will override any custom formatting and comments from the original file.
 
-You can use the pretty-print with `generate()` as well:
+You can use pretty-print with `generate()` as well:
 ```C++
 file.generate(ini, true);
 ```
 
-Example - generated INI without pretty-print:
+Example: generated INI without pretty-print:
 ```INI
 [section1]
 key1=value1
@@ -119,7 +120,7 @@ key2=value2
 key1=value1
 ```
 
-Example - generated INI with pretty-print:
+Example: generated INI with pretty-print:
 ```INI
 [section1]
 key1 = value1
@@ -143,13 +144,98 @@ auto value = ini["section"]["key"];
 auto value = ini.get("section").get("key");
 ```
 
-IMPORTANT: The difference between the `[]` and `get()` operations is that `[]` returns a reference to *real* data that you may modify and creates a new item automatically if it does not yet exist, while `get()` returns a *copy* of the data and does not create new keys. Use `has()` before doing any operations with `[]` if you don't wish to create new items. You may also want to avoid using `get()` whenever you're dealing with any sort of system constraints or enormous structures.
+IMPORTANT: The difference between the `[]` and `get()` operations is that `[]` returns a reference to **real** data that you may modify and creates a new item automatically if it does not yet exist, while `get()` returns a **copy** of the data and does not create new keys. Use `has()` before doing any operations with `[]` if you don't wish to create new items. You may also want to avoid using `get()` whenever you're dealing with any sort of system constraints or enormous structures.
 
 ### Updating values
+
+To set or update a value:
+```C++
+ini["section"]["key"] = "value";
+```
+
+You can set multiple values at once by using `set()`:
+```C++
+ini["section"].set({
+	{"key1", "value1"},
+	{"key2", "value2"}
+});
+```
+
+To remove a single key from a section:
+```C++
+bool removeSuccess = ini["section"].remove("key");
+```
+
+To remove a section:
+```C++
+bool removeSuccess = ini.remove("section");
+```
+
+To remove all keys from a section:
+```C++
+ini["section"].clear();
+```
+
+To remove all data in structure:
+```C++
+ini.clear();
+```
+
+### Other functions
 
 To check if a section is present:
 ```C++
 bool hasSection = ini.has("section");
+```
+
+To check if a key within a section is present:
+```C++
+bool hasKey = ini["section"].has("key");
+```
+
+To get the number of keys in a section:
+```C++
+size_t n_keys = ini["section"].size();
+```
+
+To get the number of sections in the structure:
+```C++
+size_t n_sections = ini.size();
+```
+
+IMPORTANT: Keep in mind that `[]` will always create a new item if one does not already exist! You can use `has()` to check if an item exists before performing further operations. Remember that `get()` will return a copy of data, so you should **not** do removes or updates to data with it. Straightforward usage of the `[]` operator shouldn't be a problem in most real-world cases where you're doing lookups on known keys and you may not care if empty keys or sections get created, but this is something to keep in mind when dealing with this datastructure. Always use `has()` before using the `[]` operator **if** you don't want new empty sections and keys. Below is a short example that demonstrates safe manipulation of data.
+
+```C++
+if (ini.has("section"))
+{
+	// we have section, we can access it safely without creating a new one
+	auto& collection = ini["section"];
+	if (collection.has("key"))
+	{
+		// we have key, we can access it safely without creating a new one
+		auto& value = collection["key"];
+		// do something with value, for example change it
+		value = "some value";
+	}
+}
+```
+
+### Iteration
+
+To iterate through data in-order and display results:
+```C++
+for (auto const& it : ini)
+{
+	auto const& section = it.first();
+	auto const& collection = *it.second();
+	std::cout << "[" << section << "]" << std::endl;
+	for (auto const& it2 : collection)
+	{
+		auto const& key = it2.first();
+		auto const& value = *it2.second();
+		std::cout << key << "=" << value << std::endl;
+	}
+}
 ```
 
 ## Thanks
