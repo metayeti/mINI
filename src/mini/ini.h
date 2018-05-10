@@ -54,7 +54,8 @@
 //
 //  /* read from file */
 //  mINI::INIFile file("myfile.ini");
-//  mINI::INIStructure ini = file.read();
+//  mINI::INIStructure ini;
+//  file.read(ini);
 //
 //  /* read values. if key doesn't exist it will be created */
 //  std::string value = ini["section"]["key"];
@@ -64,7 +65,7 @@
 //
 //  /* =IMPORTANT=
 //     The difference between the [] and get() operations is that [] returns
-//     REAL data which you can modify and creates a new key automatically
+//     REAL data which you can modify and creates a new item automatically
 //     if it doesn't yet exist, while get() returns a COPY of data and
 //     doesn't create new keys. Use has() combined with the [] operator to
 //     get full control over what is being created anew in the structure. */
@@ -156,6 +157,7 @@
 #include <string>
 #include <sstream>
 #include <algorithm>
+#include <utility>
 #include <unordered_map>
 #include <vector>
 #include <memory>
@@ -450,47 +452,48 @@ namespace mINI
 			return fileWriteStream.is_open();
 		}
 
-		void operator<<(INIStructure& data)
+		void operator<<(INIStructure const& data)
 		{
-			if (data.size())
+			if (!data.size())
 			{
-				auto it = data.begin();
-				for (;;)
+				return;
+			}
+			auto it = data.begin();
+			for (;;)
+			{
+				auto const& section = it->first;
+				auto const& collection = *it->second;
+				fileWriteStream
+					<< "["
+					<< section
+					<< "]";
+				if (collection.size())
 				{
-					auto const& section = it->first;
-					auto const& collection = *it->second;
-					fileWriteStream
-						<< "["
-						<< section
-						<< "]";
-					if (collection.size())
-					{
-						fileWriteStream << std::endl;
-						auto it2 = collection.begin();
-						for (;;)
-						{
-							auto const& key = it2->first;
-							auto const& value = *it2->second;
-							fileWriteStream
-								<< key
-								<< ((prettyPrint) ? " = " : "=")
-								<< value;
-							if (++it2 == collection.end())
-							{
-								break;
-							}
-							fileWriteStream << std::endl;
-						}
-					}
-					if (++it == data.end())
-					{
-						break;
-					}
 					fileWriteStream << std::endl;
-					if (prettyPrint)
+					auto it2 = collection.begin();
+					for (;;)
 					{
+						auto const& key = it2->first;
+						auto const& value = *it2->second;
+						fileWriteStream
+							<< key
+							<< ((prettyPrint) ? " = " : "=")
+							<< value;
+						if (++it2 == collection.end())
+						{
+							break;
+						}
 						fileWriteStream << std::endl;
 					}
+				}
+				if (++it == data.end())
+				{
+					break;
+				}
+				fileWriteStream << std::endl;
+				if (prettyPrint)
+				{
+					fileWriteStream << std::endl;
 				}
 			}
 		}
@@ -509,24 +512,32 @@ namespace mINI
 
 		~INIFile() { }
 
-		INIStructure read()
+		bool read(INIStructure& data) const
 		{
-			INIStructure output;
+			if (data.size())
+			{
+				data.clear();
+			}
+			if (filename.empty())
+			{
+				return false;
+			}
 			INIReader reader(filename);
 			if (reader.good())
 			{
-				reader >> output;
+				reader >> data;
+				return true;
 			}
-			return output;
+			return false;
 		}
 
-		bool write(INIStructure data)
+		bool write(INIStructure const& data, bool pretty = false) const
 		{
 			
 			return false;
 		}
 
-		bool generate(INIStructure data, bool pretty = false)
+		bool generate(INIStructure const& data, bool pretty = false) const
 		{
 			if (filename.empty())
 			{
@@ -537,6 +548,7 @@ namespace mINI
 			{
 				generator.prettyPrint = pretty;
 				generator << data;
+				return true;
 			}
 			return false;
 		}
