@@ -1,6 +1,8 @@
 # mINI
 
-This is a tiny C++ utility library for manipulating with INI files.
+** STILL IN DEVELOPMENT - DON'T USE!!! **
+
+This is a tiny C++ utility library for manipulating INI files.
 
 It conforms to the following format:
 - section and keys are case insensitive
