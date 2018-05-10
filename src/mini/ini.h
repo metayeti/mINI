@@ -203,8 +203,8 @@ namespace mINI
 		{
 			std::size_t index = data.size();
 			dataIndexMap[key] = index;
-			data.push_back(std::make_unique<T>());
-			iterList.push_back(T_IterItem(key, data.back().get()));
+			data.emplace_back(std::make_unique<T>());
+			iterList.emplace_back(key, data.back().get());
 			return index;
 		}
 
@@ -220,8 +220,8 @@ namespace mINI
 			{
 				std::string const& key = other.iterList[i].first;
 				auto const& ptrToData = other.data[i];
-				data.push_back(std::make_unique<T>(*ptrToData));
-				iterList.push_back(T_IterItem(key, data.back().get()));
+				data.emplace_back(std::make_unique<T>(*ptrToData));
+				iterList.emplace_back(key, data.back().get());
 			}
 			dataIndexMap = T_DataIndexMap(other.dataIndexMap);
 		}
@@ -267,8 +267,8 @@ namespace mINI
 			else
 			{
 				dataIndexMap[key] = data.size();
-				data.push_back(std::make_unique<T>(obj));
-				iterList.push_back(T_IterItem(key, data.back().get()));
+				data.emplace_back(std::make_unique<T>(obj));
+				iterList.emplace_back(key, data.back().get());
 			}
 		}
 
@@ -431,7 +431,7 @@ namespace mINI
 				}
 				if (lineData && parseResult != INIParser::PDATA_UNKNOWN)
 				{
-					lineData->push_back(line);
+					lineData->emplace_back(line);
 				}
 			}
 			return true;
