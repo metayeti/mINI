@@ -50,7 +50,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  Basic usage example:
+//  /* === BASIC READ/WRITE === */
 //
 //  /* read from file */
 //  mINI::INIFile file("myfile.ini");
@@ -84,6 +84,8 @@
 //
 //  /* or generate a file */
 //  file.generate(ini);
+//
+//  /* === OTHER FEATURES === */
 //
 //  /* check if section or key is present */
 //  bool hasSection = ini.has("section");
@@ -162,6 +164,7 @@
 #include <vector>
 #include <memory>
 #include <fstream>
+#include <sys/stat.h>
 
 namespace mINI
 {
@@ -324,7 +327,7 @@ namespace mINI
 	class INIParser
 	{
 	public:
-		using T_KeyValue = std::pair<std::string, std::string>;
+		using T_ParseValues = std::pair<std::string, std::string>;
 
 		enum PDataType
 		{
@@ -335,7 +338,7 @@ namespace mINI
 			PDATA_UNKNOWN
 		};
 
-		static PDataType parseLine(std::string line, T_KeyValue& parseData)
+		static PDataType parseLine(std::string line, T_ParseValues& parseData)
 		{
 			parseData.first.clear();
 			parseData.second.clear();
@@ -347,9 +350,6 @@ namespace mINI
 			char firstCharacter = line[0];
 			if (firstCharacter == ';')
 			{
-				auto commentText = line.substr(1);
-				INIStringUtil::Trim(commentText);
-				parseData.first = commentText;
 				return PDATA_COMMENT;
 			}
 			if (firstCharacter == '[')
@@ -361,7 +361,6 @@ namespace mINI
 					INIStringUtil::Trim(section);
 					if (!section.empty())
 					{
-						INIStringUtil::ToLower(section);
 						parseData.first = section;
 						return PDATA_SECTION;
 					}
@@ -374,7 +373,6 @@ namespace mINI
 				INIStringUtil::Trim(key);
 				if (key.length() > 0)
 				{
-					INIStringUtil::ToLower(key);
 					auto value = line.substr(equalsAt + 1);
 					INIStringUtil::Trim(value);
 					parseData.first = key;
@@ -388,27 +386,35 @@ namespace mINI
 
 	class INIReader
 	{
+	public:
+		using T_LineData = std::vector<std::string>;
+		using T_LineDataPtr = std::shared_ptr<T_LineData>;
+
 	private:
 		std::ifstream fileReadStream;
+		T_LineDataPtr lineData;
 
 	public:
-		INIReader(std::string const& filename)
+		INIReader(std::string const& filename, bool keepLineData = false)
 		{
 			fileReadStream.open(filename);
+			if (keepLineData)
+			{
+				lineData = std::make_shared<T_LineData>();
+			}
 		}
 		~INIReader() { }
 
-		bool good() const
+		bool operator>>(INIStructure& data)
 		{
-			return fileReadStream.is_open();
-		}
-
-		void operator>>(INIStructure& data)
-		{
+			if (!fileReadStream.is_open())
+			{
+				return false;
+			}
 			std::string line;
 			std::string section;
 			bool inSection = false;
-			INIParser::T_KeyValue parseData;
+			INIParser::T_ParseValues parseData;
 			while (std::getline(fileReadStream, line))
 			{
 				auto parseResult = INIParser::parseLine(line, parseData);
@@ -423,14 +429,18 @@ namespace mINI
 					auto const& value = parseData.second;
 					data[section][key] = value;
 				}
+				if (lineData && parseResult != INIParser::PDATA_UNKNOWN)
+				{
+					lineData->push_back(line);
+				}
 			}
+			return true;
 		}
-	};
 
-	class INIWriter
-	{
-	private:
-		std::ofstream fileWriteStream;
+		T_LineDataPtr getLines()
+		{
+			return lineData;
+		}
 	};
 
 	class INIGenerator
@@ -447,16 +457,15 @@ namespace mINI
 		}
 		~INIGenerator() { }
 
-		bool good() const
+		bool operator<<(INIStructure const& data)
 		{
-			return fileWriteStream.is_open();
-		}
-
-		void operator<<(INIStructure const& data)
-		{
+			if (!fileWriteStream.is_open())
+			{
+				return false;
+			}
 			if (!data.size())
 			{
-				return;
+				return true;
 			}
 			auto it = data.begin();
 			for (;;)
@@ -496,6 +505,75 @@ namespace mINI
 					fileWriteStream << std::endl;
 				}
 			}
+			return true;
+		}
+	};
+
+	class INIWriter
+	{
+	private:
+		using T_LineData = std::vector<std::string>;
+		std::string filename;
+
+		T_LineData getLazyOutput(INIStructure const& data, INIStructure const& original)
+		{
+			if (prettyPrint)
+			{
+			}
+		}
+
+	public:
+		bool prettyPrint = false;
+
+		INIWriter(std::string const& filename)
+		: filename(filename)
+		{
+		}
+		~INIWriter() { }
+
+		bool operator<<(INIStructure const& data)
+		{
+			struct stat buf;
+			bool fileExists = (stat(filename.c_str(), &buf) == 0);
+			if (!fileExists)
+			{
+				INIGenerator generator(filename);
+				generator.prettyPrint = prettyPrint;
+				return generator << data;
+			}
+			INIStructure originalData;
+			INIReader::T_LineDataPtr lineData;
+			bool readSuccess = false;
+			{
+				INIReader reader(filename, true);
+				if (readSuccess = reader >> originalData)
+				{
+					lineData = reader.getLines();
+				}
+			}
+			if (readSuccess)
+			{
+				T_LineData output = getLazyOutput(data, originalData);
+				std::ofstream fileWriteStream(filename);
+				if (fileWriteStream.is_open())
+				{
+					if (output.size())
+					{
+						auto line = output.begin();
+						for (;;)
+						{
+							fileWriteStream << *line;
+							if (++line == output.end())
+							{
+								break;
+							}
+							fileWriteStream << std::endl;
+						}
+					}
+					return true;
+				}
+			}
+			return false;
 		}
 	};
 
@@ -523,18 +601,7 @@ namespace mINI
 				return false;
 			}
 			INIReader reader(filename);
-			if (reader.good())
-			{
-				reader >> data;
-				return true;
-			}
-			return false;
-		}
-
-		bool write(INIStructure const& data, bool pretty = false) const
-		{
-			
-			return false;
+			return reader >> data;
 		}
 
 		bool generate(INIStructure const& data, bool pretty = false) const
@@ -544,13 +611,19 @@ namespace mINI
 				return false;
 			}
 			INIGenerator generator(filename);
-			if (generator.good())
+			generator.prettyPrint = pretty;
+			return generator << data;
+		}
+
+		bool write(INIStructure const& data, bool pretty = false) const
+		{
+			if (filename.empty())
 			{
-				generator.prettyPrint = pretty;
-				generator << data;
-				return true;
+				return false;
 			}
-			return false;
+			INIWriter writer(filename);
+			writer.prettyPrint = pretty;
+			return writer << data;
 		}
 	};
 }
