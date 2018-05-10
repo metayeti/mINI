@@ -144,7 +144,7 @@
 //           auto const& key = it2.first();
 //           auto const& value = *it2.second();
 //           std::cout << key << "=" << value << std::endl;
-//      }	
+//      }
 //  }
 //
 ///////////////////////////////////////////////////////////////////////////////
@@ -188,15 +188,13 @@ namespace mINI
 	template<class T>
 	class INIMap
 	{
-	public:
+	private:
 		using T_Data = std::vector<std::unique_ptr<T>>;
 		using T_DataIndexMap = std::unordered_map<std::string, std::size_t>;
 		using T_IterItem = std::pair<std::string, const T*>;
 		using T_IterList = std::vector<T_IterItem>;
 		using T_MultiArgs = typename std::vector<std::pair<std::string, T>>;
-		using const_iterator = typename T_IterList::const_iterator;
 
-	private:
 		T_Data data;
 		T_DataIndexMap dataIndexMap;
 		T_IterList iterList;
@@ -211,6 +209,8 @@ namespace mINI
 		}
 
 	public:
+		using const_iterator = typename T_IterList::const_iterator;
+
 		INIMap() { }
 
 		INIMap(INIMap const& other)
@@ -248,7 +248,7 @@ namespace mINI
 			return T(*data[it->second]);
 		}
 
-		bool has(std::string key)
+		bool has(std::string key) const
 		{
 			INIStringUtil::Trim(key);
 			INIStringUtil::ToLower(key);
@@ -585,8 +585,7 @@ namespace mINI
 	public:
 		INIFile(std::string const& filename)
 		: filename(filename)
-		{
-		}
+		{ }
 
 		~INIFile() { }
 
