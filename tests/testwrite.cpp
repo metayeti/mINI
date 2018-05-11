@@ -96,7 +96,7 @@ void outputData(mINI::INIStructure const& ini)
 //
 // test data
 //
-T_INIFileData testDataBasic = {
+T_INIFileData testDataBasic {
 	// filename
 	"data01.ini",
 	// original data
@@ -116,7 +116,7 @@ T_INIFileData testDataBasic = {
 	}
 };
 
-T_INIFileData testDataWithGarbage = {
+T_INIFileData testDataWithGarbage {
 	// filename
 	"data02.ini",
 	// original data
@@ -194,7 +194,7 @@ T_INIFileData testDataWithGarbage = {
 	}
 };
 
-T_INIFileData testDataFormatted = {
+T_INIFileData testDataFormatted {
 	// filename
 	"data03.ini",
 	// original data
