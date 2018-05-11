@@ -12,7 +12,7 @@ It conforms to the following format:
 - comments are lines that begin with a semicolon
 - trailing comments are only allowed on section lines
 
-Files are read on demand in one fell swoop, after which the data is kept in memory and is ready to be manipulated. Files are closed after read or write operations. This utility supports lazy writing, which only writes changes and updates and preserves custom spacings and comments. A lazy write invoked by a `write()` call will read the output file, find what changes have been made, and update the file accordingly. If performance is a strong issue and/or you only need to generate files, use `generate()` instead.
+Files are read on demand in one fell swoop, after which the data is kept in memory and is ready to be manipulated. Files are closed after read or write operations. This utility supports lazy writing, which only writes changes and updates and preserves custom formatting and comments. A lazy write invoked by a `write()` call will read the output file, find which changes have been made, and update the file accordingly. If performance is a strong issue and/or you only need to generate files, use `generate()` instead.
 
 Section and key order is preserved on read and write operations. Iterating through data will take the same order as the original file or the order in which keys were added to the structure.
 
@@ -247,13 +247,13 @@ To iterate through data in-order and display results:
 ```C++
 for (auto const& it : ini)
 {
-	auto const& section = it.first();
-	auto const& collection = it.second();
+	auto const& section = it.first;
+	auto const& collection = it.second;
 	std::cout << "[" << section << "]" << std::endl;
 	for (auto const& it2 : collection)
 	{
-		auto const& key = it2.first();
-		auto const& value = it2.second();
+		auto const& key = it2.first;
+		auto const& value = it2.second;
 		std::cout << key << "=" << value << std::endl;
 	}
 }
@@ -263,7 +263,7 @@ for (auto const& it : ini)
 
 `it.second` is an object type which is either an `INIMap` on the first level or `std::string` on the second.
 
-Iterators are only meant for reading data and should not be used for manipulating it in any way. For this purpose the API only exposes a `const_iterator`.
+Iterators are only meant for traversing data and should not be used for manipulating it. For this purpose the API only exposes a `const_iterator`.
 
 
 ## Thanks
