@@ -389,6 +389,10 @@ namespace mINI
 				}
 				if (lineData && parseResult != INIParser::PDATA_UNKNOWN)
 				{
+					if (parseResult == INIParser::PDATA_KEYVALUE && !inSection)
+					{
+						continue;
+					}
 					lineData->emplace_back(line);
 				}
 			}
