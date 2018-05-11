@@ -325,6 +325,7 @@ namespace mINI
 
 		T_LineData getFileData()
 		{
+			//method1
 			std::string fileData;
 			fileReadStream.seekg(0, std::ios::end);
 			fileData.resize(fileReadStream.tellg());
@@ -350,6 +351,27 @@ namespace mINI
 			}
 			output.emplace_back(buff);
 			return output;
+			/*
+			//method2
+			T_LineData output;
+			std::string buff;
+			typedef std::istreambuf_iterator<char> buff_iter;
+			for (buff_iter i(fileReadStream), e; i != e; ++i)
+			{
+				char c = *i;
+				if (c == '\n')
+				{
+					output.emplace_back(buff);
+					buff.clear();
+					continue;
+				}
+				if (c != '\0' && c != '\r')
+				{
+					buff += c;
+				}
+			}
+			output.emplace_back(buff);
+			return output;*/
 		}
 
 	public:

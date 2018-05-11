@@ -1,4 +1,5 @@
 #include <iostream>
+#include <string>
 #include <vector>
 #include <tuple>
 #include <fstream>
@@ -96,7 +97,7 @@ void outputData(mINI::INIStructure const& ini)
 //
 // test data
 //
-T_INIFileData testDataBasic {
+const T_INIFileData testDataBasic {
 	// filename
 	"data01.ini",
 	// original data
@@ -116,7 +117,7 @@ T_INIFileData testDataBasic {
 	}
 };
 
-T_INIFileData testDataWithGarbage {
+const T_INIFileData testDataWithGarbage {
 	// filename
 	"data02.ini",
 	// original data
@@ -197,7 +198,7 @@ T_INIFileData testDataWithGarbage {
 	}
 };
 
-T_INIFileData testDataFormatted {
+const T_INIFileData testDataFormatted {
 	// filename
 	"data03.ini",
 	// original data

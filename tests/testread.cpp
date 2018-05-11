@@ -1,4 +1,5 @@
 #include <iostream>
+#include <string>
 #include <vector>
 #include <utility>
 #include <fstream>
@@ -57,7 +58,7 @@ void outputData(mINI::INIStructure const& ini)
 // test data
 //
 
-T_INIFileData testDataBasic = {
+const T_INIFileData testDataBasic = {
 	// filename
 	"data01.ini",
 	// test data
