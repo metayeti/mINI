@@ -122,17 +122,17 @@ namespace mINI
 
 	const std::string INIStringUtil::whitespaceDelimiters = " \t\n\r\f\v";
 
-	template<class T>
+	template<typename T>
 	class INIMap
 	{
 	private:
 		using T_DataIndexMap = std::unordered_map<std::string, std::size_t>;
-		using T_IterItem = std::pair<std::string, T>;
-		using T_IterList = std::vector<T_IterItem>;
+		using T_DataItem = std::pair<std::string, T>;
+		using T_DataContainer = std::vector<T_DataItem>;
 		using T_MultiArgs = typename std::vector<std::pair<std::string, T>>;
 
 		T_DataIndexMap dataIndexMap;
-		T_IterList data;
+		T_DataContainer data;
 
 		inline std::size_t setEmpty(std::string& key)
 		{
@@ -143,7 +143,7 @@ namespace mINI
 		}
 
 	public:
-		using const_iterator = typename T_IterList::const_iterator;
+		using const_iterator = typename T_DataContainer::const_iterator;
 
 		INIMap() { }
 
