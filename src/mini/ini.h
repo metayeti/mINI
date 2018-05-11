@@ -126,22 +126,19 @@ namespace mINI
 	class INIMap
 	{
 	private:
-		using T_Data = std::vector<std::unique_ptr<T>>;
 		using T_DataIndexMap = std::unordered_map<std::string, std::size_t>;
-		using T_IterItem = std::pair<std::string, const T*>;
+		using T_IterItem = std::pair<std::string, T>;
 		using T_IterList = std::vector<T_IterItem>;
 		using T_MultiArgs = typename std::vector<std::pair<std::string, T>>;
 
-		T_Data data;
 		T_DataIndexMap dataIndexMap;
-		T_IterList iterList;
+		T_IterList data;
 
 		inline std::size_t setEmpty(std::string& key)
 		{
 			std::size_t index = data.size();
 			dataIndexMap[key] = index;
-			data.emplace_back(std::make_unique<T>());
-			iterList.emplace_back(key, data.back().get());
+			data.emplace_back(key, T());
 			return index;
 		}
 
@@ -155,10 +152,9 @@ namespace mINI
 			std::size_t data_size = other.data.size();
 			for (std::size_t i = 0; i < data_size; ++i)
 			{
-				std::string const& key = other.iterList[i].first;
-				auto const& ptrToData = other.data[i];
-				data.emplace_back(std::make_unique<T>(*ptrToData));
-				iterList.emplace_back(key, data.back().get());
+				auto const& key = other.data[i].first;
+				auto const& obj = other.data[i].second;
+				data.emplace_back(key, obj);
 			}
 			dataIndexMap = T_DataIndexMap(other.dataIndexMap);
 		}
@@ -170,7 +166,7 @@ namespace mINI
 			auto it = dataIndexMap.find(key);
 			bool hasIt = (it == dataIndexMap.end());
 			std::size_t index = (hasIt) ? setEmpty(key) : it->second;
-			return *data[index];
+			return data[index].second;
 		}
 
 		T get(std::string key) const
@@ -182,7 +178,7 @@ namespace mINI
 			{
 				return T();
 			}
-			return T(*data[it->second]);
+			return T(data[it->second].second);
 		}
 
 		bool has(std::string key) const
@@ -199,13 +195,12 @@ namespace mINI
 			auto it = dataIndexMap.find(key);
 			if (it != dataIndexMap.end())
 			{
-				data[it->second] = std::make_unique<T>(obj);
+				data[it->second].second = obj;
 			}
 			else
 			{
 				dataIndexMap[key] = data.size();
-				data.emplace_back(std::make_unique<T>(obj));
-				iterList.emplace_back(key, data.back().get());
+				data.emplace_back(key, obj);
 			}
 		}
 
@@ -226,9 +221,8 @@ namespace mINI
 			auto it = dataIndexMap.find(key);
 			if (it != dataIndexMap.end())
 			{
-				auto index = it->second;
+				std::size_t index = it->second;
 				data.erase(data.begin() + index);
-				iterList.erase(iterList.begin() + index);
 				dataIndexMap.erase(it);
 				for (auto& it2 : dataIndexMap)
 				{
@@ -246,7 +240,6 @@ namespace mINI
 		void clear()
 		{
 			data.clear();
-			iterList.clear();
 			dataIndexMap.clear();
 		}
 
@@ -255,8 +248,8 @@ namespace mINI
 			return data.size();
 		}
 
-		const_iterator begin() const { return iterList.begin(); }
-		const_iterator end() const { return iterList.end(); }
+		const_iterator begin() const { return data.begin(); }
+		const_iterator end() const { return data.end(); }
 	};
 
 	using INIStructure = INIMap<INIMap<std::string>>;
@@ -408,7 +401,7 @@ namespace mINI
 			for (;;)
 			{
 				auto const& section = it->first;
-				auto const& collection = *it->second;
+				auto const& collection = it->second;
 				fileWriteStream
 					<< "["
 					<< section
@@ -420,7 +413,7 @@ namespace mINI
 					for (;;)
 					{
 						auto const& key = it2->first;
-						auto const& value = *it2->second;
+						auto const& value = it2->second;
 						fileWriteStream
 							<< key
 							<< ((prettyPrint) ? " = " : "=")
@@ -557,7 +550,7 @@ namespace mINI
 							{
 								continue;
 							}
-							auto const& value = *it.second;
+							auto const& value = it.second;
 							linesToAdd.emplace_back(
 								key + ((prettyPrint) ? " = " : "=") + value
 							);
@@ -585,18 +578,18 @@ namespace mINI
 				auto const& section = it.first;
 				if (original.has(section))
 				{
-				continue;
+					continue;
 				}
 				if (prettyPrint && output.size() > 0 && !output.back().empty())
 				{
 					output.emplace_back();
 				}
 				output.emplace_back("[" + section + "]");
-				auto const& collection = *it.second;
+				auto const& collection = it.second;
 				for (auto const& it2 : collection)
 				{
 					auto const& key = it2.first;
-					auto const& value = *it2.second;
+					auto const& value = it2.second;
 					output.emplace_back(
 						key + ((prettyPrint) ? " = " : "=") + value
 					);

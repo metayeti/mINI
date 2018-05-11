@@ -222,7 +222,7 @@ To get the number of sections in the structure:
 size_t n_sections = ini.size();
 ```
 
-Keep in mind that `[]` will always create a new item if one does not already exist! You can use `has()` to check if an item exists before performing further operations. Remember that `get()` will return a copy of data, so you should **not** do removes or updates to data with it. Straightforward usage of the `[]` operator shouldn't be a problem in most real-world cases where you're doing lookups on known keys and you may not care if empty keys or sections get created, but this is something to keep in mind when dealing with this datastructure. Always use `has()` before using the `[]` operator IF you don't want new empty sections and keys. Below is a short example that demonstrates safe manipulation of data.
+Keep in mind that `[]` will always create a new item if one does not already exist! You can use `has()` to check if an item exists before performing further operations. Remember that `get()` will return a copy of data, so you should **not** do removes or updates to data with it. Straightforward usage of the `[]` operator shouldn't be a problem in most real-world cases where you're doing lookups on known keys and you may not care if empty keys or sections get created, but this is something to keep in mind when dealing with this data structure. Always use `has()` before using the `[]` operator IF you don't want new empty sections and keys. Below is a short example that demonstrates safe manipulation of data.
 
 ```C++
 if (ini.has("section"))
@@ -248,22 +248,23 @@ To iterate through data in-order and display results:
 for (auto const& it : ini)
 {
 	auto const& section = it.first();
-	auto const& collection = *it.second();
+	auto const& collection = it.second();
 	std::cout << "[" << section << "]" << std::endl;
 	for (auto const& it2 : collection)
 	{
 		auto const& key = it2.first();
-		auto const& value = *it2.second();
+		auto const& value = it2.second();
 		std::cout << key << "=" << value << std::endl;
 	}
 }
 ```
 
-`it.first` is always string type.
+`it.first` is always `std::string` type.
 
-`it.second` is const pointer type which points to data and needs to be dereferenced to be used.
+`it.second` is an object type which is either an `INIMap` on the first level or `std::string` on the second.
 
 Iterators are only meant for reading data and should not be used for manipulating it in any way. For this purpose the API only exposes a `const_iterator`.
+
 
 ## Thanks
 
