@@ -147,7 +147,7 @@ std::string& value = ini["section"]["key"];
 std::string value = ini.get("section").get("key");
 ```
 
-The difference between `[]` and `get()` operations is that `[]` returns a reference to **real** data that you may modify and creates a new item automatically if it does not yet exist, while `get()` returns a **copy** of the data and does not create new items. Use `has()` before doing any operations with `[]` if you don't wish to create new items. You may also want to avoid using `get()` if you happen to be operating on enormous structures for some reason.
+The difference between `[]` and `get()` operations is that `[]` returns a reference to **real** data that you may modify and creates a new item automatically if it does not yet exist, while `get()` returns a **copy** of the data and does not create new items. Use `has()` before doing any operations with `[]` if you wish to avoid altering the structure. You may also want to avoid using `get()` if you happen to be operating on enormous structures for some reason.
 
 You can combine usage of `[]` and `get()` at your leisure:
 ```C++
@@ -222,8 +222,9 @@ To get the number of sections in the structure:
 size_t n_sections = ini.size();
 ```
 
-Keep in mind that `[]` will always create a new item if one does not already exist! You can use `has()` to check if an item exists before performing further operations. Remember that `get()` will return a copy of data, so you should **not** do removes or updates to data with it. Straightforward usage of the `[]` operator shouldn't be a problem in most real-world cases where you're doing lookups on known keys and you may not care if empty keys or sections get created, but this is something to keep in mind when dealing with this data structure. Always use `has()` before using the `[]` operator IF you don't want new empty sections and keys. Below is a short example that demonstrates safe manipulation of data.
+Keep in mind that `[]` will always create a new item if one does not already exist! You can use `has()` to check if an item exists before performing further operations. Remember that `get()` will return a copy of data, so you should **not** do removes or updates to data with it. Straightforward usage of the `[]` operator shouldn't be a problem in most real-world cases where you're doing lookups on known keys and you may not care if empty keys or sections get created, but this is something to keep in mind when dealing with this data structure. Always use `has()` before using the `[]` operator if you don't want your structure to be altered.
 
+Short example that demonstrates safe manipulation of data:
 ```C++
 if (ini.has("section"))
 {
@@ -261,10 +262,9 @@ for (auto const& it : ini)
 
 `it.first` is always `std::string` type.
 
-`it.second` is an object type which is either an `INIMap` on the first level or `std::string` on the second.
+`it.second` is an object which is either a `mINI::INIMap` type on the first level or `std::string` type on the second level.
 
-Iterators are only meant for traversing data and should not be used for manipulating it. For this purpose the API only exposes a `const_iterator`.
-
+Iterators are only meant for traversing data in order and cannot be used for manipulating it. For this purpose the API only exposes a `const_iterator`.
 
 ## Thanks
 

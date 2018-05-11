@@ -200,7 +200,7 @@ T_INIFileData testDataWithGarbage = {
 const lest::test mINI_tests[] = {
 	CASE("TEST: Basic write")
 	{
-		// do some basic mofidications to an INI file
+		// do some basic modifications to an INI file
 		// then compare resulting file to expected data
 		std::string const& filename = std::get<0>(testDataBasic);
 		mINI::INIFile file(filename);
@@ -247,7 +247,7 @@ int main(int argc, char** argv)
 	// write test files
 	writeTestFile(testDataBasic);
 	writeTestFile(testDataWithGarbage);
-	
+
 	// run tests
 	if (int failures = lest::run(mINI_tests, argc, argv))
 	{
