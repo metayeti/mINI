@@ -119,7 +119,6 @@ namespace mINI
 			std::transform(str.begin(), str.end(), str.begin(), ::tolower);
 		}
 	};
-
 	const std::string INIStringUtil::whitespaceDelimiters = " \t\n\r\f\v";
 
 	template<typename T>
@@ -324,10 +323,39 @@ namespace mINI
 		std::ifstream fileReadStream;
 		T_LineDataPtr lineData;
 
+		T_LineData getFileData()
+		{
+			std::string fileData;
+			fileReadStream.seekg(0, std::ios::end);
+			fileData.resize(fileReadStream.tellg());
+			fileReadStream.seekg(0, std::ios::beg);
+			fileReadStream.read(&fileData[0], fileData.size());
+			fileReadStream.close();
+			T_LineData output;
+			std::string buff;
+			std::size_t N = fileData.size();
+			for (std::size_t i = 0; i < N; ++i)
+			{
+				char& c = fileData[i];
+				if (c == '\n')
+				{
+					output.emplace_back(buff);
+					buff.clear();
+					continue;
+				}
+				if (c != '\0' && c != '\r')
+				{
+					buff += c;
+				}
+			}
+			output.emplace_back(buff);
+			return output;
+		}
+
 	public:
 		INIReader(std::string const& filename, bool keepLineData = false)
 		{
-			fileReadStream.open(filename);
+			fileReadStream.open(filename, std::ios::in | std::ios::binary);
 			if (keepLineData)
 			{
 				lineData = std::make_shared<T_LineData>();
@@ -341,11 +369,11 @@ namespace mINI
 			{
 				return false;
 			}
-			std::string line;
+			T_LineData fileData = getFileData();
 			std::string section;
 			bool inSection = false;
 			INIParser::T_ParseValues parseData;
-			while (std::getline(fileReadStream, line))
+			for (auto const& line : fileData)
 			{
 				auto parseResult = INIParser::parseLine(line, parseData);
 				if (parseResult == INIParser::PDATA_SECTION)
@@ -383,7 +411,7 @@ namespace mINI
 
 		INIGenerator(std::string const& filename)
 		{
-			fileWriteStream.open(filename);
+			fileWriteStream.open(filename, std::ios::out);
 		}
 		~INIGenerator() { }
 
@@ -457,7 +485,6 @@ namespace mINI
 			bool discardNextEmpty = false;
 			bool writeNewKeys = false;
 			std::size_t lastKeyLine = 0;
-
 			for (auto line = lineData->begin(); line != lineData->end(); ++line)
 			{
 				if (!writeNewKeys)
@@ -631,7 +658,7 @@ namespace mINI
 			if (readSuccess)
 			{
 				T_LineData output = getLazyOutput(lineData, data, originalData);
-				std::ofstream fileWriteStream(filename);
+				std::ofstream fileWriteStream(filename, std::ios::out);
 				if (fileWriteStream.is_open())
 				{
 					if (output.size())

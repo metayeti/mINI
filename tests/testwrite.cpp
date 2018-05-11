@@ -157,8 +157,7 @@ T_INIFileData testDataWithGarbage = {
 		"         ccc  =  3",
 		"GARBAGE",
 		"",
-		"",
-		";eof"
+		""
 	},
 	// expected result
 	{
@@ -190,7 +189,39 @@ T_INIFileData testDataWithGarbage = {
 		"ddd=5",
 		"",
 		"",
-		";eof"
+		"[new section]",
+		"test=something"
+	}
+};
+
+T_INIFileData testDataFormatted = {
+	// filename
+	"data03.ini",
+	// original data
+	{
+		"[ Food ]",
+		"Cheese = 32",
+		"Ice Cream = 64",
+		"Bananas = 128",
+		"",
+		"[  Things  ]",
+		"Scissors   = AAA",
+		"Wooden Box = BBB",
+		"Speakers   = CCC"
+	},
+	// expected result
+	{
+		"[ Food ]",
+		"Cheese = AAA",
+		"Ice Cream = BBB"
+		"Bananas = CCC",
+		"soup=DDD",
+		"",
+		"[  Things  ]",
+		"Scissors   = 32",
+		"Wooden Box = 64",
+		"Speakers   = 128",
+		"book=256"
 	}
 };
 
@@ -235,6 +266,7 @@ const lest::test mINI_tests[] = {
 			{"ccc", "4"},
 			{"ddd", "5"}
 		});
+		ini["new section"]["test"] = "something";
 		// write to file
 		EXPECT(file.write(ini) == true);
 		// verify data

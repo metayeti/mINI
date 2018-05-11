@@ -77,7 +77,7 @@ const lest::test mINI_tests[] = {
 		mINI::INIStructure ini;
 		ini["section"]["key1"] = "value1";
 		ini["section"]["key2"] = "value2";
-		EXPECT(file.write(ini) == true);
+		EXPECT(file.generate(ini) == true);
 		EXPECT(verifyData(testDataBasic) == true);
 	}
 };
