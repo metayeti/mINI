@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <utility>
 #include <fstream>
 #include "lest.hpp"
 #include "mini/ini.h"
@@ -8,26 +9,8 @@ using T_LineData = std::vector<std::string>;
 using T_INIFileData = std::pair<std::string, T_LineData>;
 
 //
-// test data
-//
-
-T_INIFileData testDataBasic = {
-	"data01.ini", {
-		"[fruit]",
-		"bananas=1",
-		"apples=2",
-		"grapes=3",
-		"[veggies]",
-		"lettuce=scarce",
-		"onions=sufficient",
-		"potatoes=plentiful"
-	}
-};
-
-//
 // helper functions
 //
-
 bool writeTestFile(T_INIFileData const& testData)
 {
 	std::string const& filename = testData.first;
@@ -71,15 +54,36 @@ void outputData(mINI::INIStructure const& ini)
 }
 
 //
+// test data
+//
+
+T_INIFileData testDataBasic = {
+	// filename
+	"data01.ini",
+	// test data
+	{
+		"[fruit]",
+		"bananas=1",
+		"apples=2",
+		"grapes=3",
+		"[veggies]",
+		"lettuce=scarce",
+		"onions=sufficient",
+		"potatoes=plentiful"
+	}
+};
+
+//
 // test cases
 //
 const lest::test mINI_tests[] = {
-	CASE("Test: Basic read")
+	CASE("TEST: Basic read")
 	{
+		// read a basic INI file and check if values are read correctly
 		auto const& filename = testDataBasic.first;
-		mINI::INIFile iniFile(filename);
+		mINI::INIFile file(filename);
 		mINI::INIStructure ini;
-		EXPECT(iniFile.read(ini) == true);
+		EXPECT(file.read(ini) == true);
 		std::cout << filename << std::endl;
 		outputData(ini);
 		EXPECT(ini["fruit"]["bananas"] == "1");
@@ -95,6 +99,7 @@ int main(int argc, char** argv)
 {
 	// write test files
 	writeTestFile(testDataBasic);
+
 	// run tests
 	if (int failures = lest::run(mINI_tests, argc, argv))
 	{
