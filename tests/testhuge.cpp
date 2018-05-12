@@ -6,7 +6,7 @@
 
 const std::string filename = "data_huge.ini";
 
-const size_t N_sections = 10;
+const size_t N_sections = 20;
 const size_t N_items_per_section = 500;
 
 const bool generate_pretty = false;
@@ -34,6 +34,7 @@ const lest::test mINI_tests[] = {
 	},
 	CASE("TEST: Read a huge file")
 	{
+		// this testcase relies on the previous test passing
 		std::cout << "Reading file..." << std::endl;
 		mINI::INIFile file(filename);
 		mINI::INIStructure ini;

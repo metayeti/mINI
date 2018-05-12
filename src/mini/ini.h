@@ -26,31 +26,26 @@
 //  /mINI/
 //  An INI file reader and writer for the modern age.
 //
-//  (c) 2018 Danijel Durakovic
-//  Licensed under terms of the MIT License
+///////////////////////////////////////////////////////////////////////////////
+//
+//  A tiny utility library for manipulating INI files with a straightforward
+//  API and a minimal footprint. It conforms to the (somewhat) standard INI
+//  format - sections and keys are case insensitive and all leading and
+//  trailing whitespace is ignored. Empty key and section names are ignored.
+//  Comments are lines that begin with a semicolon. Trailing comments are only
+//  allowed on section lines.
+//
+//  Files are read demand, after which data is kept in memory and the file is
+//  closed. This utility supports lazy writing, which only writes changes and
+//  updates to a file and preserves custom formatting and comments. A lazy
+//  write invoked by a write() call will read the output file, find what
+//  changes have been made and update the file accordingly. If performance is
+//  a strong issue or you only need to generate files, use generate() instead.
+//  Section and key order is preserved on read and write.
 //
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  A tiny-ish utility for reading from and writing data to INI files with a
-//  straightforward API and a minimal footprint. It conforms to the (somewhat)
-//  standard INI format - sections and keys are case insensitive, and all
-//  leading and trailing whitespace is ignored. Empty keys and sections names
-//  are ignored. Comments are lines that begin with a semicolon. Trailing
-//  comments on value lines are not allowed since values may also contain
-//  semicolons. Trailing comments on section lines are ignored.
-//
-//  Files are read on demand in one fell swoop and the data is kept in memory,
-//  ready to be manipulated. Files are closed after read or write operations.
-//  This utility supports lazy writing, which only writes changes and updates
-//  and preserves custom spacings and comments. A lazy write invoked by a
-//  write() call will read the output file, find changes made and update the
-//  file accordingly. If performance is a strong issue and you only need to
-//  generate files, use generate() instead. Section and key order is preserved
-//  on both read and write operations.
-//
-///////////////////////////////////////////////////////////////////////////////
-//
-//  BASIC EXAMPLE:
+//  /* BASIC USAGE EXAMPLE: */
 //
 //  /* read from file */
 //  mINI::INIFile file("myfile.ini");
@@ -62,12 +57,6 @@
 //
 //  /* read values safely. if key doesn't exist it will NOT be created */
 //  std::string value = ini.get("section").get("key");
-//
-//  /* The difference between the [] and get() operations is that [] returns
-//     REAL data which you can modify and creates a new item automatically
-//     if it doesn't yet exist, while get() returns a COPY of data and
-//     doesn't create new items. Use has() combined with the [] operator to
-//     get full control over what is being created anew in the structure. */
 //
 //  /* set or update values */
 //  ini["section"]["key"] = "value";
@@ -81,7 +70,7 @@
 //  /* write updates back to file, preserving comments and formatting */
 //  file.write(ini);
 //
-//  /* or generate a file */
+//  /* or generate a file (overwrites the original) */
 //  file.generate(ini);
 //
 ///////////////////////////////////////////////////////////////////////////////
@@ -167,7 +156,6 @@ namespace mINI
 			std::size_t index = (hasIt) ? setEmpty(key) : it->second;
 			return data[index].second;
 		}
-
 		T get(std::string key) const
 		{
 			INIStringUtil::Trim(key);
@@ -179,14 +167,12 @@ namespace mINI
 			}
 			return T(data[it->second].second);
 		}
-
 		bool has(std::string key) const
 		{
 			INIStringUtil::Trim(key);
 			INIStringUtil::ToLower(key);
 			return (dataIndexMap.count(key) == 1);
 		}
-
 		void set(std::string key, T obj)
 		{
 			INIStringUtil::Trim(key);
@@ -202,7 +188,6 @@ namespace mINI
 				data.emplace_back(key, obj);
 			}
 		}
-
 		void set(T_MultiArgs const& multiArgs)
 		{
 			for (auto const& it : multiArgs)
@@ -212,7 +197,6 @@ namespace mINI
 				set(key, obj);
 			}
 		}
-
 		bool remove(std::string key)
 		{
 			INIStringUtil::Trim(key);
@@ -235,18 +219,15 @@ namespace mINI
 			}
 			return false;
 		}
-
 		void clear()
 		{
 			data.clear();
 			dataIndexMap.clear();
 		}
-
 		std::size_t size() const
 		{
 			return data.size();
 		}
-
 		const_iterator begin() const { return data.begin(); }
 		const_iterator end() const { return data.end(); }
 	};
@@ -323,55 +304,34 @@ namespace mINI
 		std::ifstream fileReadStream;
 		T_LineDataPtr lineData;
 
-		T_LineData getFileData()
+		T_LineData readFile()
 		{
-			//method1
-			std::string fileData;
+			std::string fileContents;
 			fileReadStream.seekg(0, std::ios::end);
-			fileData.resize(fileReadStream.tellg());
+			fileContents.resize(fileReadStream.tellg());
 			fileReadStream.seekg(0, std::ios::beg);
-			fileReadStream.read(&fileData[0], fileData.size());
+			std::size_t fileSize = fileContents.size();
+			fileReadStream.read(&fileContents[0], fileSize);
 			fileReadStream.close();
 			T_LineData output;
-			std::string buff;
-			std::size_t N = fileData.size();
-			for (std::size_t i = 0; i < N; ++i)
+			std::string buffer;
+			buffer.reserve(50);
+			for (std::size_t i = 0; i < fileSize; ++i)
 			{
-				char& c = fileData[i];
+				char& c = fileContents[i];
 				if (c == '\n')
 				{
-					output.emplace_back(buff);
-					buff.clear();
+					output.emplace_back(buffer);
+					buffer.clear();
 					continue;
 				}
 				if (c != '\0' && c != '\r')
 				{
-					buff += c;
+					buffer += c;
 				}
 			}
-			output.emplace_back(buff);
+			output.emplace_back(buffer);
 			return output;
-			/*
-			//method2
-			T_LineData output;
-			std::string buff;
-			typedef std::istreambuf_iterator<char> buff_iter;
-			for (buff_iter i(fileReadStream), e; i != e; ++i)
-			{
-				char c = *i;
-				if (c == '\n')
-				{
-					output.emplace_back(buff);
-					buff.clear();
-					continue;
-				}
-				if (c != '\0' && c != '\r')
-				{
-					buff += c;
-				}
-			}
-			output.emplace_back(buff);
-			return output;*/
 		}
 
 	public:
@@ -391,11 +351,11 @@ namespace mINI
 			{
 				return false;
 			}
-			T_LineData fileData = getFileData();
+			T_LineData fileLines = readFile();
 			std::string section;
 			bool inSection = false;
 			INIParser::T_ParseValues parseData;
-			for (auto const& line : fileData)
+			for (auto const& line : fileLines)
 			{
 				auto parseResult = INIParser::parseLine(line, parseData);
 				if (parseResult == INIParser::PDATA_SECTION)
@@ -420,7 +380,6 @@ namespace mINI
 			}
 			return true;
 		}
-
 		T_LineDataPtr getLines()
 		{
 			return lineData;
@@ -607,7 +566,6 @@ namespace mINI
 							linesToAdd.emplace_back(
 								key + ((prettyPrint) ? " = " : "=") + value
 							);
-
 						}
 					}
 					if (!linesToAdd.empty())
@@ -648,7 +606,6 @@ namespace mINI
 					);
 				}
 			}
-
 			return output;
 		}
 
@@ -732,7 +689,6 @@ namespace mINI
 			INIReader reader(filename);
 			return reader >> data;
 		}
-
 		bool generate(INIStructure const& data, bool pretty = false) const
 		{
 			if (filename.empty())
@@ -743,7 +699,6 @@ namespace mINI
 			generator.prettyPrint = pretty;
 			return generator << data;
 		}
-
 		bool write(INIStructure& data, bool pretty = false) const
 		{
 			if (filename.empty())
