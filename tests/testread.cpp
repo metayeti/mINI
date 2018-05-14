@@ -74,6 +74,143 @@ const T_INIFileData testDataBasic = {
 	}
 };
 
+const T_INIFileData testDataWellFormed = {
+	// filename
+	"data02.ini",
+	// test data
+	{
+		"; this is a comment",
+		"[first section]",
+		"someKey = 1",
+		"anotherKey = 2",
+		"",
+		"; this is another comment",
+		"[second section]",
+		"humans = 16",
+		"orcs = 8",
+		"barbarians = 20",
+		"",
+		"; this is yet another comment",
+		"[third section]",
+		"spiders=25",
+		"bugs=0",
+		"ants=100",
+		"flies=5"
+	}
+};
+
+const T_INIFileData testDataNotWellFormed = {
+	// filename
+	"data03.ini",
+	// test data
+	{
+		"GARBAGE",
+		"; this is a comment",
+		"    ; abcd   ",
+		"[first section]   ;test comment",
+		"someKey= 1",
+		"GARBAGE",
+		"anotherKey =2",
+		"",
+		"; this is another comment",
+		"GARBAGE",
+		"GARBAGE",
+		"                [second section]",
+		"GARBAGE",
+		"hUmAnS=16",
+		"GARBAGE",
+		" orcs                   =   8    ",
+		"   barbarians    =     20      ",
+		"",
+		"          GARBAGE",
+		"; this is yet another comment",
+		"[      third section   ]       ",
+		"spiders    = 25",
+		"bugs       =0    ",
+		"ants=       100",
+		"GARBAGE   ",
+		"GARBAGE  ",
+		"FLIES =    5",
+		"GARBAGE   "
+	}
+};
+
+const T_INIFileData testDataEmpty = {
+	// filename
+	"data04.ini",
+	// test data
+	{}
+};
+
+const T_INIFileData testDataEdgeCase1 = {
+	// filename
+	"data05.ini",
+	// test data
+	{
+		"ignored1=value1",
+		"ignored2=value2"
+	}
+};
+
+const T_INIFileData testDataEdgeCase2 = {
+	// filename
+	"data06.ini",
+	// test data
+	{
+		"ignored1=value1",
+		"ignored2=value2",
+		"[data]",
+		"proper1=a",
+		"proper2=b"
+	}
+};
+
+const T_INIFileData testDataEdgeCase3 = {
+	// filename
+	"data07.ini",
+	// test data
+	{
+		"[empty]"
+	}
+};
+
+const T_INIFileData testDataEdgeCase4 = {
+	// filename
+	"data08.ini",
+	// test data
+	{
+		"[empty1]",
+		"[empty2]",
+		"[empty3]",
+		"[empty4]",
+		"[empty5]"
+	}
+};
+
+const T_INIFileData testDataEdgeCase5 = {
+	// filename
+	"data09.ini",
+	// test data
+	{
+		"[data]",
+		"valueA=1",  // expected: ignored
+		"valueA=2"   // expected: not ignored
+	}
+};
+
+const T_INIFileData testDataEdgeCase6 = {
+	// filename
+	"data10.ini",
+	// test data
+	{
+		"[data]",    // expected: ignored
+		"valueA=10", // expected: ignored
+		"valueB=20", // expected: not ignored
+		"[data]",
+		"valueA=30"  // expected: not ignored
+	}
+};
+
 //
 // test cases
 //
@@ -93,6 +230,101 @@ const lest::test mINI_tests[] = {
 		EXPECT(ini["veggies"]["lettuce"] == "scarce");
 		EXPECT(ini["veggies"]["onions"] == "sufficient");
 		EXPECT(ini["veggies"]["potatoes"] == "plentiful");
+	},
+	CASE("Read and compare")
+	{
+		// read two INI files with differing form and check if all read values match
+		auto const& filename1 = testDataWellFormed.first;
+		auto const& filename2 = testDataNotWellFormed.first;
+		mINI::INIFile file1(filename1);
+		mINI::INIFile file2(filename2);
+		mINI::INIStructure ini1, ini2;
+		EXPECT(file1.read(ini1) == true);
+		EXPECT(file2.read(ini2) == true);
+		std::cout << filename1 << std::endl;
+		outputData(ini1);
+		std::cout << filename2 << std::endl;
+		outputData(ini2);
+		// compare sizes
+		EXPECT(ini1.size() == ini2.size());
+		EXPECT(ini1.get("first section").size() == ini2.get("first section").size());
+		EXPECT(ini1.get("second section").size() == ini2.get("second section").size());
+		EXPECT(ini1.get("third section").size() == ini2.get("third section").size());
+		// compare data
+		EXPECT(ini1.get("first section").get("somekey") == ini2.get("first section").get("somekey"));
+		EXPECT(ini1["first section"]["anotherkey"] == ini2["first section"]["anotherkey"]);
+		EXPECT(ini1["second section"]["humans"] == ini2["second section"]["humans"]);
+		EXPECT(ini1["second section"]["orcs"] == ini2["second section"]["orcs"]);
+		EXPECT(ini1["second section"]["barbarians"] == ini2["second section"]["barbarians"]);
+		EXPECT(ini1["third section"]["spiders"] == ini2["third section"]["spiders"]);
+		EXPECT(ini1["third section"]["bugs"] == ini2["third section"]["bugs"]);
+		EXPECT(ini1["third section"]["ants"] == ini2["third section"]["ants"]);
+		EXPECT(ini1["third section"]["flies"] == ini2["third section"]["flies"]);
+	},
+	CASE("Read empty")
+	{
+		auto const& filename = testDataEmpty.first;
+		mINI::INIFile file(filename);
+		mINI::INIStructure ini;
+		EXPECT(file.read(ini) == true);
+		EXPECT(ini.size() == 0u);
+	},
+	CASE("Edge case 1")
+	{
+		auto const& filename = testDataEdgeCase1.first;
+		mINI::INIFile file(filename);
+		mINI::INIStructure ini;
+		EXPECT(file.read(ini) == true);
+		EXPECT(ini.size() == 0u);
+	},
+	CASE("Edge case 2")
+	{
+		auto const& filename = testDataEdgeCase2.first;
+		mINI::INIFile file(filename);
+		mINI::INIStructure ini;
+		EXPECT(file.read(ini) == true);
+		EXPECT(ini.size() == 1u);
+		EXPECT(ini.get("data").size() == 2u);
+		EXPECT(ini["data"]["proper1"] == "a");
+		EXPECT(ini["data"]["proper2"] == "b");
+	},
+	CASE("Edge case 3")
+	{
+		auto const& filename = testDataEdgeCase3.first;
+		mINI::INIFile file(filename);
+		mINI::INIStructure ini;
+		EXPECT(file.read(ini) == true);
+		EXPECT(ini.size() == 0u);
+		EXPECT(ini.get("empty").size() == 0u);
+	},
+	CASE("Edge case 4")
+	{
+		auto const& filename = testDataEdgeCase4.first;
+		mINI::INIFile file(filename);
+		mINI::INIStructure ini;
+		EXPECT(file.read(ini) == true);
+		EXPECT(ini.size() == 0u);
+	},
+	CASE("Edge case 5")
+	{
+		auto const& filename = testDataEdgeCase5.first;
+		mINI::INIFile file(filename);
+		mINI::INIStructure ini;
+		EXPECT(file.read(ini) == true);
+		EXPECT(ini.size() == 1u);
+		EXPECT(ini.get("data").size() == 1u);
+		EXPECT(ini["data"]["valueA"] == "2");
+	},
+	CASE("Edge case 6")
+	{
+		auto const& filename = testDataEdgeCase6.first;
+		mINI::INIFile file(filename);
+		mINI::INIStructure ini;
+		EXPECT(file.read(ini) == true);
+		EXPECT(ini.size() == 1u);
+		EXPECT(ini.get("data").size() == 2u);
+		EXPECT(ini["data"]["valueA"] == "30");
+		EXPECT(ini["data"]["valueB"] == "20");
 	}
 };
 
@@ -100,7 +332,16 @@ int main(int argc, char** argv)
 {
 	// write test files
 	writeTestFile(testDataBasic);
-
+	writeTestFile(testDataWellFormed);
+	writeTestFile(testDataNotWellFormed);
+	writeTestFile(testDataEmpty);
+	writeTestFile(testDataEdgeCase1);
+	writeTestFile(testDataEdgeCase2);
+	writeTestFile(testDataEdgeCase3);
+	writeTestFile(testDataEdgeCase4);
+	writeTestFile(testDataEdgeCase5);
+	writeTestFile(testDataEdgeCase6);
+	
 	// run tests
 	if (int failures = lest::run(mINI_tests, argc, argv))
 	{
