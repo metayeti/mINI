@@ -94,21 +94,19 @@
 
 namespace mINI
 {
-	class INIStringUtil
+	namespace INIStringUtil
 	{
-	public:
-		static const std::string whitespaceDelimiters;
-		static inline void Trim(std::string& str)
+		const std::string whitespaceDelimiters = " \t\n\r\f\v";
+		inline void Trim(std::string& str)
 		{
 			str.erase(str.find_last_not_of(whitespaceDelimiters) + 1);
 			str.erase(0, str.find_first_not_of(whitespaceDelimiters));
 		}
-		static inline void ToLower(std::string& str)
+		inline void ToLower(std::string& str)
 		{
 			std::transform(str.begin(), str.end(), str.begin(), ::tolower);
 		}
 	};
-	const std::string INIStringUtil::whitespaceDelimiters = " \t\n\r\f\v";
 
 	template<typename T>
 	class INIMap
@@ -234,9 +232,8 @@ namespace mINI
 
 	using INIStructure = INIMap<INIMap<std::string>>;
 
-	class INIParser
+	namespace INIParser
 	{
-	public:
 		using T_ParseValues = std::pair<std::string, std::string>;
 
 		enum PDataType
@@ -248,7 +245,7 @@ namespace mINI
 			PDATA_UNKNOWN
 		};
 
-		static PDataType parseLine(std::string line, T_ParseValues& parseData)
+		PDataType parseLine(std::string line, T_ParseValues& parseData)
 		{
 			parseData.first.clear();
 			parseData.second.clear();
@@ -638,27 +635,28 @@ namespace mINI
 					lineData = reader.getLines();
 				}
 			}
-			if (readSuccess)
+			if (!readSuccess)
 			{
-				T_LineData output = getLazyOutput(lineData, data, originalData);
-				std::ofstream fileWriteStream(filename, std::ios::out);
-				if (fileWriteStream.is_open())
+				return false;
+			}
+			T_LineData output = getLazyOutput(lineData, data, originalData);
+			std::ofstream fileWriteStream(filename, std::ios::out);
+			if (fileWriteStream.is_open())
+			{
+				if (output.size())
 				{
-					if (output.size())
+					auto line = output.begin();
+					for (;;)
 					{
-						auto line = output.begin();
-						for (;;)
+						fileWriteStream << *line;
+						if (++line == output.end())
 						{
-							fileWriteStream << *line;
-							if (++line == output.end())
-							{
-								break;
-							}
-							fileWriteStream << std::endl;
+							break;
 						}
+						fileWriteStream << std::endl;
 					}
-					return true;
 				}
+				return true;
 			}
 			return false;
 		}
