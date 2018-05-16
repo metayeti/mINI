@@ -211,6 +211,28 @@ const T_INIFileData testDataEdgeCase6 = {
 	}
 };
 
+const T_INIFileData testDataEdgeCase7 = {
+	// filename
+	"data11.ini",
+	// test data
+	{
+		"[]",           // expected: ignored
+		"key1=value1",  // expected: ignored
+		"[a]",
+		"key2=value2"
+	}
+};
+
+const T_INIFileData testDataEdgeCase8 = {
+	// filename
+	"data12.ini",
+	// test data
+	{
+		"[a]",
+		"=1"   // expected: ignored
+	}
+};
+
 //
 // test cases
 //
@@ -330,6 +352,25 @@ const lest::test mINI_tests[] = {
 		EXPECT(ini.get("data").size() == 2u);
 		EXPECT(ini["data"]["valueA"] == "30");
 		EXPECT(ini["data"]["valueB"] == "20");
+	},
+	CASE("Edge case 7")
+	{
+		auto const& filename = testDataEdgeCase7.first;
+		mINI::INIFile file(filename);
+		mINI::INIStructure ini;
+		EXPECT(file.read(ini) == true);
+		EXPECT(ini.size() == 1u);
+		EXPECT(ini.get("a").size() == 1u);
+		EXPECT(ini["a"]["key2"] == "value2");
+	},
+	CASE("Edge case 8")
+	{
+		auto const& filename = testDataEdgeCase8.first;
+		mINI::INIFile file(filename);
+		mINI::INIStructure ini;
+		EXPECT(file.read(ini) == true);
+		EXPECT(ini.size() == 1u);
+		EXPECT(ini.get("a").size() == 0u);
 	}
 };
 
@@ -346,6 +387,8 @@ int main(int argc, char** argv)
 	writeTestFile(testDataEdgeCase4);
 	writeTestFile(testDataEdgeCase5);
 	writeTestFile(testDataEdgeCase6);
+	writeTestFile(testDataEdgeCase7);
+	writeTestFile(testDataEdgeCase8);
 	
 	// run tests
 	if (int failures = lest::run(mINI_tests, argc, argv))

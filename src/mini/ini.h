@@ -152,8 +152,8 @@ namespace mINI
 			INIStringUtil::Trim(key);
 			INIStringUtil::ToLower(key);
 			auto it = dataIndexMap.find(key);
-			bool hasIt = (it == dataIndexMap.end());
-			std::size_t index = (hasIt) ? setEmpty(key) : it->second;
+			bool hasIt = (it != dataIndexMap.end());
+			std::size_t index = (hasIt) ? it->second : setEmpty(key);
 			return data[index].second;
 		}
 		T get(std::string key) const
