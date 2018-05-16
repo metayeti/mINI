@@ -294,7 +294,7 @@ const lest::test mINI_tests[] = {
 		mINI::INIFile file(filename);
 		mINI::INIStructure ini;
 		EXPECT(file.read(ini) == true);
-		EXPECT(ini.size() == 0u);
+		EXPECT(ini.size() == 1u);
 		EXPECT(ini.get("empty").size() == 0u);
 	},
 	CASE("Edge case 4")
@@ -303,7 +303,12 @@ const lest::test mINI_tests[] = {
 		mINI::INIFile file(filename);
 		mINI::INIStructure ini;
 		EXPECT(file.read(ini) == true);
-		EXPECT(ini.size() == 0u);
+		EXPECT(ini.size() == 5u);
+		EXPECT(ini.get("empty1").size() == 0u);
+		EXPECT(ini.get("empty2").size() == 0u);
+		EXPECT(ini.get("empty3").size() == 0u);
+		EXPECT(ini.get("empty4").size() == 0u);
+		EXPECT(ini.get("empty5").size() == 0u);
 	},
 	CASE("Edge case 5")
 	{

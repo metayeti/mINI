@@ -361,7 +361,7 @@ namespace mINI
 				if (parseResult == INIParser::PDATA_SECTION)
 				{
 					inSection = true;
-					section = parseData.first;
+					data[section = parseData.first];
 				}
 				else if (inSection && parseResult == INIParser::PDATA_KEYVALUE)
 				{
