@@ -2,6 +2,16 @@
 
 v0.9.1
 
+## Status
+
+This library is still in development and is not yet production ready! Getting there...
+
+**Known bugs:**
+- Creating keys containing the `=` character will break the parser upon reading back (read/write will be implemented with escape characters in a future version)
+- `write()` data to an empty file will start at line 1 instead of 0
+
+## Info
+
 This is a tiny C++ utility library for manipulating INI files.
 
 It conforms to the following format:

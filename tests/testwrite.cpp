@@ -238,7 +238,7 @@ const T_INIFileData testDataRemEntry {
 		"data1=A",
 		"data2=B"
 	},
-	// expected data
+	// expected result
 	{
 		"[section]",
 		"data2=B"
@@ -254,12 +254,12 @@ const T_INIFileData testDataRemSection {
 		"data1=A",
 		"data2=B"		
 	},
-	// expected data
+	// expected result
 	{
 	}
 };
 
-const T_INIFileData testDataDuplicates {
+const T_INIFileData testDataDuplicateKeys {
 	// filename
 	"data06.ini",
 	// original data
@@ -270,7 +270,7 @@ const T_INIFileData testDataDuplicates {
 		"[section]",
 		"data=C"
 	},
-	// expected data
+	// expected result
 	{
 		"[section]",
 		"data=D",
@@ -280,9 +280,29 @@ const T_INIFileData testDataDuplicates {
 	}
 };
 
-const T_INIFileData testDataPrettyPrint {
+const T_INIFileData testDataDuplicateSections {
 	// filename
 	"data07.ini",
+	// original data
+	{
+		"[section]",
+		"[section]",
+		"[section]"
+	},
+	// expected result
+	{
+		"[section]",
+		"data=A",
+		"[section]",
+		"data=A",
+		"[section]",
+		"data=A"
+	}
+};
+
+const T_INIFileData testDataPrettyPrint {
+	// filename
+	"data08.ini",
 	// oiriginal data
 	{
 		"[section1]",
@@ -291,7 +311,7 @@ const T_INIFileData testDataPrettyPrint {
 		"[section2]",
 		"value1=A"
 	},
-	// expected data
+	// expected result
 	{
 		"[section1]",
 		"value1=A",
@@ -307,14 +327,26 @@ const T_INIFileData testDataPrettyPrint {
 	}
 };
 
+const T_INIFileData testDataEmptyFile {
+	// filename
+	"data09.ini",
+	// original data
+	{},
+	// expected results
+	{
+		"[section]",
+		"key=value"
+	}
+};
+
 const T_INIFileData testDataEmptySection {
 	// filename
-	"data08.ini",
+	"data10.ini",
 	// original data
 	{
 		"[section]"
 	},
-	// expected data
+	// expected result
 	{
 		"[section]",
 		"key=value"
@@ -323,7 +355,7 @@ const T_INIFileData testDataEmptySection {
 
 const T_INIFileData testDataManyEmptySections {
 	// filename
-	"data09.ini",
+	"data11.ini",
 	// original data
 	{
 		"[section1]",
@@ -332,7 +364,7 @@ const T_INIFileData testDataManyEmptySections {
 		"[section4]",
 		"[section5]"
 	},
-	// expected data
+	// expected result
 	{
 		"[section1]",
 		"[section2]",
@@ -418,9 +450,9 @@ const lest::test mINI_tests[] = {
 		// verify data
 		EXPECT(verifyData(testDataRemSection));
 	},
-	CASE("Test: Duplicate entries")
+	CASE("Test: Duplicate keys")
 	{
-		auto const& filename = std::get<0>(testDataDuplicates);
+		auto const& filename = std::get<0>(testDataDuplicateKeys);
 		// read from file
 		mINI::INIFile file(filename);
 		mINI::INIStructure ini;
@@ -430,7 +462,21 @@ const lest::test mINI_tests[] = {
 		// write to file
 		EXPECT(file.write(ini) == true);
 		// verify data
-		EXPECT(verifyData(testDataDuplicates));
+		EXPECT(verifyData(testDataDuplicateKeys));
+	},
+	CASE("Test: Duplicate sections")
+	{
+		auto const& filename = std::get<0>(testDataDuplicateSections);
+		// read from file
+		mINI::INIFile file(filename);
+		mINI::INIStructure ini;
+		EXPECT(file.read(ini) == true);
+		// update data
+		ini["section"]["data"] = "A";
+		// write to file
+		EXPECT(file.write(ini) == true);
+		// verify data
+		EXPECT(verifyData(testDataDuplicateSections));
 	},
 	CASE("Test: Pretty print")
 	{
@@ -450,6 +496,20 @@ const lest::test mINI_tests[] = {
 		EXPECT(file.write(ini, true) == true);
 		// verify data
 		EXPECT(verifyData(testDataPrettyPrint));
+	},
+	CASE("Test: Write to empty file")
+	{
+		auto const& filename = std::get<0>(testDataEmptyFile);
+		// read from file
+		mINI::INIFile file(filename);
+		mINI::INIStructure ini;
+		EXPECT(file.read(ini) == true);
+		// update data
+		ini["section"]["key"] = "value";
+		// write to file
+		EXPECT(file.write(ini) == true);
+		// verify data
+		EXPECT(verifyData(testDataEmptyFile));
 	},
 	CASE("Test: Write to empty section")
 	{
@@ -488,8 +548,10 @@ int main(int argc, char** argv)
 	writeTestFile(testDataWithGarbage);
 	writeTestFile(testDataRemEntry);
 	writeTestFile(testDataRemSection);
-	writeTestFile(testDataDuplicates);
+	writeTestFile(testDataDuplicateKeys);
+	writeTestFile(testDataDuplicateSections);
 	writeTestFile(testDataPrettyPrint);
+	writeTestFile(testDataEmptyFile);
 	writeTestFile(testDataEmptySection);
 	writeTestFile(testDataManyEmptySections);
 
