@@ -23,10 +23,8 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  /mINI/
+//  /mINI/ v0.9.1
 //  An INI file reader and writer for the modern age.
-//
-//  Version 0.9.0
 //
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -37,9 +35,9 @@
 //  Comments are lines that begin with a semicolon. Trailing comments are only
 //  allowed on section lines.
 //
-//  Files are read demand, after which data is kept in memory and the file is
-//  closed. This utility supports lazy writing, which only writes changes and
-//  updates to a file and preserves custom formatting and comments. A lazy
+//  Files are read on demand, after which data is kept in memory and the file
+//  is closed. This utility supports lazy writing, which only writes changes
+//  and updates to a file and preserves custom formatting and comments. A lazy
 //  write invoked by a write() call will read the output file, find what
 //  changes have been made and update the file accordingly. If performance is
 //  a strong issue or you only need to generate files, use generate() instead.
@@ -495,8 +493,9 @@ namespace mINI
 						{
 							continueToNextSection = true;
 							discardNextEmpty = true;
+							continue;
 						}
-						continue;
+						lastKeyLine = output.size();
 					}
 					else if (parseResult == INIParser::PDATA_KEYVALUE)
 					{

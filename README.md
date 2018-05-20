@@ -1,6 +1,6 @@
 # mINI
 
-Version: 0.9.0
+v0.9.1
 
 This is a tiny C++ utility library for manipulating INI files.
 
@@ -246,7 +246,7 @@ if (ini.has("section"))
 }
 ```
 
-### Iteration
+## Iteration
 
 You can traverse the structure in order of insertion. The following example loops through the structure and displays results in a familiar format:
 ```C++
