@@ -230,7 +230,7 @@ size_t n_sections = ini.size();
 
 Keep in mind that `[]` will always create a new item if the item does not already exist! You can use `has()` to check if an item exists before performing further operations. Remember that `get()` will return a copy of data, so you should **not** be doing removes or updates to data with it!
 
-Usage of the `[]` operator shouldn't be a problem in most real-world cases where you're doing lookups on known keys and you may not care if empty keys or sections get created. However - if you have a situation where you do not want new items to be added to the strucutre, either use `get()` to retreive items, or if you don't want to be working with copies of data, use `has()` before using the `[]` operator if you want to be on the safe side.
+Usage of the `[]` operator shouldn't be a problem in most real-world cases where you're doing lookups on known keys and you may not care if empty keys or sections get created. However - if you have a situation where you do not want new items to be added to the structure, either use `get()` to retreive items, or if you don't want to be working with copies of data, use `has()` before using the `[]` operator if you want to be on the safe side.
 
 Short example that demonstrates safe manipulation of data:
 ```C++
