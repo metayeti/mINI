@@ -237,7 +237,7 @@ const T_INIFileData testDataEdgeCase8 = {
 // test cases
 //
 const lest::test mINI_tests[] = {
-	CASE("TEST: Basic read")
+	CASE("Test: Basic read")
 	{
 		// read a basic INI file and check if values are read correctly
 		auto const& filename = testDataBasic.first;
@@ -253,7 +253,7 @@ const lest::test mINI_tests[] = {
 		EXPECT(ini["veggies"]["onions"] == "sufficient");
 		EXPECT(ini["veggies"]["potatoes"] == "plentiful");
 	},
-	CASE("Read and compare")
+	CASE("Test: Read and compare")
 	{
 		// read two INI files with differing form and check if all read values match
 		auto const& filename1 = testDataWellFormed.first;
@@ -283,7 +283,7 @@ const lest::test mINI_tests[] = {
 		EXPECT(ini1["third section"]["ants"] == ini2["third section"]["ants"]);
 		EXPECT(ini1["third section"]["flies"] == ini2["third section"]["flies"]);
 	},
-	CASE("Read empty")
+	CASE("Test: Read empty")
 	{
 		auto const& filename = testDataEmpty.first;
 		mINI::INIFile file(filename);
@@ -291,7 +291,7 @@ const lest::test mINI_tests[] = {
 		EXPECT(file.read(ini) == true);
 		EXPECT(ini.size() == 0u);
 	},
-	CASE("Edge case 1")
+	CASE("Test: Edge case 1")
 	{
 		auto const& filename = testDataEdgeCase1.first;
 		mINI::INIFile file(filename);
@@ -299,7 +299,7 @@ const lest::test mINI_tests[] = {
 		EXPECT(file.read(ini) == true);
 		EXPECT(ini.size() == 0u);
 	},
-	CASE("Edge case 2")
+	CASE("Test: Edge case 2")
 	{
 		auto const& filename = testDataEdgeCase2.first;
 		mINI::INIFile file(filename);
@@ -310,7 +310,7 @@ const lest::test mINI_tests[] = {
 		EXPECT(ini["data"]["proper1"] == "a");
 		EXPECT(ini["data"]["proper2"] == "b");
 	},
-	CASE("Edge case 3")
+	CASE("Test: Edge case 3")
 	{
 		auto const& filename = testDataEdgeCase3.first;
 		mINI::INIFile file(filename);
@@ -319,7 +319,7 @@ const lest::test mINI_tests[] = {
 		EXPECT(ini.size() == 1u);
 		EXPECT(ini.get("empty").size() == 0u);
 	},
-	CASE("Edge case 4")
+	CASE("Test: Edge case 4")
 	{
 		auto const& filename = testDataEdgeCase4.first;
 		mINI::INIFile file(filename);
@@ -332,7 +332,7 @@ const lest::test mINI_tests[] = {
 		EXPECT(ini.get("empty4").size() == 0u);
 		EXPECT(ini.get("empty5").size() == 0u);
 	},
-	CASE("Edge case 5")
+	CASE("Test: Edge case 5")
 	{
 		auto const& filename = testDataEdgeCase5.first;
 		mINI::INIFile file(filename);
@@ -342,7 +342,7 @@ const lest::test mINI_tests[] = {
 		EXPECT(ini.get("data").size() == 1u);
 		EXPECT(ini["data"]["valueA"] == "2");
 	},
-	CASE("Edge case 6")
+	CASE("Test: Edge case 6")
 	{
 		auto const& filename = testDataEdgeCase6.first;
 		mINI::INIFile file(filename);
@@ -353,7 +353,7 @@ const lest::test mINI_tests[] = {
 		EXPECT(ini["data"]["valueA"] == "30");
 		EXPECT(ini["data"]["valueB"] == "20");
 	},
-	CASE("Edge case 7")
+	CASE("Test: Edge case 7")
 	{
 		auto const& filename = testDataEdgeCase7.first;
 		mINI::INIFile file(filename);
@@ -363,7 +363,7 @@ const lest::test mINI_tests[] = {
 		EXPECT(ini.get("a").size() == 1u);
 		EXPECT(ini["a"]["key2"] == "value2");
 	},
-	CASE("Edge case 8")
+	CASE("Test: Edge case 8")
 	{
 		auto const& filename = testDataEdgeCase8.first;
 		mINI::INIFile file(filename);

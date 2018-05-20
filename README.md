@@ -1,18 +1,18 @@
 # mINI
 
-** STILL IN DEVELOPMENT - DON'T USE!!! **
+Version: 0.9.0
 
 This is a tiny C++ utility library for manipulating INI files.
 
 It conforms to the following format:
 - section and key names are case insensitive
 - whitespace around sections, keys and values is ignored
-- empty section or key names are ignored
+- empty section and key names are ignored
 - keys that do not belong to a section are ignored
 - comments are lines that begin with a semicolon
 - trailing comments are only allowed on section lines
 
-Files are read on demand in one fell swoop, after which the data is kept in memory and is ready to be manipulated. Files are closed after read or write operations. This utility supports lazy writing, which only writes changes and updates and preserves custom formatting and comments. A lazy write invoked by a `write()` call will read the output file, find which changes have been made, and update the file accordingly. If performance is a strong issue and/or you only need to generate files, use `generate()` instead.
+Files are read on demand in one go, after which the data is kept in memory and is ready to be manipulated. Files are closed after read or write operations. This utility supports lazy writing, which only writes changes and updates and preserves custom formatting and comments. A lazy write invoked by a `write()` call will read the output file, find which changes have been made, and update the file accordingly. If performance is a strong issue and/or you only need to generate files, use `generate()` instead.
 
 Section and key order is preserved on read and write operations. Iterating through data will take the same order as the original file or the order in which keys were added to the structure.
 
@@ -50,7 +50,7 @@ mINI::INIStructure ini;
 file.read(ini);
 
 // read a value
-std::string const& amountOfApples = ini["fruits"]["apples"];
+std::string& amountOfApples = ini["fruits"]["apples"];
 
 // update a value
 ini["fruits"]["oranges"] = "50";
@@ -135,9 +135,9 @@ key1 = value1
 
 ## Manipulating data
 
-### Reading values
+### Reading data
 
-There are two ways of reading data from the INI structure. You can either use the `[]` operator or the `get()` function:
+There are two ways to read data from the INI structure. You can either use the `[]` operator or the `get()` function:
 
 ```C++
 // read values. if key doesn't exist, it will be created
@@ -147,25 +147,26 @@ std::string& value = ini["section"]["key"];
 std::string value = ini.get("section").get("key");
 ```
 
-The difference between `[]` and `get()` operations is that `[]` returns a reference to **real** data that you may modify and creates a new item automatically if it does not yet exist, while `get()` returns a **copy** of the data and does not create new items. Use `has()` before doing any operations with `[]` if you wish to avoid altering the structure. You may also want to avoid using `get()` if you happen to be operating on enormous structures for some reason.
+The difference between `[]` and `get()` operations is that `[]` returns a reference to **real** data that you may modify and creates a new item automatically if it does not yet exist, whereas `get()` returns a **copy** of the data and does not create new items. Use `has()` before doing any operations with `[]` if you wish to avoid altering the structure.
 
-You can combine usage of `[]` and `get()` at your leisure:
+You can combine usage of `[]` and `get()`:
 ```C++
-// will get a copy of the section and retreive a key
+// will get a copy of the section and retreive a key from that copy
+// (or create a new one in that copy)
 // technically a better way to read data safely than .get().get() since it only
 // copies data once; does not create new keys in actual data
 ini.get("section")["key"];
 
-// if we're sure section exists and we just want a copy of key if one exists
-// without creating an empty value when the key doesn't exist:
+// if we're sure section exists and we want a copy of key if one exists
+// without creating an empty value when the key doesn't exist
 ini["section"].get("key");
 
-// you may chain other functions in a similar way
-// the following code gets a copy of section and checks if a key exists:
+// you can chain other functions in a similar way
+// the following code gets a copy of section and checks if a key exists
 ini.get("section").has("key");
 ```
 
-### Updating values
+### Updating data
 
 To set or update a value:
 ```C++
@@ -178,6 +179,11 @@ ini["section"].set({
 	{"key1", "value1"},
 	{"key2", "value2"}
 });
+```
+
+To create an empty section, simply do:
+```C++
+ini["section"];
 ```
 
 To remove a single key from a section:
@@ -222,7 +228,9 @@ To get the number of sections in the structure:
 size_t n_sections = ini.size();
 ```
 
-Keep in mind that `[]` will always create a new item if one does not already exist! You can use `has()` to check if an item exists before performing further operations. Remember that `get()` will return a copy of data, so you should **not** do removes or updates to data with it. Straightforward usage of the `[]` operator shouldn't be a problem in most real-world cases where you're doing lookups on known keys and you may not care if empty keys or sections get created, but this is something to keep in mind when dealing with this data structure. Always use `has()` before using the `[]` operator if you don't want your structure to be altered.
+Keep in mind that `[]` will always create a new item if the item does not already exist! You can use `has()` to check if an item exists before performing further operations. Remember that `get()` will return a copy of data, so you should **not** be doing removes or updates to data with it!
+
+Usage of the `[]` operator shouldn't be a problem in most real-world cases where you're doing lookups on known keys and you may not care if empty keys or sections get created. However - if you have a situation where you do not want new items to be added to the strucutre, either use `get()` to retreive items, or if you don't want to be working with copies of data, use `has()` before using the `[]` operator if you want to be on the safe side.
 
 Short example that demonstrates safe manipulation of data:
 ```C++
@@ -234,17 +242,13 @@ if (ini.has("section"))
 	{
 		// we have key, we can access it safely without creating a new one
 		auto& value = collection["key"];
-		// do something with value, for example change it
-		value = "some value";
-		// or we may want to remove the key instead
-		collection.remove("key");
 	}
 }
 ```
 
 ### Iteration
 
-To iterate through data in-order and display results:
+You can traverse the structure in order of insertion. The following example loops through the structure and displays results in a familiar format:
 ```C++
 for (auto const& it : ini)
 {
@@ -264,7 +268,7 @@ for (auto const& it : ini)
 
 `it.second` is an object which is either a `mINI::INIMap` type on the first level or `std::string` type on the second level.
 
-Iterators are only meant for traversing data in order and cannot be used for manipulating it. For this purpose the API only exposes a `const_iterator`.
+Iterators are only meant for traversing data and can't be used to manipulate data - for this purpose the API only exposes a `const_iterator`.
 
 ## Thanks
 

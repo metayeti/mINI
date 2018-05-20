@@ -26,6 +26,8 @@
 //  /mINI/
 //  An INI file reader and writer for the modern age.
 //
+//  Version 0.9.0
+//
 ///////////////////////////////////////////////////////////////////////////////
 //
 //  A tiny utility library for manipulating INI files with a straightforward

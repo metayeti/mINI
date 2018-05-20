@@ -229,6 +229,84 @@ const T_INIFileData testDataFormatted {
 	}
 };
 
+const T_INIFileData testDataRemEntry {
+	// filename
+	"data04.ini",
+	// original data
+	{
+		"[section]",
+		"data1=A",
+		"data2=B"
+	},
+	// expected data
+	{
+		"[section]",
+		"data2=B"
+	}
+};
+
+const T_INIFileData testDataRemSection {
+	// filename
+	"data05.ini",
+	// original data
+	{
+		"[section]",
+		"data1=A",
+		"data2=B"		
+	},
+	// expected data
+	{
+	}
+};
+
+const T_INIFileData testDataDuplicates {
+	// filename
+	"data06.ini",
+	// original data
+	{
+		"[section]",
+		"data=A",
+		"data=B",
+		"[section]",
+		"data=C"
+	},
+	// expected data
+	{
+		"[section]",
+		"data=D",
+		"data=D",
+		"[section]",
+		"data=D"
+	}
+};
+
+const T_INIFileData testDataPrettyPrint {
+	// filename
+	"data07.ini",
+	// oiriginal data
+	{
+		"[section1]",
+		"value1=A",
+		"value2=B",
+		"[section2]",
+		"value1=A"
+	},
+	// expected data
+	{
+		"[section1]",
+		"value1=A",
+		"value2=B",
+		"value3 = C",
+		"[section2]",
+		"value1=A",
+		"value2 = B",
+		"",
+		"[section3]",
+		"value1 = A",
+		"value2 = B"
+	}
+};
+
 //
 // test cases
 //
@@ -244,7 +322,7 @@ const lest::test mINI_tests[] = {
 		ini["some section"]["some key"] = "2";
 		ini["some section"]["yet another key"] = "3";
 		EXPECT(file.write(ini) == true);
-		EXPECT(verifyData(testDataBasic) == true);
+		EXPECT(verifyData(testDataBasic));
 	},
 	CASE("TEST: Garbage data")
 	{
@@ -275,6 +353,67 @@ const lest::test mINI_tests[] = {
 		EXPECT(file.write(ini) == true);
 		// verify data
 		EXPECT(verifyData(testDataWithGarbage));
+	},
+	CASE("Test: Remove entry")
+	{
+		auto const& filename = std::get<0>(testDataRemEntry);
+		// read from file
+		mINI::INIFile file(filename);
+		mINI::INIStructure ini;
+		EXPECT(file.read(ini) == true);
+		// update data
+		ini["section"].remove("data1");
+		// write to file
+		EXPECT(file.write(ini) == true);
+		// verify data
+		EXPECT(verifyData(testDataRemEntry));
+	},
+	CASE("Test: Remove section")
+	{
+		auto const& filename = std::get<0>(testDataRemSection);
+		// read from file
+		mINI::INIFile file(filename);
+		mINI::INIStructure ini;
+		EXPECT(file.read(ini) == true);
+		// update data
+		ini.remove("section");
+		// write to file
+		EXPECT(file.write(ini) == true);
+		// verify data
+		EXPECT(verifyData(testDataRemSection));
+	},
+	CASE("Test: Duplicate entries")
+	{
+		auto const& filename = std::get<0>(testDataDuplicates);
+		// read from file
+		mINI::INIFile file(filename);
+		mINI::INIStructure ini;
+		EXPECT(file.read(ini) == true);
+		// update data
+		ini["section"]["data"] = "D";
+		// write to file
+		EXPECT(file.write(ini) == true);
+		// verify data
+		EXPECT(verifyData(testDataDuplicates));
+	},
+	CASE("Test: Pretty print")
+	{
+		auto const& filename = std::get<0>(testDataPrettyPrint);
+		// read from file
+		mINI::INIFile file(filename);
+		mINI::INIStructure ini;
+		EXPECT(file.read(ini) == true);
+		// update data
+		ini["section1"]["value3"] = "C";
+		ini["section2"]["value2"] = "B";
+		ini["section3"].set({
+			{"value1", "A"},
+			{"value2", "B"}
+		});
+		// write to file
+		EXPECT(file.write(ini, true) == true);
+		// verify data
+		EXPECT(verifyData(testDataPrettyPrint));
 	}
 };
 
@@ -283,6 +422,10 @@ int main(int argc, char** argv)
 	// write test files
 	writeTestFile(testDataBasic);
 	writeTestFile(testDataWithGarbage);
+	writeTestFile(testDataRemEntry);
+	writeTestFile(testDataRemSection);
+	writeTestFile(testDataDuplicates);
+	writeTestFile(testDataPrettyPrint);
 
 	// run tests
 	if (int failures = lest::run(mINI_tests, argc, argv))

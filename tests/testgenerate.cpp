@@ -66,11 +66,69 @@ const T_INIFileData testDataBasic = {
 	}
 };
 
+const T_INIFileData testDataManySections = {
+	// filename
+	"data02.ini",
+	// expected result
+	{
+		"[section1]",
+		"key1=value1",
+		"key2=value2",
+		"key3=value3",
+		"[section2]",
+		"key1=value1",
+		"key2=value2",
+		"[section3]",
+		"key1=value1"
+	}
+};
+
+const T_INIFileData testDataEmptySection = {
+	// filename
+	"data03.ini",
+	// expected result
+	{
+		"[empty]"
+	}
+};
+
+const T_INIFileData testDataManyEmptySections = {
+	// filename
+	"data04.ini",
+	// expected result
+	{
+		"[empty1]",
+		"[empty2]",
+		"[empty3]"
+	}
+};
+
+const T_INIFileData testDataEmpty = {
+	// filename
+	"data05.ini",
+	// expected result
+	{}
+};
+
+const T_INIFileData testDataPrettyPrint = {
+	// filename
+	"data06.ini",
+	// expected result
+	{
+		"[section1]",
+		"key1 = value1",
+		"key2 = value2",
+		"",
+		"[section2]",
+		"key1 = value1"
+	}
+};
+
 //
 // test cases
 //
 const lest::test mINI_tests[] = {
-	CASE("TEST: Basic generate")
+	CASE("Test: Basic generate")
 	{
 		// create a very basic INI file and verify resulting file has correct data
 		std::string const& filename = testDataBasic.first;
@@ -80,6 +138,65 @@ const lest::test mINI_tests[] = {
 		ini["section"]["key2"] = "value2";
 		EXPECT(file.generate(ini) == true);
 		EXPECT(verifyData(testDataBasic) == true);
+	},
+	CASE("Test: Generate many sections")
+	{
+		std::string const& filename = testDataManySections.first;
+		mINI::INIFile file(filename);
+		mINI::INIStructure ini;
+		ini["section1"].set({
+			{"key1", "value1"},
+			{"key2", "value2"},
+			{"key3", "value3"}
+		});
+		ini["section2"].set({
+			{"key1", "value1"},
+			{"key2", "value2"}
+		});
+		ini["section3"]["key1"] = "value1";
+		EXPECT(file.generate(ini) == true);
+		EXPECT(verifyData(testDataManySections));
+	},
+	CASE("Test: Generate empty section")
+	{
+		std::string const& filename = testDataEmptySection.first;
+		mINI::INIFile file(filename);
+		mINI::INIStructure ini;
+		ini["empty"];
+		EXPECT(file.generate(ini) == true);
+		EXPECT(verifyData(testDataEmptySection));
+	},
+	CASE("Test: Generate many empty sections")
+	{
+		std::string const& filename = testDataManyEmptySections.first;
+		mINI::INIFile file(filename);
+		mINI::INIStructure ini;
+		ini["empty1"];
+		ini["empty2"];
+		ini["empty3"];
+		EXPECT(file.generate(ini) == true);
+		EXPECT(verifyData(testDataManyEmptySections));
+	},
+	CASE("Test: Generate empty file")
+	{
+		std::string const& filename = testDataEmpty.first;
+		mINI::INIFile file(filename);
+		mINI::INIStructure ini;
+		EXPECT(file.generate(ini) == true);
+		EXPECT(verifyData(testDataEmpty));
+	},
+	CASE("Test: Generate with pretty-print")
+	{
+		std::string const& filename = testDataPrettyPrint.first;
+		mINI::INIFile file(filename);
+		mINI::INIStructure ini;
+		ini["section1"].set({
+			{"key1", "value1"},
+			{"key2", "value2"},
+		});
+		ini["section2"]["key1"] = "value1";
+		EXPECT(file.generate(ini, true) == true);
+		EXPECT(verifyData(testDataPrettyPrint));
 	}
 };
 
