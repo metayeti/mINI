@@ -8,7 +8,8 @@ This library is still in development and is not yet production ready! Getting th
 
 **Known bugs:**
 - Creating keys containing the `=` character will break the parser upon reading back (read/write will be implemented with escape characters in a future version)
-- `write()` data to an empty file will start at line 1 instead of 0
+- `write()` data to an empty file will begin writing at line 2 instead of 1
+- Read/write with empty section and key names has inconsistent behavior - read ignores it while write allows it.
 
 ## Info
 
@@ -17,10 +18,11 @@ This is a tiny C++ utility library for manipulating INI files.
 It conforms to the following format:
 - section and key names are case insensitive
 - whitespace around sections, keys and values is ignored
-- empty section and key names are ignored
+- empty section and key names are ignored (may change in a future version)
 - keys that do not belong to a section are ignored
-- comments are lines that begin with a semicolon
-- trailing comments are only allowed on section lines
+- comments are lines where the first non-whitespace character is a semicolon (`;`)
+- trailing comments are allowed on section lines, but not key/value lines
+- every entry exists on a single line, multiline is not supported
 
 Files are read on demand in one go, after which the data is kept in memory and is ready to be manipulated. Files are closed after read or write operations. This utility supports lazy writing, which only writes changes and updates and preserves custom formatting and comments. A lazy write invoked by a `write()` call will read the output file, find which changes have been made, and update the file accordingly. If performance is a strong issue and/or you only need to generate files, use `generate()` instead.
 
