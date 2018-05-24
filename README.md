@@ -1,6 +1,6 @@
 # mINI
 
-v0.9.1
+v0.9.2
 
 ## Status
 
@@ -8,7 +8,6 @@ This library is still in development and is not yet production ready! Getting th
 
 **Known bugs:**
 - Creating keys containing the `=` character will break the parser upon reading back (read/write will be implemented with escape characters in a future version)
-- `write()` data to an empty file will start at line 1 instead of 0
 - Read/write with empty section and key names has inconsistent behavior - read ignores it while write allows it.
 
 ## Info
@@ -152,10 +151,10 @@ key1 = value1
 There are two ways to read data from the INI structure. You can either use the `[]` operator or the `get()` function:
 
 ```C++
-// read values. if key doesn't exist, it will be created
+// read value - if key doesn't exist, it will be created
 std::string& value = ini["section"]["key"];
 
-// read values safely - if key doesn't exist it will NOT be created
+// read value safely - if key doesn't exist it will NOT be created
 std::string value = ini.get("section").get("key");
 ```
 
@@ -163,8 +162,7 @@ The difference between `[]` and `get()` operations is that `[]` returns a refere
 
 You can combine usage of `[]` and `get()`:
 ```C++
-// will get a copy of the section and retreive a key from that copy
-// (or create a new one in that copy)
+// will get a copy of the section and create or retreive a key from that copy
 // technically a better way to read data safely than .get().get() since it only
 // copies data once; does not create new keys in actual data
 ini.get("section")["key"];

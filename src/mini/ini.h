@@ -23,7 +23,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  /mINI/ v0.9.1
+//  /mINI/ v0.9.2
 //  An INI file reader and writer for the modern age.
 //
 ///////////////////////////////////////////////////////////////////////////////
@@ -245,7 +245,7 @@ namespace mINI
 			PDATA_UNKNOWN
 		};
 
-		PDataType parseLine(std::string line, T_ParseValues& parseData)
+		inline PDataType parseLine(std::string line, T_ParseValues& parseData)
 		{
 			parseData.first.clear();
 			parseData.second.clear();
@@ -311,6 +311,10 @@ namespace mINI
 			fileReadStream.read(&fileContents[0], fileSize);
 			fileReadStream.close();
 			T_LineData output;
+			if (fileSize == 0)
+			{
+				return output;
+			}
 			std::string buffer;
 			buffer.reserve(50);
 			for (std::size_t i = 0; i < fileSize; ++i)
@@ -488,6 +492,7 @@ namespace mINI
 							continueToNextSection = false;
 							discardNextEmpty = false;
 							output.emplace_back(*line);
+							lastKeyLine = output.size();
 						}
 						else
 						{
@@ -495,7 +500,6 @@ namespace mINI
 							discardNextEmpty = true;
 							continue;
 						}
-						lastKeyLine = output.size();
 					}
 					else if (parseResult == INIParser::PDATA_KEYVALUE)
 					{
@@ -581,7 +585,6 @@ namespace mINI
 					}
 				}
 			}
-
 			for (auto const& it : data)
 			{
 				auto const& section = it.first;
