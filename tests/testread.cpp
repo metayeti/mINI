@@ -216,8 +216,8 @@ const T_INIFileData testDataEdgeCase7 = {
 	"data11.ini",
 	// test data
 	{
-		"[]",           // expected: ignored
-		"key1=value1",  // expected: ignored
+		"[]",
+		"key1=value1",
 		"[a]",
 		"key2=value2"
 	}
@@ -229,7 +229,7 @@ const T_INIFileData testDataEdgeCase8 = {
 	// test data
 	{
 		"[a]",
-		"=1"   // expected: ignored
+		"=1"
 	}
 };
 
@@ -359,7 +359,9 @@ const lest::test mINI_tests[] = {
 		mINI::INIFile file(filename);
 		mINI::INIStructure ini;
 		EXPECT(file.read(ini) == true);
-		EXPECT(ini.size() == 1u);
+		EXPECT(ini.size() == 2u);
+		EXPECT(ini.get("").size() == 1u);
+		EXPECT(ini.get("").get("key1") == "value1");
 		EXPECT(ini.get("a").size() == 1u);
 		EXPECT(ini["a"]["key2"] == "value2");
 	},
@@ -370,7 +372,8 @@ const lest::test mINI_tests[] = {
 		mINI::INIStructure ini;
 		EXPECT(file.read(ini) == true);
 		EXPECT(ini.size() == 1u);
-		EXPECT(ini.get("a").size() == 0u);
+		EXPECT(ini.get("a").size() == 1u);
+		EXPECT(ini["a"][""] == "1");
 	}
 };
 

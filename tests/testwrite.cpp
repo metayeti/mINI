@@ -252,7 +252,7 @@ const T_INIFileData testDataRemSection {
 	{
 		"[section]",
 		"data1=A",
-		"data2=B"		
+		"data2=B"
 	},
 	// expected result
 	{
@@ -372,6 +372,27 @@ const T_INIFileData testDataManyEmptySections {
 		"key=value",
 		"[section4]",
 		"[section5]"
+	}
+};
+
+const T_INIFileData testDataEmptyNames {
+	// filename
+	"data12.ini",
+	// original data
+	{
+		"[]",
+		"key=value",
+		"key2=value2",
+		"[section]",
+		"=value"
+	},
+	// expected result
+	{
+		"[]",
+		"key=value2",
+		"=value3",
+		"[section]",
+		"=value2"
 	}
 };
 
@@ -538,6 +559,23 @@ const lest::test mINI_tests[] = {
 		EXPECT(file.write(ini) == true);
 		// verify data
 		EXPECT(verifyData(testDataManyEmptySections));
+	},
+	CASE("Test: Write with empty section and key names")
+	{
+		auto const& filename = std::get<0>(testDataEmptyNames);
+		// read from file
+		mINI::INIFile file(filename);
+		mINI::INIStructure ini;
+		EXPECT(file.read(ini) == true);
+		// update data
+		ini[""]["key"] = "value2";
+		EXPECT(ini[""].remove("key2") == true);
+		ini[""][""] = "value3";
+		ini["section"][""] = "value2";
+		// write to file
+		EXPECT(file.write(ini) == true);
+		// verify data
+		EXPECT(verifyData(testDataEmptyNames));
 	}
 };
 
@@ -554,6 +592,7 @@ int main(int argc, char** argv)
 	writeTestFile(testDataEmptyFile);
 	writeTestFile(testDataEmptySection);
 	writeTestFile(testDataManyEmptySections);
+	writeTestFile(testDataEmptyNames);
 
 	// run tests
 	if (int failures = lest::run(mINI_tests, argc, argv))

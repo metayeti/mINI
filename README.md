@@ -1,6 +1,6 @@
 # mINI
 
-v0.9.2
+v0.9.3
 
 ## Status
 
@@ -8,7 +8,6 @@ This library is still in development and is not yet production ready! Getting th
 
 **Known bugs:**
 - Creating keys containing the `=` character will break the parser upon reading back (read/write will be implemented with escape characters in a future version)
-- Read/write with empty section and key names has inconsistent behavior - read ignores it while write allows it.
 
 ## Info
 
@@ -17,7 +16,7 @@ This is a tiny C++ utility library for manipulating INI files.
 It conforms to the following format:
 - section and key names are case insensitive
 - whitespace around sections, keys and values is ignored
-- empty section and key names are ignored (may change in a future version)
+- empty section and key names are allowed
 - keys that do not belong to a section are ignored
 - comments are lines where the first non-whitespace character is a semicolon (`;`)
 - trailing comments are allowed on section lines, but not key/value lines

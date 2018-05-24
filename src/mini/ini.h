@@ -23,7 +23,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  /mINI/ v0.9.2
+//  /mINI/ v0.9.3
 //  An INI file reader and writer for the modern age.
 //
 ///////////////////////////////////////////////////////////////////////////////
@@ -266,11 +266,8 @@ namespace mINI
 				{
 					auto section = line.substr(1, closingBracketAt - 1);
 					INIStringUtil::Trim(section);
-					if (!section.empty())
-					{
-						parseData.first = section;
-						return PDATA_SECTION;
-					}
+					parseData.first = section;
+					return PDATA_SECTION;
 				}
 			}
 			auto equalsAt = line.find_first_of('=');
@@ -278,14 +275,11 @@ namespace mINI
 			{
 				auto key = line.substr(0, equalsAt);
 				INIStringUtil::Trim(key);
-				if (key.length() > 0)
-				{
-					auto value = line.substr(equalsAt + 1);
-					INIStringUtil::Trim(value);
-					parseData.first = key;
-					parseData.second = value;
-					return PDATA_KEYVALUE;
-				}
+				auto value = line.substr(equalsAt + 1);
+				INIStringUtil::Trim(value);
+				parseData.first = key;
+				parseData.second = value;
+				return PDATA_KEYVALUE;
 			}
 			return PDATA_UNKNOWN;
 		}

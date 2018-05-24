@@ -124,6 +124,18 @@ const T_INIFileData testDataPrettyPrint = {
 	}
 };
 
+const T_INIFileData testDataEmptyNames = {
+	// filename
+	"data07.ini",
+	// expected result
+	{
+		"[]",
+		"key=value",
+		"[section]",
+		"=value"
+	}
+};
+
 //
 // test cases
 //
@@ -197,6 +209,16 @@ const lest::test mINI_tests[] = {
 		ini["section2"]["key1"] = "value1";
 		EXPECT(file.generate(ini, true) == true);
 		EXPECT(verifyData(testDataPrettyPrint));
+	},
+	CASE("Test: Generate empty section and key names")
+	{
+		std::string const& filename = testDataEmptyNames.first;
+		mINI::INIFile file(filename);
+		mINI::INIStructure ini;
+		ini[""]["key"] = "value";
+		ini["section"][""] = "value";
+		EXPECT(file.generate(ini) == true);
+		EXPECT(verifyData(testDataEmptyNames));
 	}
 };
 
