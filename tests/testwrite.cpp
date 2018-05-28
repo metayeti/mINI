@@ -439,6 +439,21 @@ const T_INIFileData testDataConsecutiveWrites {
 	}
 };
 
+const T_INIFileData testDataEmptyValues {
+	// filename
+	"data16.ini",
+	// original data
+	{
+		"[section]",
+		"key=value"
+	},
+	// expected result
+	{
+		"[section]",
+		"key="
+	}
+};
+
 //
 // test cases
 //
@@ -682,6 +697,20 @@ const lest::test mINI_tests[] = {
 		}
 		// verify data
 		EXPECT(verifyData(testDataConsecutiveWrites));
+	},
+	CASE("Test: Empty values")
+	{
+		auto const& filename = std::get<0>(testDataEmptyValues);
+		// read from file
+		mINI::INIFile file(filename);
+		mINI::INIStructure ini;
+		EXPECT(file.read(ini) == true);
+		// update data
+		ini["section"]["key"].clear();
+		// write to file
+		EXPECT(file.write(ini) == true);
+		// verify data
+		EXPECT(verifyData(testDataEmptyValues));
 	}
 };
 
@@ -702,7 +731,8 @@ int main(int argc, char** argv)
 	writeTestFile(testDataMalformed1);
 	writeTestFile(testDataMalformed2);
 	writeTestFile(testDataConsecutiveWrites);
-
+	writeTestFile(testDataEmptyValues);
+	
 	// run tests
 	if (int failures = lest::run(mINI_tests, argc, argv))
 	{
