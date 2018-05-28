@@ -1,6 +1,6 @@
 # mINI
 
-v0.9.4
+v0.9.5
 
 ## Info
 
@@ -163,7 +163,7 @@ ini.get("section")["key"];
 // without creating an empty value when the key doesn't exist
 ini["section"].get("key");
 
-// you can chain other functions in a similar way
+// you may chain other functions in a similar way
 // the following code gets a copy of section and checks if a key exists
 ini.get("section").has("key");
 ```

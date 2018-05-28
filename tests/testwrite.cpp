@@ -403,8 +403,9 @@ const T_INIFileData testDataMalformed2 {
 		"[name]",
 		"\\====",         //  key: "="     value: "=="
 		"a\\= \\===bb",   //  key: "a= ="  value: "=bb"
-		"c\\= \\===dd",   //  key: "c= ="  value: "=dd"
-		"e\\===f="         //  key: "e="  value: "=f="
+		"e\\===f=",         //  key: "e="  value: "=f=",
+		"[other]",
+		"\\==="
 	}
 };
 
@@ -662,9 +663,10 @@ const lest::test mINI_tests[] = {
 		ini["name"].set({
 			{"=", "  ==  "},
 			{"a= =", "=bb"},
-			{"c= =", "=dd"},
 			{"e=", "  =f=  "}
 		});
+		ini["name"].remove("c= =");
+		ini["other"]["="] = "=";
 		// write to file
 		EXPECT(file.write(ini) == true);
 		// verify data

@@ -23,7 +23,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  /mINI/ v0.9.4
+//  /mINI/ v0.9.5
 //  An INI file reader and writer for the modern age.
 //
 ///////////////////////////////////////////////////////////////////////////////
@@ -620,8 +620,10 @@ namespace mINI
 				auto const& collection = it.second;
 				for (auto const& it2 : collection)
 				{
-					auto const& key = it2.first;
-					auto const& value = it2.second;
+					auto key = it2.first;
+					auto value = it2.second;
+					INIStringUtil::replace(key, "=", "\\=");
+					INIStringUtil::trim(value);
 					output.emplace_back(
 						key + ((prettyPrint) ? " = " : "=") + value
 					);

@@ -1,3 +1,6 @@
+## 0.9.5 (May 28, 2018)
+- `BUGFIX` Fixes a bug where writer would skip escaped `=` sequences for new sections.
+
 ## 0.9.4 (May 28, 2018)
 - `BUGFIX / FEATURE` Equals (`=`) characters within key names are now allowed. When writing or generating a file, key values containing the `=` characters will be escaped with the `\=` sequence. Upon reading the file back, the escape sequences will again be converted back to `=`. Values do not use escape sequences and may contain `=` characters.
 - `BUGFIX` Square bracket characters (`[` and `]`) are now valid within section names.
