@@ -136,6 +136,32 @@ const T_INIFileData testDataEmptyNames = {
 	}
 };
 
+const T_INIFileData testDataMalformed1 = {
+	// filename
+	"data08.ini",
+	// test data
+	{
+		"[[name1]",
+		"key=value",
+		"[name2]]",
+		"key=value",
+		"[[name3]]",
+		"key=value"
+	}
+};
+
+const T_INIFileData testDataMalformed2 = {
+	// filename
+	"data09.ini",
+	// test data
+	{
+		"[name]",
+		"\\===",         // key: "="   value: "="
+		"a\\= \\===b",  //  key: "a= ="  value: "=b"
+		"c\\= \\===d"  //  key: "c= ="  value: "=d"
+	}
+};
+
 //
 // test cases
 //
@@ -219,6 +245,30 @@ const lest::test mINI_tests[] = {
 		ini["section"][""] = "value";
 		EXPECT(file.generate(ini) == true);
 		EXPECT(verifyData(testDataEmptyNames));
+	},
+	CASE("Test: Generate malformed section names")
+	{
+		std::string const& filename = testDataMalformed1.first;
+		mINI::INIFile file(filename);
+		mINI::INIStructure ini;
+		ini["[name1"]["key"] = "value";
+		ini["name2]"]["key"] = "value";
+		ini["[name3]"]["key"] = "value";
+		EXPECT(file.generate(ini) == true);
+		EXPECT(verifyData(testDataMalformed1));
+	},
+	CASE("Test: Generate malformed key names")
+	{
+		std::string const& filename = testDataMalformed2.first;
+		mINI::INIFile file(filename);
+		mINI::INIStructure ini;
+		ini["name"].set({
+			{"=", "="},
+			{"a= =", "=b"},
+			{"     c= =  ", "    =d  "}
+		});
+		EXPECT(file.generate(ini) == true);
+		EXPECT(verifyData(testDataMalformed2));
 	}
 };
 

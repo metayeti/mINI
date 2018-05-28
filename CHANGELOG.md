@@ -1,3 +1,9 @@
+## 0.9.4 (May 28, 2018)
+- `BUGFIX / FEATURE` Equals (`=`) characters within key names are now allowed. When writing or generating a file, key values containing the `=` characters will be escaped with the `\=` sequence. Upon reading the file back, the escape sequences will again be converted back to `=`. Values do not use escape sequences and may contain `=` characters.
+- `BUGFIX` Square bracket characters (`[` and `]`) are now valid within section names.
+- `BUGFIX` Trailing comments on section lines are now parsed properly. Fixes a bug where a trailing comment containing the `]` character would break the parser.
+- `BUGFIX` Values being written or generated are now stripped of leading and trailing whitespace to conform to the specified format.
+
 ## 0.9.3 (May 24, 2018)
 - `BUGFIX` Fixes inconsistent behavior with empty section and key names where read would ignore empty names and write would allow them.
 - `FEATURE` Empty key and section names are now allowed.

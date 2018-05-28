@@ -57,7 +57,6 @@ void outputData(mINI::INIStructure const& ini)
 //
 // test data
 //
-
 const T_INIFileData testDataBasic = {
 	// filename
 	"data01.ini",
@@ -124,7 +123,7 @@ const T_INIFileData testDataNotWellFormed = {
 		"",
 		"          GARBAGE",
 		"; this is yet another comment",
-		"[      third section   ]       ",
+		"[      third section   ]      ;;; test comment[]]] ",
 		"spiders    = 25",
 		"bugs       =0    ",
 		"ants=       100",
@@ -230,6 +229,33 @@ const T_INIFileData testDataEdgeCase8 = {
 	{
 		"[a]",
 		"=1"
+	}
+};
+
+const T_INIFileData testDataMalformed1 = {
+	// filename
+	"data13.ini",
+	// test data
+	{
+		"[[name1]",
+		"key=value",
+		"[name2]]",
+		"key=value",
+		"[[name3]]",
+		"key=value"
+	}
+};
+
+const T_INIFileData testDataMalformed2 = {
+	// filename
+	"data14.ini",
+	// test data
+	{
+		"[name]",
+		"key\\==value",
+		"\\===", // expected key: "="   expected value: "="
+		"a\\= \\===b",  //  expected key: "a= ="  expected value: "=b"
+		"   c\\= \\=  =       =d "  //  expected key: "c= ="  expected value: "=d"
 	}
 };
 
@@ -374,6 +400,30 @@ const lest::test mINI_tests[] = {
 		EXPECT(ini.size() == 1u);
 		EXPECT(ini.get("a").size() == 1u);
 		EXPECT(ini["a"][""] == "1");
+	},
+	CASE("Test: Malformed case 1")
+	{
+		// read INI with malformed section names
+		auto const& filename = testDataMalformed1.first;
+		mINI::INIFile file(filename);
+		mINI::INIStructure ini;
+		EXPECT(file.read(ini) == true);
+		EXPECT(ini.size() == 3u);
+		EXPECT(ini.get("[name1").size() == 1u);
+		EXPECT(ini.get("name2]").size() == 1u);
+		EXPECT(ini.get("[name3]").size() == 1u);
+	},
+	CASE("Test: Malformed case 2")
+	{
+		// read INI with malformed key names
+		auto const& filename = testDataMalformed2.first;
+		mINI::INIFile file(filename);
+		mINI::INIStructure ini;
+		EXPECT(file.read(ini) == true);
+		EXPECT(ini.get("name").get("key=") == "value");
+		EXPECT(ini.get("name").get("=") == "=");
+		EXPECT(ini.get("name").get("a= =") == "=b");
+		EXPECT(ini.get("name").get("c= =") == "=d");
 	}
 };
 
@@ -392,7 +442,9 @@ int main(int argc, char** argv)
 	writeTestFile(testDataEdgeCase6);
 	writeTestFile(testDataEdgeCase7);
 	writeTestFile(testDataEdgeCase8);
-	
+	writeTestFile(testDataMalformed1);
+	writeTestFile(testDataMalformed2);
+
 	// run tests
 	if (int failures = lest::run(mINI_tests, argc, argv))
 	{

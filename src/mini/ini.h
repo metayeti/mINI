@@ -23,7 +23,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  /mINI/ v0.9.3
+//  /mINI/ v0.9.4
 //  An INI file reader and writer for the modern age.
 //
 ///////////////////////////////////////////////////////////////////////////////
@@ -31,17 +31,16 @@
 //  A tiny utility library for manipulating INI files with a straightforward
 //  API and a minimal footprint. It conforms to the (somewhat) standard INI
 //  format - sections and keys are case insensitive and all leading and
-//  trailing whitespace is ignored. Empty key and section names are ignored.
-//  Comments are lines that begin with a semicolon. Trailing comments are only
-//  allowed on section lines.
+//  trailing whitespace is ignored. Comments are lines that begin with a
+//  semicolon. Trailing comments are allowed on section lines.
 //
-//  Files are read on demand, after which data is kept in memory and the file
+//  Files are read on demand, upon which data is kept in memory and the file
 //  is closed. This utility supports lazy writing, which only writes changes
 //  and updates to a file and preserves custom formatting and comments. A lazy
 //  write invoked by a write() call will read the output file, find what
-//  changes have been made and update the file accordingly. If performance is
-//  a strong issue or you only need to generate files, use generate() instead.
-//  Section and key order is preserved on read and write.
+//  changes have been made and update the file accordingly. If you only need to
+//  generate files, use generate() instead. Section and key order is preserved
+//  on read, write and insert.
 //
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -97,14 +96,26 @@ namespace mINI
 	namespace INIStringUtil
 	{
 		const std::string whitespaceDelimiters = " \t\n\r\f\v";
-		inline void Trim(std::string& str)
+		inline void trim(std::string& str)
 		{
 			str.erase(str.find_last_not_of(whitespaceDelimiters) + 1);
 			str.erase(0, str.find_first_not_of(whitespaceDelimiters));
 		}
-		inline void ToLower(std::string& str)
+		inline void toLower(std::string& str)
 		{
 			std::transform(str.begin(), str.end(), str.begin(), ::tolower);
+		}
+		inline void replace(std::string& str, std::string const& a, std::string const& b)
+		{
+			if (!a.empty())
+			{
+				std::size_t pos = 0;
+				while ((pos = str.find(a, pos)) != std::string::npos)
+				{
+					str.replace(pos, a.size(), b);
+					pos += b.size();
+				}
+			}
 		}
 	};
 
@@ -147,8 +158,8 @@ namespace mINI
 
 		T& operator[](std::string key)
 		{
-			INIStringUtil::Trim(key);
-			INIStringUtil::ToLower(key);
+			INIStringUtil::trim(key);
+			INIStringUtil::toLower(key);
 			auto it = dataIndexMap.find(key);
 			bool hasIt = (it != dataIndexMap.end());
 			std::size_t index = (hasIt) ? it->second : setEmpty(key);
@@ -156,8 +167,8 @@ namespace mINI
 		}
 		T get(std::string key) const
 		{
-			INIStringUtil::Trim(key);
-			INIStringUtil::ToLower(key);
+			INIStringUtil::trim(key);
+			INIStringUtil::toLower(key);
 			auto it = dataIndexMap.find(key);
 			if (it == dataIndexMap.end())
 			{
@@ -167,14 +178,14 @@ namespace mINI
 		}
 		bool has(std::string key) const
 		{
-			INIStringUtil::Trim(key);
-			INIStringUtil::ToLower(key);
+			INIStringUtil::trim(key);
+			INIStringUtil::toLower(key);
 			return (dataIndexMap.count(key) == 1);
 		}
 		void set(std::string key, T obj)
 		{
-			INIStringUtil::Trim(key);
-			INIStringUtil::ToLower(key);
+			INIStringUtil::trim(key);
+			INIStringUtil::toLower(key);
 			auto it = dataIndexMap.find(key);
 			if (it != dataIndexMap.end())
 			{
@@ -197,8 +208,8 @@ namespace mINI
 		}
 		bool remove(std::string key)
 		{
-			INIStringUtil::Trim(key);
-			INIStringUtil::ToLower(key);
+			INIStringUtil::trim(key);
+			INIStringUtil::toLower(key);
 			auto it = dataIndexMap.find(key);
 			if (it != dataIndexMap.end())
 			{
@@ -249,7 +260,7 @@ namespace mINI
 		{
 			parseData.first.clear();
 			parseData.second.clear();
-			INIStringUtil::Trim(line);
+			INIStringUtil::trim(line);
 			if (line.empty())
 			{
 				return PDATA_NONE;
@@ -261,22 +272,30 @@ namespace mINI
 			}
 			if (firstCharacter == '[')
 			{
-				auto closingBracketAt = line.find_first_of(']');
+				auto commentAt = line.find_first_of(';');
+				if (commentAt != std::string::npos)
+				{
+					line = line.substr(0, commentAt);
+				}
+				auto closingBracketAt = line.find_last_of(']');
 				if (closingBracketAt != std::string::npos)
 				{
 					auto section = line.substr(1, closingBracketAt - 1);
-					INIStringUtil::Trim(section);
+					INIStringUtil::trim(section);
 					parseData.first = section;
 					return PDATA_SECTION;
 				}
 			}
-			auto equalsAt = line.find_first_of('=');
+			auto lineNorm = line;
+			INIStringUtil::replace(lineNorm, "\\=", "  ");
+			auto equalsAt = lineNorm.find_first_of('=');
 			if (equalsAt != std::string::npos)
 			{
 				auto key = line.substr(0, equalsAt);
-				INIStringUtil::Trim(key);
+				INIStringUtil::trim(key);
+				INIStringUtil::replace(key, "\\=", "=");
 				auto value = line.substr(equalsAt + 1);
-				INIStringUtil::Trim(value);
+				INIStringUtil::trim(value);
 				parseData.first = key;
 				parseData.second = value;
 				return PDATA_KEYVALUE;
@@ -420,8 +439,10 @@ namespace mINI
 					auto it2 = collection.begin();
 					for (;;)
 					{
-						auto const& key = it2->first;
-						auto const& value = it2->second;
+						auto key = it2->first;
+						INIStringUtil::replace(key, "=", "\\=");
+						auto value = it2->second;
+						INIStringUtil::trim(value);
 						fileWriteStream
 							<< key
 							<< ((prettyPrint) ? " = " : "=")
@@ -508,15 +529,18 @@ namespace mINI
 							auto const& value = parseData.second;
 							if (collection.has(key))
 							{
-								auto& outputValue = collection[key];
+								auto outputValue = collection[key];
 								if (value == outputValue)
 								{
 									output.emplace_back(*line);
 								}
 								else
 								{
-									auto equalsAt = line->find_first_of('=');
-									auto valueAt = line->find_first_not_of(
+									INIStringUtil::trim(outputValue);
+									auto lineNorm = *line;
+									INIStringUtil::replace(lineNorm, "\\=", "  ");
+									auto equalsAt = lineNorm.find_first_of('=');
+									auto valueAt = lineNorm.find_first_not_of(
 										INIStringUtil::whitespaceDelimiters,
 										equalsAt + 1
 									);
@@ -553,12 +577,14 @@ namespace mINI
 						auto const& collectionOriginal = original[sectionCurrent];
 						for (auto const& it : collection)
 						{
-							auto const& key = it.first;
+							auto key = it.first;
 							if (collectionOriginal.has(key))
 							{
 								continue;
 							}
-							auto const& value = it.second;
+							auto value = it.second;
+							INIStringUtil::replace(key, "=", "\\=");
+							INIStringUtil::trim(value);
 							linesToAdd.emplace_back(
 								key + ((prettyPrint) ? " = " : "=") + value
 							);

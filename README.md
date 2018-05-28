@@ -1,17 +1,10 @@
 # mINI
 
-v0.9.3
-
-## Status
-
-This library is still in development and is not yet production ready! Getting there...
-
-**Known bugs:**
-- Creating keys containing the `=` character will break the parser upon reading back (read/write will be implemented with escape characters in a future version)
+v0.9.4
 
 ## Info
 
-This is a tiny C++ utility library for manipulating INI files.
+This is a tiny, header only C++ library for manipulating INI files.
 
 It conforms to the following format:
 - section and key names are case insensitive
@@ -20,9 +13,9 @@ It conforms to the following format:
 - keys that do not belong to a section are ignored
 - comments are lines where the first non-whitespace character is a semicolon (`;`)
 - trailing comments are allowed on section lines, but not key/value lines
-- every entry exists on a single line, multiline is not supported
+- every entry exists on a single line and multiline is not supported
 
-Files are read on demand in one go, after which the data is kept in memory and is ready to be manipulated. Files are closed after read or write operations. This utility supports lazy writing, which only writes changes and updates and preserves custom formatting and comments. A lazy write invoked by a `write()` call will read the output file, find which changes have been made, and update the file accordingly. If performance is a strong issue and/or you only need to generate files, use `generate()` instead.
+Files are read on demand in one go, after which the data is kept in memory and is ready to be manipulated. Files are closed after read or write operations. This utility supports lazy writing, which only writes changes and updates and preserves custom formatting and comments. A lazy write invoked by a `write()` call will read the output file, find which changes have been made, and update the file accordingly. If you only need to generate files, use `generate()` instead.
 
 Section and key order is preserved on read and write operations. Iterating through data will take the same order as the original file or the order in which keys were added to the structure.
 
@@ -38,7 +31,7 @@ This is a header-only library. To install it, just copy everything in `/src/` in
 
 You're good to go!
 
-## Minimal example
+## Basic example
 
 Start with an INI file named `myfile.ini`:
 ```INI

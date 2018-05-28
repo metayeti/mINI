@@ -198,37 +198,6 @@ const T_INIFileData testDataWithGarbage {
 	}
 };
 
-const T_INIFileData testDataFormatted {
-	// filename
-	"data03.ini",
-	// original data
-	{
-		"[ Food ]",
-		"Cheese = 32",
-		"Ice Cream = 64",
-		"Bananas = 128",
-		"",
-		"[  Things  ]",
-		"Scissors   = AAA",
-		"Wooden Box = BBB",
-		"Speakers   = CCC"
-	},
-	// expected result
-	{
-		"[ Food ]",
-		"Cheese = AAA",
-		"Ice Cream = BBB"
-		"Bananas = CCC",
-		"soup=DDD",
-		"",
-		"[  Things  ]",
-		"Scissors   = 32",
-		"Wooden Box = 64",
-		"Speakers   = 128",
-		"book=256"
-	}
-};
-
 const T_INIFileData testDataRemEntry {
 	// filename
 	"data04.ini",
@@ -393,6 +362,80 @@ const T_INIFileData testDataEmptyNames {
 		"=value3",
 		"[section]",
 		"=value2"
+	}
+};
+
+const T_INIFileData testDataMalformed1 {
+	// filename
+	"data13.ini",
+	// original data
+	{
+		"[[name1]",
+		"key=value",
+		"[name2]]",
+		"key=value",
+		"[[name3]]",
+		"key=value"
+	},
+	// expected result
+	{
+		"[[name1]",
+		"key=value1",
+		"[name2]]",
+		"key=value2",
+		"[[name3]]",
+		"key=value3"
+	}
+};
+
+const T_INIFileData testDataMalformed2 {
+	// filename
+	"data14.ini",
+	// original data
+	{
+		"[name]",
+		"\\===",         //  key: "="     value: "="
+		"a\\= \\===b",   //  key: "a= ="  value: "=b"
+		"c\\= \\===d"    //  key: "c= ="  value: "=d"
+	},
+	// expected result
+	{
+		"[name]",
+		"\\====",         //  key: "="     value: "=="
+		"a\\= \\===bb",   //  key: "a= ="  value: "=bb"
+		"c\\= \\===dd",   //  key: "c= ="  value: "=dd"
+		"e\\===f="         //  key: "e="  value: "=f="
+	}
+};
+
+const T_INIFileData testDataConsecutiveWrites {
+	// filename
+	"data15.ini",
+	// original data
+	{
+		"[ Food ]",
+		"Cheese = 32",
+		"Ice Cream = 64",
+		"Bananas = 128",
+		"",
+		"[  Things  ]",
+		"Scissors   = AAA",
+		"Wooden Box = BBB",
+		"Speakers   = CCC"
+	},
+	// expected result
+	{
+		"[ Food ]",
+		"Cheese = AAA",
+		"Ice Cream = BBB",
+		"Bananas = CCC",
+		"soup=DDD",
+		"",
+		"[  Things  ]",
+		"Scissors   = 32",
+		"Wooden Box = 64",
+		"Speakers   = 128",
+		"book=256"
 	}
 };
 
@@ -576,6 +619,69 @@ const lest::test mINI_tests[] = {
 		EXPECT(file.write(ini) == true);
 		// verify data
 		EXPECT(verifyData(testDataEmptyNames));
+	},
+	CASE("Test: Write malformed section names")
+	{
+		auto const& filename = std::get<0>(testDataMalformed1);
+		// read from file
+		mINI::INIFile file(filename);
+		mINI::INIStructure ini;
+		EXPECT(file.read(ini) == true);
+		// update data
+		ini["[name1"]["key"] = "value1";
+		ini["name2]"]["key"] = "value2";
+		ini["[name3]"]["key"] = "value3";
+		// write to file
+		EXPECT(file.write(ini) == true);
+		// verify data
+		EXPECT(verifyData(testDataMalformed1));
+	},
+	CASE("Test: Write malformed key names")
+	{
+		auto const& filename = std::get<0>(testDataMalformed2);
+		// read from file
+		mINI::INIFile file(filename);
+		mINI::INIStructure ini;
+		EXPECT(file.read(ini) == true);
+		// update data
+		ini["name"].set({
+			{"=", "  ==  "},
+			{"a= =", "=bb"},
+			{"c= =", "=dd"},
+			{"e=", "  =f=  "}
+		});
+		// write to file
+		EXPECT(file.write(ini) == true);
+		// verify data
+		EXPECT(verifyData(testDataMalformed2));
+	},
+	CASE("Test: Consecutive writes")
+	{
+		auto const& filename = std::get<0>(testDataConsecutiveWrites);
+		// read from file
+		mINI::INIFile file(filename);
+		mINI::INIStructure ini;
+		EXPECT(file.read(ini) == true);
+		// update data
+		ini["food"].set({
+			{"cheese", "AAA"},
+			{"ice cream", "BBB"},
+			{"bananas", "CCC"},
+			{"soup", "DDD"}
+		});
+		ini["things"].set({
+			{"scissors", "32"},
+			{"wooden box", "64"},
+			{"   speakers  ", "  128   "},
+			{"  book  ", "  256  "}
+		});
+		// write to file multiple times
+		for (unsigned int i = 0; i < 10; ++i)
+		{
+			EXPECT(file.write(ini) == true);
+		}
+		// verify data
+		EXPECT(verifyData(testDataConsecutiveWrites));
 	}
 };
 
@@ -593,6 +699,9 @@ int main(int argc, char** argv)
 	writeTestFile(testDataEmptySection);
 	writeTestFile(testDataManyEmptySections);
 	writeTestFile(testDataEmptyNames);
+	writeTestFile(testDataMalformed1);
+	writeTestFile(testDataMalformed2);
+	writeTestFile(testDataConsecutiveWrites);
 
 	// run tests
 	if (int failures = lest::run(mINI_tests, argc, argv))
