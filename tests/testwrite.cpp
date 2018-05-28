@@ -358,10 +358,12 @@ const T_INIFileData testDataEmptyNames {
 	// expected result
 	{
 		"[]",
-		"key=value2",
+		"key=",
 		"=value3",
 		"[section]",
-		"=value2"
+		"=value2",
+		"[section2]",
+		"="
 	}
 };
 
@@ -627,10 +629,11 @@ const lest::test mINI_tests[] = {
 		mINI::INIStructure ini;
 		EXPECT(file.read(ini) == true);
 		// update data
-		ini[""]["key"] = "value2";
+		ini[""]["key"] = "";
 		EXPECT(ini[""].remove("key2") == true);
 		ini[""][""] = "value3";
 		ini["section"][""] = "value2";
+		ini["section2"][""] = "";
 		// write to file
 		EXPECT(file.write(ini) == true);
 		// verify data

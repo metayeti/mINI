@@ -132,7 +132,9 @@ const T_INIFileData testDataEmptyNames = {
 		"[]",
 		"key=value",
 		"[section]",
-		"=value"
+		"=value",
+		"[section2]",
+		"="
 	}
 };
 
@@ -243,6 +245,7 @@ const lest::test mINI_tests[] = {
 		mINI::INIStructure ini;
 		ini[""]["key"] = "value";
 		ini["section"][""] = "value";
+		ini["section2"][""] = "";
 		EXPECT(file.generate(ini) == true);
 		EXPECT(verifyData(testDataEmptyNames));
 	},
