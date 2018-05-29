@@ -1,3 +1,7 @@
+## 0.9.6 (May 30, 2018)
+- `BUGFIX` Changed how files are written / generated. Proper line endings are selected depending on the system.
+- `FEATURE` Support UTF-8 encoding.
+
 ## 0.9.5 (May 28, 2018)
 - `BUGFIX` Fixes a bug where writer would skip escaped `=` sequences for new sections.
 

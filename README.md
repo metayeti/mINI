@@ -1,6 +1,6 @@
 # mINI
 
-v0.9.5
+v0.9.6
 
 ## Info
 
@@ -19,7 +19,7 @@ Files are read on demand in one go, after which the data is kept in memory and i
 
 Section and key order is preserved on read and write operations. Iterating through data will take the same order as the original file or the order in which keys were added to the structure.
 
-This library operates with the `std::string` type to hold values and relies on your host environment for encoding.
+This library operates with the `std::string` type to hold values and relies on your host environment for encoding. It should play nicely with UTF-8 but your mileage may vary.
 
 ## Installation
 
