@@ -23,7 +23,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  /mINI/ v0.9.5
+//  /mINI/ v0.9.5+
 //  An INI file reader and writer for the modern age.
 //
 ///////////////////////////////////////////////////////////////////////////////
@@ -247,7 +247,7 @@ namespace mINI
 	{
 		using T_ParseValues = std::pair<std::string, std::string>;
 
-		enum PDataType
+		enum class PDataType : char
 		{
 			PDATA_NONE,
 			PDATA_COMMENT,
@@ -263,12 +263,12 @@ namespace mINI
 			INIStringUtil::trim(line);
 			if (line.empty())
 			{
-				return PDATA_NONE;
+				return PDataType::PDATA_NONE;
 			}
 			char firstCharacter = line[0];
 			if (firstCharacter == ';')
 			{
-				return PDATA_COMMENT;
+				return PDataType::PDATA_COMMENT;
 			}
 			if (firstCharacter == '[')
 			{
@@ -283,7 +283,7 @@ namespace mINI
 					auto section = line.substr(1, closingBracketAt - 1);
 					INIStringUtil::trim(section);
 					parseData.first = section;
-					return PDATA_SECTION;
+					return PDataType::PDATA_SECTION;
 				}
 			}
 			auto lineNorm = line;
@@ -298,9 +298,9 @@ namespace mINI
 				INIStringUtil::trim(value);
 				parseData.first = key;
 				parseData.second = value;
-				return PDATA_KEYVALUE;
+				return PDataType::PDATA_KEYVALUE;
 			}
-			return PDATA_UNKNOWN;
+			return PDataType::PDATA_UNKNOWN;
 		}
 	};
 
@@ -372,20 +372,20 @@ namespace mINI
 			for (auto const& line : fileLines)
 			{
 				auto parseResult = INIParser::parseLine(line, parseData);
-				if (parseResult == INIParser::PDATA_SECTION)
+				if (parseResult == INIParser::PDataType::PDATA_SECTION)
 				{
 					inSection = true;
 					data[section = parseData.first];
 				}
-				else if (inSection && parseResult == INIParser::PDATA_KEYVALUE)
+				else if (inSection && parseResult == INIParser::PDataType::PDATA_KEYVALUE)
 				{
 					auto const& key = parseData.first;
 					auto const& value = parseData.second;
 					data[section][key] = value;
 				}
-				if (lineData && parseResult != INIParser::PDATA_UNKNOWN)
+				if (lineData && parseResult != INIParser::PDataType::PDATA_UNKNOWN)
 				{
-					if (parseResult == INIParser::PDATA_KEYVALUE && !inSection)
+					if (parseResult == INIParser::PDataType::PDATA_KEYVALUE && !inSection)
 					{
 						continue;
 					}
@@ -410,7 +410,7 @@ namespace mINI
 
 		INIGenerator(std::string const& filename)
 		{
-			fileWriteStream.open(filename, std::ios::out);
+			fileWriteStream.open(filename, std::ios::out | std::ios::binary);
 		}
 		~INIGenerator() { }
 
@@ -491,7 +491,7 @@ namespace mINI
 				if (!writeNewKeys)
 				{
 					auto parseResult = INIParser::parseLine(*line, parseData);
-					if (parseResult == INIParser::PDATA_SECTION)
+					if (parseResult == INIParser::PDataType::PDATA_SECTION)
 					{
 						if (parsingSection)
 						{
@@ -516,7 +516,7 @@ namespace mINI
 							continue;
 						}
 					}
-					else if (parseResult == INIParser::PDATA_KEYVALUE)
+					else if (parseResult == INIParser::PDataType::PDATA_KEYVALUE)
 					{
 						if (continueToNextSection)
 						{
@@ -562,7 +562,7 @@ namespace mINI
 						{
 							discardNextEmpty = false;
 						}
-						else if (parseResult != INIParser::PDATA_UNKNOWN)
+						else if (parseResult != INIParser::PDataType::PDATA_UNKNOWN)
 						{
 							output.emplace_back(*line);
 						}
@@ -666,7 +666,7 @@ namespace mINI
 				return false;
 			}
 			T_LineData output = getLazyOutput(lineData, data, originalData);
-			std::ofstream fileWriteStream(filename, std::ios::out);
+			std::ofstream fileWriteStream(filename, std::ios::out | std::ios::binary);
 			if (fileWriteStream.is_open())
 			{
 				if (output.size())
