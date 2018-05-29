@@ -117,6 +117,11 @@ namespace mINI
 				}
 			}
 		}
+#ifdef _WIN32
+		const std::string endl = "\r\n";
+#else
+		const std::string endl = "\n";
+#endif
 	};
 
 	template<typename T>
@@ -435,7 +440,7 @@ namespace mINI
 					<< "]";
 				if (collection.size())
 				{
-					fileWriteStream << std::endl;
+					fileWriteStream << INIStringUtil::endl;
 					auto it2 = collection.begin();
 					for (;;)
 					{
@@ -451,17 +456,17 @@ namespace mINI
 						{
 							break;
 						}
-						fileWriteStream << std::endl;
+						fileWriteStream << INIStringUtil::endl;
 					}
 				}
 				if (++it == data.end())
 				{
 					break;
 				}
-				fileWriteStream << std::endl;
+				fileWriteStream << INIStringUtil::endl;
 				if (prettyPrint)
 				{
-					fileWriteStream << std::endl;
+					fileWriteStream << INIStringUtil::endl;
 				}
 			}
 			return true;
@@ -679,7 +684,7 @@ namespace mINI
 						{
 							break;
 						}
-						fileWriteStream << std::endl;
+						fileWriteStream << INIStringUtil::endl;
 					}
 				}
 				return true;
