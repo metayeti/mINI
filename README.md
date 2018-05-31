@@ -152,7 +152,7 @@ std::string value = ini.get("section").get("key");
 
 The difference between `[]` and `get()` operations is that `[]` returns a reference to **real** data that you may modify and creates a new item automatically if it does not yet exist, whereas `get()` returns a **copy** of the data and does not create new items. Use `has()` before doing any operations with `[]` if you wish to avoid altering the structure.
 
-You can combine usage of `[]` and `get()`:
+You may combine usage of `[]` and `get()`:
 ```C++
 // will get a copy of the section and create or retreive a key from that copy
 // technically a better way to read data safely than .get().get() since it only
@@ -168,12 +168,16 @@ ini["section"].get("key");
 ini.get("section").has("key");
 ```
 
+Section and key names are case insensitive and are stripped of leading and trailing whitespace. `ini["section"]` is the same as `ini["SECTION"]` is the same as `ini["   sEcTiOn   "]` and so on, and same for keys. Generated files always use lower case for section and key names. Writing to an existing file will preserve letter cases of the original file whenever those keys or sections already exists.
+
 ### Updating data
 
 To set or update a value:
 ```C++
 ini["section"]["key"] = "value";
 ```
+
+Note that when writing to a file, values will be stripped of leading and trailing whitespace . For example, the following value will be converted to just `"c"` when reading back from a file: `ini["a"]["b"] = "   c   ";`
 
 You can set multiple values at once by using `set()`:
 ```C++
@@ -186,6 +190,11 @@ ini["section"].set({
 To create an empty section, simply do:
 ```C++
 ini["section"];
+```
+
+Similarly, to create an empty key:
+```C++
+ini["section"]["key"];
 ```
 
 To remove a single key from a section:
@@ -229,6 +238,8 @@ To get the number of sections in the structure:
 ```C++
 size_t n_sections = ini.size();
 ```
+
+### Nitty-gritty
 
 Keep in mind that `[]` will always create a new item if the item does not already exist! You can use `has()` to check if an item exists before performing further operations. Remember that `get()` will return a copy of data, so you should **not** be doing removes or updates to data with it!
 
