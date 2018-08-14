@@ -1,6 +1,6 @@
 # mINI
 
-v0.9.6
+v0.9.7
 
 ## Info
 
@@ -143,14 +143,16 @@ key1 = value1
 There are two ways to read data from the INI structure. You can either use the `[]` operator or the `get()` function:
 
 ```C++
-// read value - if key doesn't exist, it will be created
+// read value - if key or section don't exist, they will be created
+// returns reference to real value
 std::string& value = ini["section"]["key"];
 
-// read value safely - if key doesn't exist it will NOT be created
+// read value safely - if key or section don't exist they will NOT be created
+// returns a copy
 std::string value = ini.get("section").get("key");
 ```
 
-The difference between `[]` and `get()` operations is that `[]` returns a reference to **real** data that you may modify and creates a new item automatically if it does not yet exist, whereas `get()` returns a **copy** of the data and does not create new items. Use `has()` before doing any operations with `[]` if you wish to avoid altering the structure.
+The difference between `[]` and `get()` operations is that `[]` returns a reference to **real** data that you may modify and creates a new item automatically if it does not yet exist, whereas `get()` returns a **copy** of the data and does not create new items in the structure. Use `has()` before doing any operations with `[]` if you wish to avoid altering the structure.
 
 You may combine usage of `[]` and `get()`:
 ```C++
@@ -281,7 +283,31 @@ for (auto const& it : ini)
 
 `it.second` is an object which is either a `mINI::INIMap` type on the first level or `std::string` type on the second level.
 
-Iterators are only meant for traversing data and can't be used to manipulate data - for this purpose the API only exposes a `const_iterator`.
+The API only exposes a `const_iterator`, so you can't use iterators to manipulate data directly. You can however access the structure as normal while iterating:
+
+```C++
+// change all values in the structure to "banana"
+for (auto const& it : ini)
+{
+	auto const& section = it.first;
+	auto const& collection = it.second;
+	for (auto const& it2 : collection)
+	{
+		auto const& key = it2.first;
+		ini[section][key] = "banana";
+	}
+}
+```
+
+## Case sensitivity
+
+If you wish to make the library not ignore letter case, add the directive `#define MINI_CASE_SENSITIVE` **before** including the library:
+```C++
+#define MINI_CASE_SENSITIVE
+#include "mini/ini.h"
+```
+
+This will affect reading and writing from files and access to the structure.
 
 ## Thanks
 

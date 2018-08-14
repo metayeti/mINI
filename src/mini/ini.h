@@ -23,7 +23,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  /mINI/ v0.9.6
+//  /mINI/ v0.9.7
 //  An INI file reader and writer for the modern age.
 //
 ///////////////////////////////////////////////////////////////////////////////
@@ -51,10 +51,12 @@
 //  mINI::INIStructure ini;
 //  file.read(ini);
 //
-//  /* read values. if key doesn't exist it will be created */
-//  std::string value = ini["section"]["key"];
+//  /* read value; gets a reference to actual value in the structure.
+//     if key or section don't exist, a new empty value will be created */
+//  std::string& value = ini["section"]["key"];
 //
-//  /* read values safely. if key doesn't exist it will NOT be created */
+//  /* read value safely; gets a copy of value in the structure.
+//     does not alter the structure */
 //  std::string value = ini.get("section").get("key");
 //
 //  /* set or update values */
@@ -101,10 +103,12 @@ namespace mINI
 			str.erase(str.find_last_not_of(whitespaceDelimiters) + 1);
 			str.erase(0, str.find_first_not_of(whitespaceDelimiters));
 		}
+#ifndef MINI_CASE_SENSITIVE
 		inline void toLower(std::string& str)
 		{
 			std::transform(str.begin(), str.end(), str.begin(), ::tolower);
 		}
+#endif
 		inline void replace(std::string& str, std::string const& a, std::string const& b)
 		{
 			if (!a.empty())
@@ -164,7 +168,9 @@ namespace mINI
 		T& operator[](std::string key)
 		{
 			INIStringUtil::trim(key);
+#ifndef MINI_CASE_SENSITIVE
 			INIStringUtil::toLower(key);
+#endif
 			auto it = dataIndexMap.find(key);
 			bool hasIt = (it != dataIndexMap.end());
 			std::size_t index = (hasIt) ? it->second : setEmpty(key);
@@ -173,7 +179,9 @@ namespace mINI
 		T get(std::string key) const
 		{
 			INIStringUtil::trim(key);
+#ifndef MINI_CASE_SENSITIVE
 			INIStringUtil::toLower(key);
+#endif
 			auto it = dataIndexMap.find(key);
 			if (it == dataIndexMap.end())
 			{
@@ -184,13 +192,17 @@ namespace mINI
 		bool has(std::string key) const
 		{
 			INIStringUtil::trim(key);
+#ifndef MINI_CASE_SENSITIVE
 			INIStringUtil::toLower(key);
+#endif
 			return (dataIndexMap.count(key) == 1);
 		}
 		void set(std::string key, T obj)
 		{
 			INIStringUtil::trim(key);
+#ifndef MINI_CASE_SENSITIVE
 			INIStringUtil::toLower(key);
+#endif
 			auto it = dataIndexMap.find(key);
 			if (it != dataIndexMap.end())
 			{
@@ -214,7 +226,9 @@ namespace mINI
 		bool remove(std::string key)
 		{
 			INIStringUtil::trim(key);
+#ifndef MINI_CASE_SENSITIVE
 			INIStringUtil::toLower(key);
+#endif
 			auto it = dataIndexMap.find(key);
 			if (it != dataIndexMap.end())
 			{
