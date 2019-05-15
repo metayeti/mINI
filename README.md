@@ -15,6 +15,13 @@ It conforms to the following format:
 - trailing comments are allowed on section lines, but not key/value lines
 - every entry exists on a single line and multiline is not supported
 
+
+```
+[section]
+key = value
+```
+
+
 Files are read on demand in one go, after which the data is kept in memory and is ready to be manipulated. Files are closed after read or write operations. This utility supports lazy writing, which only writes changes and updates and preserves custom formatting and comments. A lazy write invoked by a `write()` call will read the output file, find which changes have been made, and update the file accordingly. If you only need to generate files, use `generate()` instead.
 
 Section and key order is preserved on read and write operations. Iterating through data will take the same order as the original file or the order in which keys were added to the structure.
@@ -31,7 +38,9 @@ This is a header-only library. To install it, just copy everything in `/src/` in
 
 You're good to go!
 
-## Basic example
+## Basic examples
+
+### Reading / writing
 
 Start with an INI file named `myfile.ini`:
 ```INI
@@ -72,6 +81,23 @@ After running the code, our INI file now looks like this:
 apples=20
 oranges=50
 bananas=100
+```
+
+### Generating a file
+
+```C++
+// create a file instance
+mINI::INIFile file("myfile.ini");
+
+// create a data structure
+mINI::INIStructure ini;
+
+// populate the structure
+ini["things"]["chairs"] = "20";
+ini["things"]["balloons"] = "100";
+
+// generate an INI file (overwrites any previous file)
+file.generate(ini);
 ```
 
 ## Manipulating files
@@ -154,21 +180,7 @@ std::string value = ini.get("section").get("key");
 
 The difference between `[]` and `get()` operations is that `[]` returns a reference to **real** data that you may modify and creates a new item automatically if it does not yet exist, whereas `get()` returns a **copy** of the data and does not create new items in the structure. Use `has()` before doing any operations with `[]` if you wish to avoid altering the structure.
 
-You may combine usage of `[]` and `get()`:
-```C++
-// will get a copy of the section and create or retreive a key from that copy
-// technically a better way to read data safely than .get().get() since it only
-// copies data once; does not create new keys in actual data
-ini.get("section")["key"];
-
-// if we're sure section exists and we want a copy of key if one exists
-// without creating an empty value when the key doesn't exist
-ini["section"].get("key");
-
-// you may chain other functions in a similar way
-// the following code gets a copy of section and checks if a key exists
-ini.get("section").has("key");
-```
+You may combine usage of `[]` and `get()`.
 
 Section and key names are case insensitive and are stripped of leading and trailing whitespace. `ini["section"]` is the same as `ini["SECTION"]` is the same as `ini["   sEcTiOn   "]` and so on, and same for keys. Generated files always use lower case for section and key names. Writing to an existing file will preserve letter cases of the original file whenever those keys or sections already exists.
 
@@ -289,7 +301,6 @@ The API only exposes a `const_iterator`, so you can't use iterators to manipulat
 // change all values in the structure to "banana"
 for (auto const& it : ini)
 {
-	auto const& section = it.first;
 	auto const& collection = it.second;
 	for (auto const& it2 : collection)
 	{
