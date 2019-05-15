@@ -301,6 +301,7 @@ The API only exposes a `const_iterator`, so you can't use iterators to manipulat
 // change all values in the structure to "banana"
 for (auto const& it : ini)
 {
+	auto const& section = it.first;
 	auto const& collection = it.second;
 	for (auto const& it2 : collection)
 	{
