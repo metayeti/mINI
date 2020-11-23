@@ -1,6 +1,6 @@
 # mINI
 
-v0.9.7
+v0.9.8
 
 ## Info
 
@@ -14,6 +14,8 @@ It conforms to the following format:
 - comments are lines where the first non-whitespace character is a semicolon (`;`)
 - trailing comments are allowed on section lines, but not key/value lines
 - every entry exists on a single line and multiline is not supported
+
+This library has been tested in the GCC 4.8.5
 
 
 ```
