@@ -1,3 +1,6 @@
+## 0.9.8 (February 14, 2021)
+- `BUGFIX` Avoid C4244 warning. ([#2](https://github.com/pulzed/mINI/pull/2))
+
 ## 0.9.7 (August 14, 2018)
 - `FEATURE` Add case sensitivity toggle via a macro definition.
 
