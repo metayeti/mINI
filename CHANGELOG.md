@@ -1,5 +1,8 @@
-## 0.9.8 (November 23, 2020)
+## 0.9.9 (Febuary 17, 2021)
 - `FEATURE` Made some changes to add compatibility to GCC 4.8.5.
+
+## 0.9.8 (February 14, 2021)
+- `BUGFIX` Avoid C4244 warning. ([#2](https://github.com/pulzed/mINI/pull/2))
 
 ## 0.9.7 (August 14, 2018)
 - `FEATURE` Add case sensitivity toggle via a macro definition.
