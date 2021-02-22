@@ -1,8 +1,11 @@
+## 0.9.9 (February 22, 2021)
+- `BUGFIX` Adds missing cctype header. ([#4](https://github.com/pulzed/mINI/pull/4))
+
 ## 0.9.8 (February 14, 2021)
 - `BUGFIX` Avoid C4244 warning. ([#2](https://github.com/pulzed/mINI/pull/2))
 
 ## 0.9.7 (August 14, 2018)
-- `FEATURE` Add case sensitivity toggle via a macro definition.
+- `FEATURE` Adds case sensitivity toggle via a macro definition.
 
 ## 0.9.6 (May 30, 2018)
 - `BUGFIX` Changed how files are written / generated. Proper line endings are selected depending on the system.
