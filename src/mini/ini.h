@@ -23,7 +23,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  /mINI/ v0.9.9
+//  /mINI/ v0.9.10
 //  An INI file reader and writer for the modern age.
 //
 ///////////////////////////////////////////////////////////////////////////////
@@ -98,7 +98,7 @@ namespace mINI
 {
 	namespace INIStringUtil
 	{
-		const std::string whitespaceDelimiters = " \t\n\r\f\v";
+		const char* const whitespaceDelimiters = " \t\n\r\f\v";
 		inline void trim(std::string& str)
 		{
 			str.erase(str.find_last_not_of(whitespaceDelimiters) + 1);
@@ -125,9 +125,9 @@ namespace mINI
 			}
 		}
 #ifdef _WIN32
-		const std::string endl = "\r\n";
+		const char* const endl = "\r\n";
 #else
-		const std::string endl = "\n";
+		const char* const endl = "\n";
 #endif
 	};
 

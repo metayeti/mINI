@@ -1,3 +1,6 @@
+## 0.9.10 (March 4, 2021)
+- `BUGFIX` - Change delimiter constants to `const char* const` to prevent unnecessary allocations. ([#5](https://github.com/pulzed/mINI/issues/5))
+
 ## 0.9.9 (February 22, 2021)
 - `BUGFIX` Adds missing cctype header. ([#4](https://github.com/pulzed/mINI/pull/4))
 
