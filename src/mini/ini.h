@@ -317,6 +317,9 @@ namespace mINI
 				INIStringUtil::trim(key);
 				INIStringUtil::replace(key, "\\=", "=");
 				auto value = line.substr(equalsAt + 1);
+				auto commentAt = value.find_first_of(';');
+				if (commentAt != std::string::npos)
+					value = value.erase(commentAt, value.length());
 				INIStringUtil::trim(value);
 				parseData.first = key;
 				parseData.second = value;
