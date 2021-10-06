@@ -324,7 +324,7 @@ namespace mINI
 			}
 			return PDataType::PDATA_UNKNOWN;
 		}
-	};
+	}
 
 	class INIReader
 	{
