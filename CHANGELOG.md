@@ -1,3 +1,6 @@
+## 0.9.11 (October 6, 2021)
+- `BUGFIX` - Fixes various compiler warnings.
+
 ## 0.9.10 (March 4, 2021)
 - `BUGFIX` - Change delimiter constants to `const char* const` to prevent unnecessary allocations. ([#5](https://github.com/pulzed/mINI/issues/5))
 
