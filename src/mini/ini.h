@@ -129,7 +129,7 @@ namespace mINI
 #else
 		const char* const endl = "\n";
 #endif
-	};
+	}
 
 	template<typename T>
 	class INIMap
