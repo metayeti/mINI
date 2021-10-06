@@ -129,7 +129,7 @@ namespace mINI
 #else
 		const char* const endl = "\n";
 #endif
-	};
+	}
 
 	template<typename T>
 	class INIMap
@@ -324,7 +324,7 @@ namespace mINI
 			}
 			return PDataType::PDATA_UNKNOWN;
 		}
-	};
+	}
 
 	class INIReader
 	{
@@ -340,7 +340,7 @@ namespace mINI
 		{
 			std::string fileContents;
 			fileReadStream.seekg(0, std::ios::end);
-			fileContents.resize(fileReadStream.tellg());
+			fileContents.resize(static_cast<std::size_t>(fileReadStream.tellg()));
 			fileReadStream.seekg(0, std::ios::beg);
 			std::size_t fileSize = fileContents.size();
 			fileReadStream.read(&fileContents[0], fileSize);
