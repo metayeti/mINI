@@ -1,0 +1,10 @@
+file(GLOB_RECURSE mINITestsSRC *.cpp)
+
+foreach(src ${mINITestsSRC})
+  get_filename_component(filename ${src} NAME)
+  string(REPLACE ".cpp" "" tgt ${filename})
+  add_executable(${tgt} ${src})
+  target_include_directories(${tgt} PRIVATE lest)
+  target_link_libraries(${tgt} PRIVATE mINI::mINI)
+  add_test(NAME ${tgt} COMMAND ${tgt})
+endforeach()
