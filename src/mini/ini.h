@@ -94,6 +94,12 @@
 #include <sys/stat.h>
 #include <cctype>
 
+#ifdef MINI_SUPPORT_KEYNAME_ONLY
+#ifndef MINI_KEYNAME_ONLY_VALUE
+#define MINI_KEYNAME_ONLY_VALUE	"[^--KEYNAME_ONLY_VALUE--^]"
+#endif
+#endif
+
 namespace mINI
 {
 	namespace INIStringUtil
@@ -200,6 +206,17 @@ namespace mINI
 #endif
 			return (dataIndexMap.count(key) == 1);
 		}
+#ifdef MINI_SUPPORT_KEYNAME_ONLY
+		bool isKeyNameOnly(std::string key) const
+		{
+			if (!has(key)) return false;
+			return get(key) == MINI_KEYNAME_ONLY_VALUE;
+		}
+		void setKeyNameOnly(std::string key)
+		{
+			set(key, MINI_KEYNAME_ONLY_VALUE);
+		}
+#endif
 		void set(std::string key, T obj)
 		{
 			INIStringUtil::trim(key);
@@ -288,7 +305,12 @@ namespace mINI
 				return PDataType::PDATA_NONE;
 			}
 			char firstCharacter = line[0];
+#ifdef MINI_SUPPORT_HASH_CHARACTER_AS_COMMENT
+			if (firstCharacter == ';' 
+				|| firstCharacter == '#')
+#else
 			if (firstCharacter == ';')
+#endif
 			{
 				return PDataType::PDATA_COMMENT;
 			}
@@ -322,7 +344,18 @@ namespace mINI
 				parseData.second = value;
 				return PDataType::PDATA_KEYVALUE;
 			}
+#ifdef MINI_SUPPORT_KEYNAME_ONLY
+			else 
+			{
+				auto key = lineNorm;
+				INIStringUtil::trim(key);
+				parseData.first = key;
+				parseData.second = MINI_KEYNAME_ONLY_VALUE;
+				return PDataType::PDATA_KEYVALUE;
+			}
+#else
 			return PDataType::PDATA_UNKNOWN;
+#endif
 		}
 	}
 
@@ -607,6 +640,13 @@ namespace mINI
 							auto value = it.second;
 							INIStringUtil::replace(key, "=", "\\=");
 							INIStringUtil::trim(value);
+#ifdef MINI_SUPPORT_KEYNAME_ONLY
+							if (value == MINI_KEYNAME_ONLY_VALUE)
+								linesToAdd.emplace_back(
+									key
+								);
+							else
+#endif
 							linesToAdd.emplace_back(
 								key + ((prettyPrint) ? " = " : "=") + value
 							);
