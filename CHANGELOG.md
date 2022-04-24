@@ -1,3 +1,6 @@
+## 0.9.12 (April 24, 2022)
+- `BUGFIX` - Fixes parser breaking for UTF-8 BOM-encoded files. ([#7](https://github.com/pulzed/mINI/issues/17))
+
 ## 0.9.11 (October 6, 2021)
 - `BUGFIX` - Fixes various compiler warnings.
 

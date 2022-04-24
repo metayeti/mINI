@@ -23,7 +23,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  /mINI/ v0.9.11
+//  /mINI/ v0.9.12
 //  An INI file reader and writer for the modern age.
 //
 ///////////////////////////////////////////////////////////////////////////////
@@ -338,10 +338,12 @@ namespace mINI
 
 		T_LineData readFile()
 		{
+			const char header[3] = {(char)fileReadStream.get(), (char)fileReadStream.get(), (char)fileReadStream.get()};
+			const bool isBOM = header[0] == (char)0xEF && header[1] == (char)0xBB && header[2] == (char)0xBF;
 			std::string fileContents;
 			fileReadStream.seekg(0, std::ios::end);
 			fileContents.resize(static_cast<std::size_t>(fileReadStream.tellg()));
-			fileReadStream.seekg(0, std::ios::beg);
+			fileReadStream.seekg(isBOM ? 3 : 0, std::ios::beg);
 			std::size_t fileSize = fileContents.size();
 			fileReadStream.read(&fileContents[0], fileSize);
 			fileReadStream.close();
