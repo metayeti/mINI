@@ -109,6 +109,17 @@ const lest::test mINI_tests[] = {
 		EXPECT(ini["section"]["key"] == "value");
 		EXPECT(ini["section"]["key2"] == "value2");
 		EXPECT(ini["section2"]["key"] == "value");
+	},
+	CASE("Test: Write to UTF-8 BOM encoded file")
+	{
+		mINI::INIFile file("utf8bom.ini");
+		mINI::INIStructure ini;
+		EXPECT(file.read(ini) == true);
+		// update
+		ini["section"]["key"] = "something else";
+		// write
+		EXPECT(file.write(ini) == true);
+		// todo expect BOM encoding
 	}
 };
 

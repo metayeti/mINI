@@ -1,3 +1,7 @@
+## 0.9.13 (April 25, 2022)
+- `BUGFIX` - Writer now understands UTF-8 BOM-encoded files. ([#7](https://github.com/pulzed/mINI/issues/17))
+- `BUGFIX` - Fixes a bug introduced in 0.9.12 where reader would break when reading empty files.
+
 ## 0.9.12 (April 24, 2022)
 - `BUGFIX` - Fixes parser breaking for UTF-8 BOM-encoded files. ([#7](https://github.com/pulzed/mINI/issues/17))
 

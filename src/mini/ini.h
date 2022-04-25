@@ -23,7 +23,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  /mINI/ v0.9.12
+//  /mINI/ v0.9.13
 //  An INI file reader and writer for the modern age.
 //
 ///////////////////////////////////////////////////////////////////////////////
@@ -332,19 +332,31 @@ namespace mINI
 		using T_LineData = std::vector<std::string>;
 		using T_LineDataPtr = std::shared_ptr<T_LineData>;
 
+		bool isBOM = false;
+
 	private:
 		std::ifstream fileReadStream;
 		T_LineDataPtr lineData;
 
 		T_LineData readFile()
 		{
-			const char header[3] = {(char)fileReadStream.get(), (char)fileReadStream.get(), (char)fileReadStream.get()};
-			const bool isBOM = header[0] == (char)0xEF && header[1] == (char)0xBB && header[2] == (char)0xBF;
-			std::string fileContents;
 			fileReadStream.seekg(0, std::ios::end);
-			fileContents.resize(static_cast<std::size_t>(fileReadStream.tellg()));
+			const std::size_t fileSize = static_cast<std::size_t>(fileReadStream.tellg());
+			fileReadStream.seekg(0, std::ios::beg);
+			if (fileSize >= 3) {
+				const char header[3] = {
+					static_cast<char>(fileReadStream.get()),
+					static_cast<char>(fileReadStream.get()),
+					static_cast<char>(fileReadStream.get())
+				};
+				isBOM = header[0] == (char)0xEF && header[1] == (char)0xBB && header[2] == (char)0xBF;
+			}
+			else {
+				isBOM = false;
+			}
+			std::string fileContents;
+			fileContents.resize(fileSize);
 			fileReadStream.seekg(isBOM ? 3 : 0, std::ios::beg);
-			std::size_t fileSize = fileContents.size();
 			fileReadStream.read(&fileContents[0], fileSize);
 			fileReadStream.close();
 			T_LineData output;
@@ -678,11 +690,13 @@ namespace mINI
 			INIStructure originalData;
 			T_LineDataPtr lineData;
 			bool readSuccess = false;
+			bool fileIsBOM = false;
 			{
 				INIReader reader(filename, true);
 				if ((readSuccess = reader >> originalData))
 				{
 					lineData = reader.getLines();
+					fileIsBOM = reader.isBOM;
 				}
 			}
 			if (!readSuccess)
@@ -693,6 +707,10 @@ namespace mINI
 			std::ofstream fileWriteStream(filename, std::ios::out | std::ios::binary);
 			if (fileWriteStream.is_open())
 			{
+				if (fileIsBOM) {
+					const char utf8_BOM[3] = {(char)0xEF, (char)0xBB, (char)0xBF};
+					fileWriteStream.write(utf8_BOM, 3);
+				}
 				if (output.size())
 				{
 					auto line = output.begin();
