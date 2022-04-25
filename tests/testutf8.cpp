@@ -119,7 +119,11 @@ const lest::test mINI_tests[] = {
 		ini["section"]["key"] = "something else";
 		// write
 		EXPECT(file.write(ini) == true);
-		// todo expect BOM encoding
+		// expect BOM encoding
+		mINI::INIReader testReader("utf8bom.ini");
+		mINI::INIStructure testStructure;
+		testReader >> testStructure;
+		EXPECT(testReader.isBOM == true);
 	}
 };
 
