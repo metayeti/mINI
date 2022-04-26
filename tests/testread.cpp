@@ -69,7 +69,9 @@ const T_INIFileData testDataBasic = {
 		"[veggies]",
 		"lettuce=scarce",
 		"onions=sufficient",
-		"potatoes=plentiful"
+		"potatoes=plentiful",
+		"[section with spaces]",
+		"key with spaces = value with spaces"
 	}
 };
 
@@ -278,6 +280,7 @@ const lest::test mINI_tests[] = {
 		EXPECT(ini["veggies"]["lettuce"] == "scarce");
 		EXPECT(ini["veggies"]["onions"] == "sufficient");
 		EXPECT(ini["veggies"]["potatoes"] == "plentiful");
+		EXPECT(ini["section with spaces"]["key with spaces"] == "value with spaces");
 	},
 	CASE("Test: Read and compare")
 	{
