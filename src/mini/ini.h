@@ -23,7 +23,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  /mINI/ v0.9.13
+//  /mINI/ v0.9.14
 //  An INI file reader and writer for the modern age.
 //
 ///////////////////////////////////////////////////////////////////////////////
@@ -349,7 +349,11 @@ namespace mINI
 					static_cast<char>(fileReadStream.get()),
 					static_cast<char>(fileReadStream.get())
 				};
-				isBOM = header[0] == (char)0xEF && header[1] == (char)0xBB && header[2] == (char)0xBF;
+				isBOM = (
+					header[0] == static_cast<char>(0xEF) &&
+					header[1] == static_cast<char>(0xBB) &&
+					header[2] == static_cast<char>(0xBF)
+				);
 			}
 			else {
 				isBOM = false;
@@ -708,7 +712,11 @@ namespace mINI
 			if (fileWriteStream.is_open())
 			{
 				if (fileIsBOM) {
-					const char utf8_BOM[3] = {(char)0xEF, (char)0xBB, (char)0xBF};
+					const char utf8_BOM[3] = {
+						static_cast<char>(0xEF),
+						static_cast<char>(0xBB),
+						static_cast<char>(0xBF)
+					};
 					fileWriteStream.write(utf8_BOM, 3);
 				}
 				if (output.size())

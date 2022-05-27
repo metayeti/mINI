@@ -1,3 +1,6 @@
+## 0.9.14 (May 27, 2022)
+- `BUGFIX` - Fixes C4310 warning. ([#19](https://github.com/pulzed/mINI/issues/19))
+
 ## 0.9.13 (April 25, 2022)
 - `BUGFIX` - Writer now understands UTF-8 BOM-encoded files. ([#7](https://github.com/pulzed/mINI/issues/17))
 - `BUGFIX` - Fixes a bug introduced in 0.9.12 where reader would break when reading empty files.
