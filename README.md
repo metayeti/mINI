@@ -83,6 +83,23 @@ oranges=50
 bananas=100
 ```
 
+If you have a compiler that supports __c++17__, you can also construct `INIFile` with `std::filesystem:::path`.  
+Like:
+
+```cpp
+#include "src/mini/ini.h"
+#include <filesystem>
+
+int main()
+{
+    // "t/my.ini"
+    mINI::INIFile iniFile{std::filesystem::path("t") / "my.ini"};
+    ..........
+
+    return 0;
+}
+```
+
 ### Generating a file
 
 ```C++
