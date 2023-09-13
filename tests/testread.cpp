@@ -453,5 +453,5 @@ int main(int argc, char** argv)
 	{
 		return failures;
 	}
-	return std::cout << std::endl << "All tests passed!" << std::endl, EXIT_SUCCESS;
+	return std::cout << std::endl << "Reading tests passed!" << std::endl, EXIT_SUCCESS;
 }
