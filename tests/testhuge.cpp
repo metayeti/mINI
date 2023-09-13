@@ -1,8 +1,9 @@
-/* use testhuge -t to time tests */
-
 #include <iostream>
+#include <algorithm>
+
 #include "lest.hpp"
 #include "mini/ini.h"
+#include "vector"
 
 const std::string filename = "data_huge.ini";
 
@@ -15,6 +16,7 @@ const lest::test mINI_tests[] = {
 	CASE("TEST: Generate a huge file")
 	{
 		std::cout << "Writing file..." << std::endl;
+
 		mINI::INIFile file(filename);
 		mINI::INIStructure ini;
 		// generate data
@@ -50,10 +52,15 @@ const lest::test mINI_tests[] = {
 
 int main(int argc, char** argv)
 {
+	std::vector<char*> v_argv(argv, argv+argc);
+	if(not (std::find(v_argv.begin(), v_argv.end(), "-t") != v_argv.end())) {
+		v_argv.push_back(std::vector<char*>::value_type("-t"));
+	}
+
 	// run tests
-	if (int failures = lest::run(mINI_tests, argc, argv))
+	if (int failures = lest::run(mINI_tests, v_argv.size(), v_argv.data()))
 	{
 		return failures;
 	}
-	return std::cout << std::endl << "All tests passed!" << std::endl, EXIT_SUCCESS;
+	return std::cout << std::endl << "Passed tests with a huge file!" << std::endl, EXIT_SUCCESS;
 }
