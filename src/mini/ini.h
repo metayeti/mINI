@@ -288,7 +288,7 @@ namespace mINI
 				return PDataType::PDATA_NONE;
 			}
 			char firstCharacter = line[0];
-			if (firstCharacter == ';')
+                        if (firstCharacter == ';' || firstCharacter == '#')
 			{
 				return PDataType::PDATA_COMMENT;
 			}
