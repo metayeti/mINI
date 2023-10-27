@@ -16,7 +16,7 @@ It conforms to the following format:
 - every entry exists on a single line and multiline is not supported
 
 
-```
+```INI
 ; comment
 [section]
 key = value
