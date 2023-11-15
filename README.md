@@ -1,4 +1,4 @@
-# mINI <img align="left" src="logo.png?raw=true" height="96">
+# mINI <img align="left" src="icon.png?raw=true" height="96">
 
 v0.9.14
 
