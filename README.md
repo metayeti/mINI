@@ -1,4 +1,4 @@
-# mINI
+# mINI <img align="left" src="logo.png?raw=true" height="96">
 
 v0.9.14
 
@@ -327,6 +327,6 @@ This will affect reading and writing from files and access to the structure.
 
 ## License
 
-Copyright (c) 2018 Danijel Durakovic
+Copyright &copy; 2018 Danijel Durakovic
 
-MIT License
+Licensed under the terms of the [MIT license](LICENSE)
