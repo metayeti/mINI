@@ -1,18 +1,21 @@
+## 0.9.15 (January 11, 2024)
+- `BUGFIX` Fixes G++ warnings and implements a copy assignment operator for mINI::INIMap. ([#28](https://github.com/pulzed/mINI/pull/28))
+
 ## 0.9.14 (May 27, 2022)
-- `BUGFIX` - Fixes C4310 warning. ([#19](https://github.com/pulzed/mINI/issues/19))
+- `BUGFIX` Fixes C4310 warning. ([#19](https://github.com/pulzed/mINI/issues/19))
 
 ## 0.9.13 (April 25, 2022)
-- `BUGFIX` - Writer now understands UTF-8 BOM-encoded files. ([#7](https://github.com/pulzed/mINI/issues/17))
-- `BUGFIX` - Fixes a bug introduced in 0.9.12 where reader would break when reading empty files.
+- `BUGFIX` Writer now understands UTF-8 BOM-encoded files. ([#7](https://github.com/pulzed/mINI/issues/17))
+- `BUGFIX` Fixes a bug introduced in 0.9.12 where reader would break when reading empty files.
 
 ## 0.9.12 (April 24, 2022)
-- `BUGFIX` - Fixes parser breaking for UTF-8 BOM-encoded files. ([#7](https://github.com/pulzed/mINI/issues/17))
+- `BUGFIX` Fixes parser breaking for UTF-8 BOM-encoded files. ([#7](https://github.com/pulzed/mINI/issues/17))
 
 ## 0.9.11 (October 6, 2021)
-- `BUGFIX` - Fixes various compiler warnings.
+- `BUGFIX` Fixes various compiler warnings.
 
 ## 0.9.10 (March 4, 2021)
-- `BUGFIX` - Change delimiter constants to `const char* const` to prevent unnecessary allocations. ([#5](https://github.com/pulzed/mINI/issues/5))
+- `BUGFIX` Change delimiter constants to `const char* const` to prevent unnecessary allocations. ([#5](https://github.com/pulzed/mINI/issues/5))
 
 ## 0.9.9 (February 22, 2021)
 - `BUGFIX` Adds missing cctype header. ([#4](https://github.com/pulzed/mINI/pull/4))
