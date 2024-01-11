@@ -31,25 +31,11 @@
 #include <cmath>
 #include <cstddef>
 
-#ifdef __clang__
-# pragma clang diagnostic ignored "-Waggregate-return"
-# pragma clang diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
-# pragma clang diagnostic ignored "-Woverloaded-shift-op-parentheses"
-# pragma clang diagnostic ignored "-Wunused-comparison"
-# pragma clang diagnostic ignored "-Wunused-value"
-#elif defined __GNUC__
-# pragma GCC   diagnostic ignored "-Waggregate-return"
-# pragma GCC   diagnostic ignored "-Wunused-value"
-#endif
+#define lest_MAJOR  1
+#define lest_MINOR  35
+#define lest_PATCH  2
 
-#ifdef  _MSVC_LANG
-# define lest_CPP17_OR_GREATER_MS (  _MSVC_LANG >= 201703L )
-#else
-# define lest_CPP17_OR_GREATER_MS    0
-#endif
-# define lest_CPP17_OR_GREATER    ( __cplusplus >= 201703L ||  lest_CPP17_OR_GREATER_MS )
-
-#define  lest_VERSION "1.32.0"
+#define  lest_VERSION  lest_STRINGIFY(lest_MAJOR) "." lest_STRINGIFY(lest_MINOR) "." lest_STRINGIFY(lest_PATCH)
 
 #ifndef  lest_FEATURE_AUTO_REGISTER
 # define lest_FEATURE_AUTO_REGISTER  0
@@ -67,33 +53,90 @@
 # define lest_FEATURE_REGEX_SEARCH  0
 #endif
 
-#ifndef lest_FEATURE_TIME_PRECISION
-#define lest_FEATURE_TIME_PRECISION  0
+#ifndef  lest_FEATURE_TIME_PRECISION
+# define lest_FEATURE_TIME_PRECISION  0
 #endif
 
-#ifndef lest_FEATURE_WSTRING
-#define lest_FEATURE_WSTRING  1
+#ifndef  lest_FEATURE_WSTRING
+# define lest_FEATURE_WSTRING  1
 #endif
 
-#ifdef lest_FEATURE_RTTI
-# define lest__cpp_rtti  lest_FEATURE_RTTI
+#ifdef    lest_FEATURE_RTTI
+# define  lest__cpp_rtti  lest_FEATURE_RTTI
 #elif defined(__cpp_rtti)
-# define lest__cpp_rtti  __cpp_rtti
+# define  lest__cpp_rtti  __cpp_rtti
 #elif defined(__GXX_RTTI) || defined (_CPPRTTI)
-# define lest__cpp_rtti  1
+# define  lest__cpp_rtti  1
 #else
-# define lest__cpp_rtti  0
+# define  lest__cpp_rtti  0
 #endif
 
 #if lest_FEATURE_REGEX_SEARCH
 # include <regex>
 #endif
 
+// Stringify:
+
+#define lest_STRINGIFY(  x )  lest_STRINGIFY_( x )
+#define lest_STRINGIFY_( x )  #x
+
+// Compiler warning suppression:
+
+#if defined (__clang__)
+# pragma clang diagnostic ignored "-Waggregate-return"
+# pragma clang diagnostic ignored "-Woverloaded-shift-op-parentheses"
+# pragma clang diagnostic push
+# pragma clang diagnostic ignored "-Wunused-comparison"
+#elif defined (__GNUC__)
+# pragma GCC   diagnostic ignored "-Waggregate-return"
+# pragma GCC   diagnostic push
+#endif
+
+// Suppress shadow and unused-value warning for sections:
+
+#if defined (__clang__)
+# define lest_SUPPRESS_WSHADOW    _Pragma( "clang diagnostic push" ) \
+                                  _Pragma( "clang diagnostic ignored \"-Wshadow\"" )
+# define lest_SUPPRESS_WUNUSED    _Pragma( "clang diagnostic push" ) \
+                                  _Pragma( "clang diagnostic ignored \"-Wunused-value\"" )
+# define lest_RESTORE_WARNINGS    _Pragma( "clang diagnostic pop"  )
+
+#elif defined (__GNUC__)
+# define lest_SUPPRESS_WSHADOW    _Pragma( "GCC diagnostic push" ) \
+                                  _Pragma( "GCC diagnostic ignored \"-Wshadow\"" )
+# define lest_SUPPRESS_WUNUSED    _Pragma( "GCC diagnostic push" ) \
+                                  _Pragma( "GCC diagnostic ignored \"-Wunused-value\"" )
+# define lest_RESTORE_WARNINGS    _Pragma( "GCC diagnostic pop"  )
+#else
+# define lest_SUPPRESS_WSHADOW    /*empty*/
+# define lest_SUPPRESS_WUNUSED    /*empty*/
+# define lest_RESTORE_WARNINGS    /*empty*/
+#endif
+
+// C++ language version detection (C++23 is speculative):
+// Note: VC14.0/1900 (VS2015) lacks too much from C++14.
+
+#ifndef   lest_CPLUSPLUS
+# if defined(_MSVC_LANG ) && !defined(__clang__)
+#  define lest_CPLUSPLUS  (_MSC_VER == 1900 ? 201103L : _MSVC_LANG )
+# else
+#  define lest_CPLUSPLUS  __cplusplus
+# endif
+#endif
+
+#define lest_CPP98_OR_GREATER  ( lest_CPLUSPLUS >= 199711L )
+#define lest_CPP11_OR_GREATER  ( lest_CPLUSPLUS >= 201103L )
+#define lest_CPP14_OR_GREATER  ( lest_CPLUSPLUS >= 201402L )
+#define lest_CPP17_OR_GREATER  ( lest_CPLUSPLUS >= 201703L )
+#define lest_CPP20_OR_GREATER  ( lest_CPLUSPLUS >= 202002L )
+#define lest_CPP23_OR_GREATER  ( lest_CPLUSPLUS >= 202300L )
+
 #if ! defined( lest_NO_SHORT_MACRO_NAMES ) && ! defined( lest_NO_SHORT_ASSERTION_NAMES )
 # define MODULE            lest_MODULE
 
 # if ! lest_FEATURE_AUTO_REGISTER
 #  define CASE             lest_CASE
+#  define CASE_ON          lest_CASE_ON
 #  define SCENARIO         lest_SCENARIO
 # endif
 
@@ -133,7 +176,10 @@
 
 #else // lest_FEATURE_AUTO_REGISTER
 
-# define lest_CASE( proposition, ... ) \
+# define lest_CASE( proposition ) \
+    proposition, []( lest::env & lest_env )
+
+# define lest_CASE_ON( proposition, ... ) \
     proposition, [__VA_ARGS__]( lest::env & lest_env )
 
 # define lest_MODULE( specification, module ) \
@@ -141,17 +187,17 @@
 
 #endif //lest_FEATURE_AUTO_REGISTER
 
-// Implementation note: made lest__ctx_... a reference to correct lifetime for VC12 (VS2013):
-
 #define lest_SETUP( context ) \
     for ( int lest__section = 0, lest__count = 1; lest__section < lest__count; lest__count -= 0==lest__section++ ) \
-       if ( lest::ctx const & lest__ctx_setup = lest::ctx( lest_env, context ) )
+       for ( lest::ctx lest__ctx_setup( lest_env, context ); lest__ctx_setup; )
 
 #define lest_SECTION( proposition ) \
+    lest_SUPPRESS_WSHADOW \
     static int lest_UNIQUE( id ) = 0; \
     if ( lest::guard( lest_UNIQUE( id ), lest__section, lest__count ) ) \
         for ( int lest__section = 0, lest__count = 1; lest__section < lest__count; lest__count -= 0==lest__section++ ) \
-            if ( lest::ctx const & lest__ctx_section = lest::ctx( lest_env, proposition ) )
+            for ( lest::ctx lest__ctx_section( lest_env, proposition ); lest__ctx_section; ) \
+    lest_RESTORE_WARNINGS
 
 #define lest_EXPECT( expr ) \
     do { \
@@ -160,7 +206,7 @@
             if ( lest::result score = lest_DECOMPOSE( expr ) ) \
                 throw lest::failure{ lest_LOCATION, #expr, score.decomposition }; \
             else if ( lest_env.pass() ) \
-                lest::report( lest_env.os, lest::passing{ lest_LOCATION, #expr, score.decomposition }, lest_env.context() ); \
+                lest::report( lest_env.os, lest::passing{ lest_LOCATION, #expr, score.decomposition, lest_env.zen() }, lest_env.context() ); \
         } \
         catch(...) \
         { \
@@ -175,7 +221,7 @@
             if ( lest::result score = lest_DECOMPOSE( expr ) ) \
             { \
                 if ( lest_env.pass() ) \
-                    lest::report( lest_env.os, lest::passing{ lest_LOCATION, lest::not_expr( #expr ), lest::not_expr( score.decomposition ) }, lest_env.context() ); \
+                    lest::report( lest_env.os, lest::passing{ lest_LOCATION, lest::not_expr( #expr ), lest::not_expr( score.decomposition ), lest_env.zen() }, lest_env.context() ); \
             } \
             else \
                 throw lest::failure{ lest_LOCATION, lest::not_expr( #expr ), lest::not_expr( score.decomposition ) }; \
@@ -191,7 +237,9 @@
     { \
         try \
         { \
+            lest_SUPPRESS_WUNUSED \
             expr; \
+            lest_RESTORE_WARNINGS \
         } \
         catch (...) \
         { \
@@ -206,7 +254,9 @@
     { \
         try \
         { \
+            lest_SUPPRESS_WUNUSED \
             expr; \
+            lest_RESTORE_WARNINGS \
         } \
         catch (...) \
         { \
@@ -223,7 +273,9 @@
     { \
         try \
         { \
+            lest_SUPPRESS_WUNUSED \
             expr; \
+            lest_RESTORE_WARNINGS \
         }  \
         catch ( excpt & ) \
         { \
@@ -262,8 +314,8 @@ struct test
     std::function<void( env & )> behaviour;
 
 #if lest_FEATURE_AUTO_REGISTER
-    test( text name, std::function<void( env & )> behaviour )
-    : name( name ), behaviour( behaviour ) {}
+    test( text name_, std::function<void( env & )> behaviour_ )
+    : name( name_), behaviour( behaviour_) {}
 #endif
 };
 
@@ -349,8 +401,8 @@ struct success : message
 
 struct passing : success
 {
-    passing( location where_, text expr_, text decomposition_ )
-    : success( "passed", where_, expr_ + " for " + decomposition_) {}
+    passing( location where_, text expr_, text decomposition_, bool zen )
+    : success( "passed", where_, expr_ + (zen ? "":" for " + decomposition_) ) {}
 };
 
 struct got_none : success
@@ -492,14 +544,46 @@ inline char const * sfx( char const  * txt ) { return txt; }
 inline char const * sfx( char const  *      ) { return ""; }
 #endif
 
-inline std::string to_string( std::nullptr_t               ) { return "nullptr"; }
-inline std::string to_string( std::string     const & txt ) { return "\"" + txt + "\"" ; }
+inline std::string transformed( char chr )
+{
+    struct Tr { char chr; char const * str; } table[] =
+    {
+        {'\\', "\\\\" },
+        {'\r', "\\r"  }, {'\f', "\\f" },
+        {'\n', "\\n"  }, {'\t', "\\t" },
+    };
+
+    for ( auto tr : table )
+    {
+        if ( chr == tr.chr )
+            return tr.str;
+    }
+
+    // The cast below helps suppress warnings ("-Wtype-limits" on GCC) on architectures where `char` is unsigned.
+    auto unprintable = [](char c){ return 0 <= static_cast<signed char>(c) && c < ' '; };
+
+    auto to_hex_string = [](char c)
+    {
+        std::ostringstream os;
+        os << "\\x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>( static_cast<unsigned char>(c) );
+        return os.str();
+    };
+
+    return unprintable( chr  ) ? to_hex_string( chr ) : std::string( 1, chr );
+}
+
+inline std::string make_tran_string( std::string const & txt ) { std::ostringstream os; for(auto c:txt) os << transformed(c); return os.str(); }
+inline std::string make_strg_string( std::string const & txt ) { return "\"" + make_tran_string(                 txt   ) + "\"" ; }
+inline std::string make_char_string(                char chr ) { return "\'" + make_tran_string( std::string( 1, chr ) ) + "\'" ; }
+
+inline std::string to_string( std::nullptr_t              ) { return "nullptr"; }
+inline std::string to_string( std::string     const & txt ) { return make_strg_string( txt ); }
 #if lest_FEATURE_WSTRING
 inline std::string to_string( std::wstring    const & txt ) ;
 #endif
 
-inline std::string to_string( char    const * const   txt ) { return txt ? to_string( std::string ( txt ) ) : "{null string}"; }
-inline std::string to_string( char          * const   txt ) { return txt ? to_string( std::string ( txt ) ) : "{null string}"; }
+inline std::string to_string( char    const * const   txt ) { return txt ? make_strg_string( txt ) : "{null string}"; }
+inline std::string to_string( char          * const   txt ) { return txt ? make_strg_string( txt ) : "{null string}"; }
 #if lest_FEATURE_WSTRING
 inline std::string to_string( wchar_t const * const   txt ) { return txt ? to_string( std::wstring( txt ) ) : "{null string}"; }
 inline std::string to_string( wchar_t       * const   txt ) { return txt ? to_string( std::wstring( txt ) ) : "{null string}"; }
@@ -518,29 +602,9 @@ inline std::string to_string( unsigned  long long   value ) { return make_value_
 inline std::string to_string(         double        value ) { return make_value_string( value ) ;             }
 inline std::string to_string(          float        value ) { return make_value_string( value ) + sfx("f"  ); }
 
-inline std::string to_string(   signed char           chr ) { return to_string( static_cast<char>( chr ) ); }
-inline std::string to_string( unsigned char           chr ) { return to_string( static_cast<char>( chr ) ); }
-
-inline std::string to_string(          char           chr )
-{
-    struct Tr { char chr; char const * str; } table[] =
-    {
-        {'\r', "'\\r'" }, {'\f', "'\\f'" },
-        {'\n', "'\\n'" }, {'\t', "'\\t'" },
-    };
-
-    for ( auto tr : table )
-    {
-        if ( chr == tr.chr )
-            return tr.str;
-    }
-
-    auto unprintable = [](char c){ return 0 <= c && c < ' '; };
-
-    return unprintable( chr  )
-        ? to_string( static_cast<unsigned int>( chr ) )
-        : "\'" + std::string( 1, chr ) + "\'" ;
-}
+inline std::string to_string(   signed char           chr ) { return make_char_string( static_cast<char>( chr ) ); }
+inline std::string to_string( unsigned char           chr ) { return make_char_string( static_cast<char>( chr ) ); }
+inline std::string to_string(          char           chr ) { return make_char_string(                    chr   ); }
 
 template< typename T >
 struct is_streamable
@@ -590,15 +654,15 @@ template< typename T, typename R >
 using ForContainer = typename std::enable_if< is_container<T>::value, R>::type;
 
 template< typename T, typename R >
-using ForNonContainer = typename std::enable_if< ! is_container<T>::value, R>::type;
+using ForNonContainerNonPointer = typename std::enable_if< ! (is_container<T>::value || std::is_pointer<T>::value), R>::type;
 
 template< typename T >
-auto make_enum_string( T const & ) -> ForNonEnum<T, std::string>
+auto make_enum_string( T const & item ) -> ForNonEnum<T, std::string>
 {
 #if lest__cpp_rtti
-    return text("[type: ") + typeid(T).name() + "]";
+    return text("[type: ") + typeid(T).name() + "]: " + make_memory_string( item );
 #else
-    return text("[type: (no RTTI)]");
+    return text("[type: (no RTTI)]: ") + make_memory_string( item );
 #endif
 }
 
@@ -618,20 +682,6 @@ template< typename T >
 auto make_string( T const & item ) -> ForStreamable<T, std::string>
 {
     std::ostringstream os; os << item; return os.str();
-}
-
-template< typename T >
-auto make_string( T * p )-> std::string
-{
-    if ( p ) return make_memory_string( p );
-    else     return "NULL";
-}
-
-template<typename C, typename R>
-auto make_string( R C::* p ) -> std::string
-{
-    if ( p ) return make_memory_string( p );
-    else     return "NULL";
 }
 
 template<typename T1, typename T2>
@@ -666,7 +716,36 @@ auto make_string( std::tuple<TS...> const & tuple ) -> std::string
 }
 
 template< typename T >
-auto to_string( T const & item ) -> ForNonContainer<T, std::string>
+inline std::string make_string( T const * ptr )
+{
+    // Note showbase affects the behavior of /integer/ output;
+    std::ostringstream os;
+    os << std::internal << std::hex << std::showbase << std::setw( 2 + 2 * sizeof(T*) ) << std::setfill('0') << reinterpret_cast<std::ptrdiff_t>( ptr );
+    return os.str();
+}
+
+template< typename C, typename R >
+inline std::string make_string( R C::* ptr )
+{
+    std::ostringstream os;
+    os << std::internal << std::hex << std::showbase << std::setw( 2 + 2 * sizeof(R C::* ) ) << std::setfill('0') << ptr;
+    return os.str();
+}
+
+template< typename T >
+auto to_string( T const * ptr ) -> std::string
+{
+    return ! ptr ? "nullptr" : make_string( ptr );
+}
+
+template<typename C, typename R>
+auto to_string( R C::* ptr ) -> std::string
+{
+    return ! ptr ? "nullptr" : make_string( ptr );
+}
+
+template< typename T >
+auto to_string( T const & item ) -> ForNonContainerNonPointer<T, std::string>
 {
     return make_string( item );
 }
@@ -921,7 +1000,7 @@ inline bool select( text name, texts include )
 
 inline int indefinite( int repeat ) { return repeat == -1; }
 
-using seed_t = unsigned long;
+using seed_t = std::mt19937::result_type;
 
 struct options
 {
@@ -932,6 +1011,7 @@ struct options
     bool tags    = false;
     bool time    = false;
     bool pass    = false;
+    bool zen     = false;
     bool lexical = false;
     bool random  = false;
     bool verbose = false;
@@ -952,12 +1032,14 @@ struct env
 
     env & operator()( text test )
     {
-        testing = test; return *this;
+        clear(); testing = test; return *this;
     }
 
     bool abort() { return opt.abort; }
     bool pass()  { return opt.pass; }
+    bool zen()   { return opt.zen; }
 
+    void clear() { ctx.clear(); }
     void pop()   { ctx.pop_back(); }
     void push( text proposition ) { ctx.emplace_back( proposition ); }
 
@@ -980,11 +1062,12 @@ struct env
 struct ctx
 {
     env & environment;
+    bool once;
 
-    ctx( env & environment_, text proposition )
-    : environment{ environment_ }
+    ctx( env & environment_, text proposition_ )
+    : environment( environment_), once( true )
     {
-        environment.push( proposition );
+        environment.push( proposition_);
     }
 
     ~ctx()
@@ -999,7 +1082,7 @@ struct ctx
         }
     }
 
-    explicit operator bool() const { return true; }
+    explicit operator bool() { bool result = once; once = false; return result; }
 };
 
 struct action
@@ -1263,6 +1346,7 @@ inline auto split_arguments( texts args ) -> std::tuple<options, texts>
             else if ( opt == "-l"      || "--list-tests" == opt ) { option.list    =  true; continue; }
             else if ( opt == "-t"      || "--time"       == opt ) { option.time    =  true; continue; }
             else if ( opt == "-p"      || "--pass"       == opt ) { option.pass    =  true; continue; }
+            else if ( opt == "-z"      || "--pass-zen"   == opt ) { option.zen     =  true; continue; }
             else if ( opt == "-v"      || "--verbose"    == opt ) { option.verbose =  true; continue; }
             else if (                     "--version"    == opt ) { option.version =  true; continue; }
             else if ( opt == "--order" && "declared"     == val ) { /* by definition */   ; continue; }
@@ -1274,6 +1358,8 @@ inline auto split_arguments( texts args ) -> std::tuple<options, texts>
         }
         in.push_back( arg );
     }
+    option.pass = option.pass || option.zen;
+
     return std::make_tuple( option, in );
 }
 
@@ -1289,6 +1375,7 @@ inline int usage( std::ostream & os )
         "  -g, --list-tags    list tags of selected tests\n"
         "  -l, --list-tests   list selected tests\n"
         "  -p, --pass         also report passing tests\n"
+        "  -z, --pass-zen     ... without expansion\n"
         "  -t, --time         list duration of selected tests\n"
         "  -v, --verbose      also report passing or failing sections\n"
         "  --order=declared   use source code test order (default)\n"
@@ -1388,5 +1475,11 @@ int run( test const (&specification)[N], int argc, char * argv[], std::ostream &
 }
 
 } // namespace lest
+
+#if defined (__clang__)
+# pragma clang diagnostic pop
+#elif defined (__GNUC__)
+# pragma GCC   diagnostic pop
+#endif
 
 #endif // LEST_LEST_HPP_INCLUDED
