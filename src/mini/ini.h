@@ -23,7 +23,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  /mINI/ v0.9.14
+//  /mINI/ v0.9.15
 //  An INI file reader and writer for the modern age.
 //
 ///////////////////////////////////////////////////////////////////////////////
@@ -156,7 +156,11 @@ namespace mINI
 
 		INIMap() { }
 
-		INIMap(INIMap const& other)
+		INIMap(INIMap const& other) : dataIndexMap(other.dataIndexMap), data(other.data)
+		{
+		}
+
+		INIMap& operator=(INIMap const& other)
 		{
 			std::size_t data_size = other.data.size();
 			for (std::size_t i = 0; i < data_size; ++i)
@@ -166,6 +170,7 @@ namespace mINI
 				data.emplace_back(key, obj);
 			}
 			dataIndexMap = T_DataIndexMap(other.dataIndexMap);
+			return *this;
 		}
 
 		T& operator[](std::string key)
