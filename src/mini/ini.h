@@ -124,7 +124,7 @@ namespace mINI
 				}
 			}
 		}
-#ifdef _WIN32
+#if defined _WIN32 || defined MINI_ENDL_CRLF
 		const char* const endl = "\r\n";
 #else
 		const char* const endl = "\n";
@@ -338,6 +338,9 @@ namespace mINI
 		using T_LineDataPtr = std::shared_ptr<T_LineData>;
 
 		bool isBOM = false;
+#ifdef MINI_FINAL_NEWLINE
+		bool isEOF = false;
+#endif
 
 	private:
 		std::ifstream fileReadStream;
@@ -389,6 +392,9 @@ namespace mINI
 					buffer += c;
 				}
 			}
+#ifdef MINI_FINAL_NEWLINE
+			isEOF = fileContents[fileSize - 1] == '\n';
+#endif
 			output.emplace_back(buffer);
 			return output;
 		}
@@ -509,6 +515,9 @@ namespace mINI
 					fileWriteStream << INIStringUtil::endl;
 				}
 			}
+#ifdef MINI_FINAL_NEWLINE
+			fileWriteStream << INIStringUtil::endl;
+#endif
 			return true;
 		}
 	};
@@ -700,12 +709,18 @@ namespace mINI
 			T_LineDataPtr lineData;
 			bool readSuccess = false;
 			bool fileIsBOM = false;
+#ifdef MINI_FINAL_NEWLINE
+			bool fileIsEOF = false;
+#endif
 			{
 				INIReader reader(filename, true);
 				if ((readSuccess = reader >> originalData))
 				{
 					lineData = reader.getLines();
 					fileIsBOM = reader.isBOM;
+#ifdef MINI_FINAL_NEWLINE
+					fileIsEOF = reader.isEOF;
+#endif
 				}
 			}
 			if (!readSuccess)
@@ -737,6 +752,12 @@ namespace mINI
 						fileWriteStream << INIStringUtil::endl;
 					}
 				}
+#ifdef MINI_FINAL_NEWLINE
+				if (!fileIsEOF)
+				{
+					fileWriteStream << INIStringUtil::endl;
+				}
+#endif
 				return true;
 			}
 			return false;

@@ -36,6 +36,10 @@ This is a header-only library. To install it, just copy everything in `/src/` in
 ```C++
 #include "mini/ini.h"
 ```
+You can also rename and use.
+```C++
+#include "mINI.h"
+```
 
 You're good to go!
 
@@ -321,6 +325,63 @@ If you wish to make the library not ignore letter case, add the directive `#defi
 ```
 
 This will affect reading and writing from files and access to the structure.
+
+## Misappropriation of legacy ini file
+
+In particular case, the following points should be noted when an ini as configuration file.
+
+### Line break codes
+
+If you wish to make the library force CRLF to newline code, add the directive `#define MINI_ENDL_CRLF` **before** including the library:
+```C++
+#define MINI_ENDL_CRLF
+#include "mini/ini.h"
+```
+
+The _WIN32 option can become useless because the source code's newline code and the configuration file's newline code does not necessarily match.
+
+### Insert final new line
+
+If you wish to make the library force newline to EOF, add the directive `#define MINI_FINAL_NEWLINE` **before** including the library:
+```C++
+#define MINI_FINAL_NEWLINE
+#include "mini/ini.h"
+```
+
+The ini file format does not explicitly mention EOF and new line of EOF is not included by default, so we made it optional to avoid breaking changes.
+
+### Convert file encodings
+
+- This library does not support how to convert old encodings to utf8. e.g. shift-jis(CP932)
+- I think it would be wise to use another library that specializes in encoding conversion.
+- It is necessary to parse the saved ini file using this library with a temporary UTF8 file, re-save it, and finally write it back with the original encoding.
+- Here is an example of how to convert using iconv.
+```C++
+#include <iconv.h>
+auto cd = iconv_open("UTF-8", "CP932");
+iconv(cd, &ptr_in, &inbufsz, &ptr_out, &outbufsz);
+iconv_close(cd);
+```
+- inbufsz and outbufsz are probably different.
+- I will avoid mentioning this as it is off-topic.
+
+## Add the ini.h directive directly
+- This is completely a matter of preference, but if you don't want to write a #define statement before the #include statement, insert the directive directly at the beginning of the library (between the #include statement and the namespace mINI).
+
+```C++
+#ifndef MINI_INI_H_
+#define MINI_INI_H_
+
+#include <string>
+.
+.
+.
+#define MINI_CASE_SENSITIVE
+#define MINI_ENDL_CRLF
+#define MINI_FINAL_NEWLINE
+namespace mINI
+{
+```
 
 ## Thanks
 
