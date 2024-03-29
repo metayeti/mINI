@@ -1,0 +1,1 @@
+install_subdir('mini', install_dir: 'include')

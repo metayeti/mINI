@@ -37,6 +37,15 @@ This is a header-only library. To install it, just copy everything in `/src/` in
 #include "mini/ini.h"
 ```
 
+Or you can use meson to install the project for easier usage:
+
+```bash
+$ meson build --prefix=/usr
+$ ninja -C build install
+```
+
+Then you can include `mini/ini.h` as usual.
+
 You're good to go!
 
 ## Basic examples
