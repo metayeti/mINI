@@ -94,6 +94,12 @@
 #include <sys/stat.h>
 #include <cctype>
 
+#ifdef _WIN32
+typedef std::wstring mINIFilePath;
+#else
+typedef std::string mINIFilePath;
+#endif
+
 namespace mINI
 {
 	namespace INIStringUtil
@@ -394,7 +400,7 @@ namespace mINI
 		}
 
 	public:
-		INIReader(std::string const& filename, bool keepLineData = false)
+		INIReader(mINIFilePath const& filename, bool keepLineData = false)
 		{
 			fileReadStream.open(filename, std::ios::in | std::ios::binary);
 			if (keepLineData)
@@ -453,7 +459,7 @@ namespace mINI
 	public:
 		bool prettyPrint = false;
 
-		INIGenerator(std::string const& filename)
+		INIGenerator(mINIFilePath filename)
 		{
 			fileWriteStream.open(filename, std::ios::out | std::ios::binary);
 		}
@@ -519,7 +525,7 @@ namespace mINI
 		using T_LineData = std::vector<std::string>;
 		using T_LineDataPtr = std::shared_ptr<T_LineData>;
 
-		std::string filename;
+		mINIFilePath filename;
 
 		T_LineData getLazyOutput(T_LineDataPtr const& lineData, INIStructure& data, INIStructure& original)
 		{
@@ -680,7 +686,7 @@ namespace mINI
 	public:
 		bool prettyPrint = false;
 
-		INIWriter(std::string const& filename)
+		INIWriter(mINIFilePath const& filename)
 		: filename(filename)
 		{
 		}
@@ -688,8 +694,14 @@ namespace mINI
 
 		bool operator<<(INIStructure& data)
 		{
+#ifdef _WIN32
+			struct _stat64i32 buf;
+			bool fileExists = (_wstat(filename.c_str(), &buf) == 0);
+#else
 			struct stat buf;
 			bool fileExists = (stat(filename.c_str(), &buf) == 0);
+#endif
+
 			if (!fileExists)
 			{
 				INIGenerator generator(filename);
@@ -746,10 +758,10 @@ namespace mINI
 	class INIFile
 	{
 	private:
-		std::string filename;
+		mINIFilePath filename;
 
 	public:
-		INIFile(std::string const& filename)
+		INIFile(mINIFilePath filename)
 		: filename(filename)
 		{ }
 
