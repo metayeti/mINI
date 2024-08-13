@@ -1,13 +1,13 @@
 # mINI <img align="left" src="icon.png?raw=true" height="96">
 
-v0.9.15
+v0.9.16
 
 ## Info
 
 This is a tiny, header only C++ library for manipulating INI files.
 
 It conforms to the following format:
-- section and key names are case insensitive
+- section and key names are case insensitive by default
 - whitespace around sections, keys and values is ignored
 - empty section and key names are allowed
 - keys that do not belong to a section are ignored

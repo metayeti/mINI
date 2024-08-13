@@ -1,27 +1,30 @@
+## 0.9.16 (August 13, 2024)
+- `BUGFIX` Fixes a serious regression bug where removing a section would break the file in random ways due to the assignment operator introduced in the previous version. This version removes the assignment operator until it can be implemented in a way that is compliant with expected behavior. ([issue #36](https://github.com/metayeti/mINI/issues/36))
+
 ## 0.9.15 (January 11, 2024)
-- `BUGFIX` Fixes G++ warnings and implements a copy assignment operator for mINI::INIMap. ([#28](https://github.com/pulzed/mINI/pull/28))
+- `BUGFIX` Fixes G++ warnings and implements a copy assignment operator for mINI::INIMap. ([pull #28](https://github.com/metayeti/mINI/pull/28))
 
 ## 0.9.14 (May 27, 2022)
-- `BUGFIX` Fixes C4310 warning. ([#19](https://github.com/pulzed/mINI/issues/19))
+- `BUGFIX` Fixes C4310 warning. ([issue #19](https://github.com/metayeti/mINI/issues/19))
 
 ## 0.9.13 (April 25, 2022)
-- `BUGFIX` Writer now understands UTF-8 BOM-encoded files. ([#7](https://github.com/pulzed/mINI/issues/17))
+- `BUGFIX` Writer now understands UTF-8 BOM-encoded files. ([issue #7](https://github.com/metayeti/mINI/issues/17))
 - `BUGFIX` Fixes a bug introduced in 0.9.12 where reader would break when reading empty files.
 
 ## 0.9.12 (April 24, 2022)
-- `BUGFIX` Fixes parser breaking for UTF-8 BOM-encoded files. ([#7](https://github.com/pulzed/mINI/issues/17))
+- `BUGFIX` Fixes parser breaking for UTF-8 BOM-encoded files. ([issue #7](https://github.com/metayeti/mINI/issues/17))
 
 ## 0.9.11 (October 6, 2021)
 - `BUGFIX` Fixes various compiler warnings.
 
 ## 0.9.10 (March 4, 2021)
-- `BUGFIX` Change delimiter constants to `const char* const` to prevent unnecessary allocations. ([#5](https://github.com/pulzed/mINI/issues/5))
+- `BUGFIX` Change delimiter constants to `const char* const` to prevent unnecessary allocations. ([issue #5](https://github.com/metayeti/mINI/issues/5))
 
 ## 0.9.9 (February 22, 2021)
-- `BUGFIX` Adds missing cctype header. ([#4](https://github.com/pulzed/mINI/pull/4))
+- `BUGFIX` Adds missing cctype header. ([pull #4](https://github.com/metayeti/mINI/pull/4))
 
 ## 0.9.8 (February 14, 2021)
-- `BUGFIX` Avoid C4244 warning. ([#2](https://github.com/pulzed/mINI/pull/2))
+- `BUGFIX` Avoid C4244 warning. ([pull #2](https://github.com/metayeti/mINI/pull/2))
 
 ## 0.9.7 (August 14, 2018)
 - `FEATURE` Adds case sensitivity toggle via a macro definition.
@@ -44,7 +47,7 @@
 - `FEATURE` Empty key and section names are now allowed.
 
 ## 0.9.2 (May 24, 2018)
-- `BUGFIX` Fixes the multiple definition bug [#1](/../../issues/1)
+- `BUGFIX` Fixes the multiple definition bug [issue #1](/../../issues/1)
 - `BUGFIX` Fixes a bug where a `write()` call to an empty file would begin writing at line 2 instead of 1 due to a reader bug.
 
 ## 0.9.1 (May 20, 2018)
