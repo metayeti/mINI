@@ -1,3 +1,6 @@
+## 0.9.17 (September 30, 2024)
+- `FEATURE` Adds `CMakeLists.txt`. ([pull #38](https://github.com/metayeti/mINI/pull/38))
+
 ## 0.9.16 (August 13, 2024)
 - `BUGFIX` Fixes a serious regression bug where removing a section would break the file in random ways due to the assignment operator introduced in the previous version. This version removes the assignment operator until it can be implemented in a way that is compliant with expected behavior. ([issue #36](https://github.com/metayeti/mINI/issues/36))
 
