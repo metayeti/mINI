@@ -23,3 +23,14 @@ Examples:
 To cleanup all test files:
 
   clean
+
+------------------------------------------------------------
+
+Also can use cmake to build all tests:
+
+  cmake . -B "build"
+  cmake --build "build" -j
+
+And can run all test, use:
+
+  ./runalltest.sh 
