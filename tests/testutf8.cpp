@@ -1,4 +1,4 @@
-#include <iostream>
+﻿#include <iostream>
 #include <string>
 #include <vector>
 #include <utility>
@@ -36,6 +36,13 @@ bool writeTestFile(T_INIFileData const& testData)
 	std::ofstream fileWriteStream(filename);
 	if (fileWriteStream.is_open())
 	{
+		const char utf8_BOM[3] = {
+			static_cast<char>(0xEF),
+			static_cast<char>(0xBB),
+			static_cast<char>(0xBF)
+		};
+		fileWriteStream.write(utf8_BOM, 3);
+
 		if (lines.size())
 		{
 			auto it = lines.begin();
@@ -62,7 +69,7 @@ const T_INIFileData testDataUTF8BOM = {
 	"utf8bom.ini",
 	// test data
 	{
-		"﻿[section]",
+		"[section]",
 		"key=value",
 		"key2=value2",
 		"[section2]",
@@ -103,27 +110,24 @@ const lest::test mINI_tests[] = {
 	},
 	CASE("Test: UTF-8 BOM encoded file")
 	{
-		mINI::INIFile file("utf8bom.ini");
+		const auto& filename = testDataUTF8BOM.first;
+		mINI::INIFile file(filename);
 		mINI::INIStructure ini;
-		file.read(ini);
+		EXPECT(file.read(ini) == true);
 		EXPECT(ini["section"]["key"] == "value");
 		EXPECT(ini["section"]["key2"] == "value2");
 		EXPECT(ini["section2"]["key"] == "value");
-	},
-	CASE("Test: Write to UTF-8 BOM encoded file")
-	{
-		mINI::INIFile file("utf8bom.ini");
-		mINI::INIStructure ini;
-		EXPECT(file.read(ini) == true);
 		// update
 		ini["section"]["key"] = "something else";
 		// write
 		EXPECT(file.write(ini) == true);
 		// expect BOM encoding
-		mINI::INIReader testReader("utf8bom.ini");
+		mINI::INIReader testReader(filename);
 		mINI::INIStructure testStructure;
 		testReader >> testStructure;
 		EXPECT(testReader.isBOM == true);
+		// verify data
+		EXPECT(testStructure["section"]["key"] == "something else");
 	}
 };
 
