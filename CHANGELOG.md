@@ -1,3 +1,6 @@
+## 0.9.18 (March 30, 2025)
+- `FEATURE` Replaces string paths with std::filesystem::path. ([pull #42](https://github.com/metayeti/mINI/pull/42))
+
 ## 0.9.17 (September 30, 2024)
 - `FEATURE` Adds `CMakeLists.txt`. ([pull #38](https://github.com/metayeti/mINI/pull/38))
 

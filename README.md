@@ -1,6 +1,6 @@
 # mINI <img align="left" src="icon.png?raw=true" height="96">
 
-v0.9.17
+v0.9.18
 
 ## Info
 
