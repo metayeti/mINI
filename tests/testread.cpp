@@ -261,6 +261,18 @@ const T_INIFileData testDataMalformed2 = {
 	}
 };
 
+const T_INIFileData testDataTrim = {
+	// filename
+	"data15.ini",
+	// test data
+	{
+		"[section]",
+		"key1=  value with spaces  ",
+		"  key2  =value2",
+		"  key3  =  value3  "
+	}
+};
+
 //
 // test cases
 //
@@ -427,6 +439,26 @@ const lest::test mINI_tests[] = {
 		EXPECT(ini.get("name").get("=") == "=");
 		EXPECT(ini.get("name").get("a= =") == "=b");
 		EXPECT(ini.get("name").get("c= =") == "=d");
+	},
+	CASE("Test: Trim values disabled")
+	{
+		auto const& filename = testDataTrim.first;
+		mINI::INIFile file(filename);
+		mINI::INIStructure ini;
+		EXPECT(file.read(ini, false) == true);
+		EXPECT(ini["section"]["key1"] == "value with spaces");
+		EXPECT(ini["section"]["key2"] == "value2");
+		EXPECT(ini["section"]["key3"] == "value3");
+	},
+	CASE("Test: Trim values enabled")
+	{
+		auto const& filename = testDataTrim.first;
+		mINI::INIFile file(filename);
+		mINI::INIStructure ini;
+		EXPECT(file.read(ini, true) == true);
+		EXPECT(ini["section"]["key1"] == "value with spaces");
+		EXPECT(ini["section"]["key2"] == "value2");
+		EXPECT(ini["section"]["key3"] == "value3");
 	}
 };
 
@@ -447,6 +479,7 @@ int main(int argc, char** argv)
 	writeTestFile(testDataEdgeCase8);
 	writeTestFile(testDataMalformed1);
 	writeTestFile(testDataMalformed2);
+	writeTestFile(testDataTrim);
 
 	// run tests
 	if (int failures = lest::run(mINI_tests, argc, argv))

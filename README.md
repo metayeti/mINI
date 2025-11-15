@@ -120,6 +120,13 @@ To read from a file:
 bool readSuccess = file.read(ini);
 ```
 
+You can optionally trim keys and values during read by passing `true` as the second parameter:
+```C++
+bool readSuccess = file.read(ini, true);
+```
+
+This will apply additional trimming to keys and values beyond the standard processing. By default, trimming is disabled (`false`).
+
 To write back to a file while preserving comments and custom formatting:
 ```C++
 bool writeSuccess = file.write(ini);

@@ -142,6 +142,7 @@ namespace mINI
 
 		T_DataIndexMap dataIndexMap;
 		T_DataContainer data;
+		bool valuesTrimmed = false;
 
 		std::size_t setEmpty(std::string& key)
 		{
@@ -156,13 +157,16 @@ namespace mINI
 
 		INIMap() = default;
 
-		INIMap(INIMap const& other) : dataIndexMap(other.dataIndexMap), data(other.data)
+		INIMap(INIMap const& other) : dataIndexMap(other.dataIndexMap), data(other.data), valuesTrimmed(other.valuesTrimmed)
 		{
 		}
 
 		T& operator[](std::string key)
 		{
-			INIStringUtil::trim(key);
+			if (!valuesTrimmed)
+			{
+				INIStringUtil::trim(key);
+			}
 #ifndef MINI_CASE_SENSITIVE
 			INIStringUtil::toLower(key);
 #endif
@@ -173,7 +177,10 @@ namespace mINI
 		}
 		[[nodiscard]] T get(std::string key) const
 		{
-			INIStringUtil::trim(key);
+			if (!valuesTrimmed)
+			{
+				INIStringUtil::trim(key);
+			}
 #ifndef MINI_CASE_SENSITIVE
 			INIStringUtil::toLower(key);
 #endif
@@ -186,7 +193,10 @@ namespace mINI
 		}
 		[[nodiscard]] bool has(std::string key) const
 		{
-			INIStringUtil::trim(key);
+			if (!valuesTrimmed)
+			{
+				INIStringUtil::trim(key);
+			}
 #ifndef MINI_CASE_SENSITIVE
 			INIStringUtil::toLower(key);
 #endif
@@ -194,7 +204,10 @@ namespace mINI
 		}
 		void set(std::string key, T obj)
 		{
-			INIStringUtil::trim(key);
+			if (!valuesTrimmed)
+			{
+				INIStringUtil::trim(key);
+			}
 #ifndef MINI_CASE_SENSITIVE
 			INIStringUtil::toLower(key);
 #endif
@@ -220,7 +233,10 @@ namespace mINI
 		}
 		bool remove(std::string key)
 		{
-			INIStringUtil::trim(key);
+			if (!valuesTrimmed)
+			{
+				INIStringUtil::trim(key);
+			}
 #ifndef MINI_CASE_SENSITIVE
 			INIStringUtil::toLower(key);
 #endif
@@ -253,6 +269,10 @@ namespace mINI
 		}
 		[[nodiscard]] const_iterator begin() const { return data.begin(); }
 		[[nodiscard]] const_iterator end() const { return data.end(); }
+		void setValuesTrimmed(bool trimmed)
+		{
+			valuesTrimmed = trimmed;
+		}
 	};
 
 	using INIStructure = INIMap<INIMap<std::string>>;
@@ -393,6 +413,11 @@ namespace mINI
 
 		bool operator>>(INIStructure& data)
 		{
+			return read(data, false);
+		}
+
+		bool read(INIStructure& data, bool trimValues = false)
+		{
 			if (!fileReadStream.is_open())
 			{
 				return false;
@@ -401,18 +426,31 @@ namespace mINI
 			std::string section;
 			bool inSection = false;
 			INIParser::T_ParseValues parseData;
+			if (trimValues)
+			{
+				data.setValuesTrimmed(true);
+			}
 			for (auto const& line : fileLines)
 			{
 				auto parseResult = INIParser::parseLine(line, parseData);
 				if (parseResult == INIParser::PDataType::PDATA_SECTION)
 				{
 					inSection = true;
-					data[section = parseData.first];
+					auto& sectionMap = data[section = parseData.first];
+					if (trimValues)
+					{
+						sectionMap.setValuesTrimmed(true);
+					}
 				}
 				else if (inSection && parseResult == INIParser::PDataType::PDATA_KEYVALUE)
 				{
-					auto const& key = parseData.first;
-					auto const& value = parseData.second;
+					auto key = parseData.first;
+					auto value = parseData.second;
+					if (trimValues)
+					{
+						INIStringUtil::trim(key);
+						INIStringUtil::trim(value);
+					}
 					data[section][key] = value;
 				}
 				if (lineData && parseResult != INIParser::PDataType::PDATA_UNKNOWN)
@@ -741,7 +779,7 @@ namespace mINI
 
 		~INIFile() = default;
 
-		bool read(INIStructure& data) const
+		bool read(INIStructure& data, bool trimValues = false) const
 		{
 			if (data.size() != 0U)
 			{
@@ -752,7 +790,7 @@ namespace mINI
 				return false;
 			}
 			INIReader reader(filename);
-			return reader >> data;
+			return reader.read(data, trimValues);
 		}
 		[[nodiscard]] bool generate(INIStructure const& data, bool pretty = false) const
 		{
