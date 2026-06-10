@@ -6,3 +6,4 @@
 /tests/*.test
 /tests/*.exe
 /tests/build
+/temp/

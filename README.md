@@ -1,6 +1,6 @@
 # mINI <img align="left" src="icon.png?raw=true" height="96">
 
-v0.9.19
+v0.9.20
 
 ## Info
 
@@ -278,35 +278,24 @@ if (ini.has("section"))
 
 You can traverse the structure in order of insertion. The following example loops through the structure and displays results in a familiar format:
 ```C++
-for (auto const& it : ini)
+for (auto const& [section, collection] : ini)
 {
-	auto const& section = it.first;
-	auto const& collection = it.second;
 	std::cout << "[" << section << "]" << std::endl;
-	for (auto const& it2 : collection)
+	for (auto const& [key, value] : collection)
 	{
-		auto const& key = it2.first;
-		auto const& value = it2.second;
 		std::cout << key << "=" << value << std::endl;
 	}
 }
 ```
 
-`it.first` is always `std::string` type.
-
-`it.second` is an object which is either a `mINI::INIMap` type on the first level or `std::string` type on the second level.
-
-The API only exposes a `const_iterator`, so you can't use iterators to manipulate data directly. You can however access the structure as normal while iterating:
+The API only exposes a `const_iterator`, so you can't use iterators to manipulate data directly. You can, however access the structure as normal while iterating:
 
 ```C++
 // change all values in the structure to "banana"
-for (auto const& it : ini)
+for (auto const& [section, collection] : ini)
 {
-	auto const& section = it.first;
-	auto const& collection = it.second;
-	for (auto const& it2 : collection)
+	for (auto const& [key, value] : collection)
 	{
-		auto const& key = it2.first;
 		ini[section][key] = "banana"; // O(1) because hashmaps
 	}
 }
