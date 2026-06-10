@@ -1,3 +1,6 @@
+# 0.9.19 (June 10, 2026)
+- `API CHANGE` Removed `[[nodiscard]]` from the `generate()` function.
+
 ## 0.9.18 (March 30, 2025)
 - `FEATURE` Replaces string paths with std::filesystem::path. ([pull #42](https://github.com/metayeti/mINI/pull/42))
 

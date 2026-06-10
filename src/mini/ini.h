@@ -23,7 +23,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  /mINI/ v0.9.18
+//  /mINI/ v0.9.19
 //  An INI file reader and writer for the modern age.
 //
 ///////////////////////////////////////////////////////////////////////////////
@@ -754,7 +754,7 @@ namespace mINI
 			INIReader reader(filename);
 			return reader >> data;
 		}
-		[[nodiscard]] bool generate(INIStructure const& data, bool pretty = false) const
+		bool generate(INIStructure const& data, bool pretty = false) const
 		{
 			if (filename.empty())
 			{
