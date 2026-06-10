@@ -1,3 +1,7 @@
+# 0.9.20 (June 10, 2026)
+- `BUGFIX` Fix an overflow issue when reading BOM-encoded files.
+- `TESTS` Added tests for BOM-encoded files.
+
 # 0.9.19 (June 10, 2026)
 - `API CHANGE` Removed `[[nodiscard]]` from the `generate()` function.
 

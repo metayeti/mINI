@@ -351,18 +351,19 @@ namespace mINI
 				isBOM = false;
 			}
 			std::string fileContents;
-			fileContents.resize(fileSize);
+			const std::size_t contentSize = (isBOM ? fileSize - 3 : fileSize);
+			fileContents.resize(contentSize);
 			fileReadStream.seekg(isBOM ? 3 : 0, std::ios::beg);
-			fileReadStream.read(fileContents.data(), fileSize);
+			fileReadStream.read(fileContents.data(), contentSize);
 			fileReadStream.close();
 			T_LineData output;
-			if (fileSize == 0)
+			if (contentSize == 0)
 			{
 				return output;
 			}
 			std::string buffer;
 			buffer.reserve(50);
-			for (std::size_t i = 0; i < fileSize; ++i)
+			for (std::size_t i = 0; i < contentSize; ++i)
 			{
 				const char& c = fileContents[i];
 				if (c == '\n')
