@@ -11,4 +11,6 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 endif()
 
 add_library(mINI INTERFACE)
-target_include_directories(mINI INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/src")
+target_include_directories(mINI INTERFACE
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
+    $<INSTALL_INTERFACE:include/mINI>)
