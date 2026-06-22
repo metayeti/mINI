@@ -42,6 +42,9 @@
 //  generate files, use generate() instead. Section and key order is preserved
 //  on read, write and insert.
 //
+//  NOTE: This library is not thread-safe. If you need concurrent access from
+//  multiple threads, you must provide your own synchronization mechanisms.
+//
 ///////////////////////////////////////////////////////////////////////////////
 //
 //  /* BASIC USAGE EXAMPLE: */
@@ -98,7 +101,7 @@ namespace mINI
 {
 	namespace INIStringUtil
 	{
-		const char* const whitespaceDelimiters = " \t\n\r\f\v";
+		constexpr const char* const whitespaceDelimiters = " \t\n\r\f\v";
 		inline void trim(std::string& str)
 		{
 			str.erase(str.find_last_not_of(whitespaceDelimiters) + 1);
@@ -125,9 +128,9 @@ namespace mINI
 			}
 		}
 #ifdef _WIN32
-		const char* const endl = "\r\n";
+		constexpr const char* const endl = "\r\n";
 #else
-		const char* const endl = "\n";
+		constexpr const char* const endl = "\n";
 #endif
 	}
 
@@ -158,6 +161,16 @@ namespace mINI
 
 		INIMap(INIMap const& other) : dataIndexMap(other.dataIndexMap), data(other.data)
 		{
+		}
+
+		INIMap& operator=(INIMap const& other)
+		{
+			if (this != &other)
+			{
+				dataIndexMap = other.dataIndexMap;
+				data = other.data;
+			}
+			return *this;
 		}
 
 		T& operator[](std::string key)
